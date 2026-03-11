@@ -1,0 +1,18 @@
+[
+  {
+    "noPartie": 25,
+    "noSérie": 1,
+    "noQuestion": 1,
+    "noJoueur": 10,
+    "noÉquipe": 5,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 1,
+    "noQuestion": 4,
+    "noJoueur": 8,
+    "noÉquipe": 5,
+    "pointsSecondaires": false
+  }
+]

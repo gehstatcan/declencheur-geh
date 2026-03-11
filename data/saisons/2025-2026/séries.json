@@ -1,0 +1,626 @@
+[
+  {
+    "noSérie": 1,
+    "typeSérie": "Individuelle",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 6,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 7,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 8,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 2,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 3,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 4,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 5,
+    "typeSérie": "Contrôle",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 5,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 6,
+    "typeSérie": "Les 4 V",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 6,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 7,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 8,
+        "points": 10,
+        "pointsSecondaires": 5
+      }
+    ]
+  },
+  {
+    "noSérie": 7,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 8,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 9,
+    "typeSérie": "Indice",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 30,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 20,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 10,
+    "typeSérie": "Association",
+    "réplique": false,
+    "estÉquipe": true,
+    "consultation": true,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 20,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 6,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 7,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 8,
+        "points": 20,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 11,
+    "typeSérie": "Vis-à-Vis",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 12,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 13,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 14,
+    "typeSérie": "GEHopardy",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 6,
+        "points": 10,
+        "pointsSecondaires": 5
+      },
+      {
+        "noQuestion": 7,
+        "points": 10,
+        "pointsSecondaires": 5
+      }
+    ]
+  },
+  {
+    "noSérie": 15,
+    "typeSérie": "Collective",
+    "réplique": true,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 6,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 7,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 8,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 9,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 10,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  },
+  {
+    "noSérie": 16,
+    "typeSérie": "Prime",
+    "réplique": false,
+    "estÉquipe": false,
+    "consultation": false,
+    "questions": [
+      {
+        "noQuestion": 1,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 2,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 3,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 4,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 5,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 6,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 7,
+        "points": 10,
+        "pointsSecondaires": 0
+      },
+      {
+        "noQuestion": 8,
+        "points": 10,
+        "pointsSecondaires": 0
+      }
+    ]
+  }
+]

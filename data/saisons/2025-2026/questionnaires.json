@@ -1,0 +1,512 @@
+[
+  {
+    "noQuestionnaire": 1,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "20ième siècle",
+        "sousThème": "l'année est la réponse à la Q1"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Langue",
+        "sousThème": "Se termine en \"ologie\""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et Loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Géographie",
+        "sousThème": "Un fleuve et son île"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Littérature et musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Libre",
+        "sousThème": "Rouge et or"
+      },
+      {
+        "noSérie": 15,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 16,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 2,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Mots se terminant par erie"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": "Commence par W"
+      },
+      {
+        "noSérie": 3,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "20ième siècle",
+        "sousThème": "1985"
+      },
+      {
+        "noSérie": 6,
+        "thème": "(Choisir un thème)",
+        "sousThème": "Dirigeants"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et Loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Littérature et musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Sciences",
+        "sousThème": "Masse atomique"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Littérature et musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 16,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 3,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Trouvez l'animal"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "20ième siècle",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 6,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et Loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Histoire",
+        "sousThème": "Grands belligérants de l'Histoire"
+      },
+      {
+        "noSérie": 12,
+        "thème": "Littérature et musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 16,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 4,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "20ième siècle",
+        "sousThème": "1909"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Littérature et musique",
+        "sousThème": "Littérature"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et Loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "(Choisir un thème)",
+        "sousThème": "Littérature, société, sciences, etc."
+      },
+      {
+        "noSérie": 10,
+        "thème": "Sciences",
+        "sousThème": "Des pieds et des mains"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Histoire",
+        "sousThème": "Citations célèbres"
+      },
+      {
+        "noSérie": 12,
+        "thème": "Littérature et musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 16,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 5,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "20ième siècle",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 6,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et Loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Littérature et musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 16,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 6,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Comme chien et chat"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "20ième siècle",
+        "sousThème": "1984"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Langue",
+        "sousThème": "Expressions sur la langue"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Histoire",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et Loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Arts, cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Sciences",
+        "sousThème": "Nombre de protons - éléments chimiques"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Histoire",
+        "sousThème": "Charlemagne"
+      },
+      {
+        "noSérie": 12,
+        "thème": "Littérature et musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 16,
+        "thème": "Depuis 2010",
+        "sousThème": ""
+      }
+    ]
+  }
+]

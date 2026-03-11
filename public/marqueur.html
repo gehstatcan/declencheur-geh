@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Marqueur - Génie en Herbe</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            background: #1a1a2e;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #e94560;
+            margin-top: 20px;
+        }
+
+        /* Mode */
+        #modePartie {
+            font-size: 0.9em;
+            margin: 10px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        #modePartie.initialisation {
+            background: #e67e22;
+        }
+
+        #modePartie.jeu {
+            background: #2ecc71;
+        }
+
+        /* Sélecteur */
+        select {
+            font-size: 1em;
+            padding: 10px;
+            border-radius: 10px;
+            background: #16213e;
+            color: white;
+            border: 1px solid #e94560;
+        }
+
+        /* Scores */
+        #scores {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin: 20px 0;
+        }
+
+        .score-équipe {
+            background: #16213e;
+            padding: 15px 30px;
+            border-radius: 10px;
+            min-width: 180px;
+        }
+
+        .score-équipe h3 {
+            color: #e94560;
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+        }
+
+        .score-valeur {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        /* Série et thème */
+        #infoQuestion {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px auto;
+            max-width: 600px;
+        }
+
+        #infoQuestion .série {
+            font-size: 1.3em;
+            color: #e94560;
+            font-weight: bold;
+        }
+
+        #infoQuestion .thème {
+            font-size: 1em;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        #infoQuestion .question {
+            font-size: 1em;
+            margin-top: 5px;
+        }
+
+        /* Buzzer */
+        #buzzer {
+            font-size: 2em;
+            margin: 15px auto;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+
+        #buzzer.actif {
+            background: #e94560;
+        }
+
+        #buzzer.réplique {
+            background: #e67e22;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #buzzer.actif {
+            animation: flash 0.5s;
+        }
+
+        /* Boutons points */
+        #boutonsPoints {
+            display: none;
+            margin: 10px 0;
+        }
+
+        .bouton {
+            font-size: 1em;
+            padding: 12px 25px;
+            margin: 5px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .bouton-bonne {
+            background: #2ecc71;
+        }
+
+        .bouton-bonne:hover {
+            background: #27ae60;
+        }
+
+        .bouton-secondaire {
+            background: #f39c12;
+        }
+
+        .bouton-secondaire:hover {
+            background: #d68910;
+        }
+
+        .bouton-mauvaise {
+            background: #e74c3c;
+        }
+
+        .bouton-mauvaise:hover {
+            background: #c0392b;
+        }
+
+        .bouton-action {
+            background: #0f3460;
+        }
+
+        .bouton-action:hover {
+            background: #16213e;
+        }
+
+        .bouton-orange {
+            background: #e67e22;
+        }
+
+        .bouton-orange:hover {
+            background: #d35400;
+        }
+
+        /* Équipes */
+        #équipes {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .équipe {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 220px;
+        }
+
+        .équipe h2 {
+            color: #e94560;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        .joueur {
+            padding: 8px 12px;
+            margin: 5px;
+            font-size: 0.95em;
+            border-radius: 8px;
+            background: #2c2c54;
+            color: #aaa;
+        }
+
+        .joueur.connecté {
+            background: #2ecc71;
+            color: white;
+            font-weight: bold;
+        }
+
+        #zoneJeu {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎯 Génie en Herbe</h1>
+
+    <div id="modePartie" class="initialisation">🔧 Initialisation</div>
+
+
+    <label id="labelToutesParties" style="font-size: 0.9em; color: #aaa;">
+        <input type="checkbox" id="toutesParties" onchange="toggleToutesParties()">
+        Afficher toutes les parties
+    </label>
+
+    <!-- Sélecteur de partie -->
+    <div id="sélecteurPartie">
+        <select id="listeParties" onchange="choisirPartie()">
+            <option value="">-- Choisir une partie --</option>
+        </select>
+    </div>
+
+    <!-- Zone initialisation -->
+    <div id="zoneInitialisation">
+        <br>
+        <button class="bouton bouton-bonne" onclick="démarrerPartie()">
+            ▶️ Démarrer la partie
+        </button>
+    </div>
+
+    <!-- Zone de jeu -->
+    <div id="zoneJeu">
+
+        <!-- Scores -->
+        <div id="scores"></div>
+
+        <!-- Série, thème, question -->
+        <div id="infoQuestion">
+            <div class="série" id="titreSérie">—</div>
+            <div class="thème" id="titreThème">—</div>
+            <div class="question" id="titreQuestion">—</div>
+            <div id="répondantExistant" style="display:none; margin-top:8px; 
+         padding:8px; background:#27ae60; border-radius:8px; font-size:0.9em;">
+            </div>
+        </div>
+
+        <!-- Buzzer -->
+        <div id="buzzer">En attente d'un buzzer...</div>
+
+        <!-- Boutons points (apparaissent après un buzz) -->
+        <div id="boutonsPoints">
+            <button class="bouton bouton-bonne" id="btnBonne" onclick="bonneRéponse(10)">
+                ✅ 10 pts
+            </button>
+            <button class="bouton bouton-secondaire" id="btnSecondaire" onclick="bonneRéponse(5)" style="display:none">
+                ✅ 5 pts
+            </button>
+            <button class="bouton bouton-mauvaise" id="btnMauvaise" onclick="mauvaiseRéponse()">
+                ❌ Mauvaise
+            </button>
+        </div>
+
+        <br>
+        <button class="bouton bouton-action" onclick="questionPrécédente()">
+            ⏮️ Question précédente
+        </button>
+        <button class="bouton bouton-action" onclick="questionSuivante()">
+            ⏭️ Question suivante
+        </button>
+
+        <button class="bouton bouton-orange" onclick="réinitialiser()">
+            🔄 Retour initialisation
+        </button>
+
+        <button class="bouton" style="background:#8e44ad;" onclick="terminerPartie()">
+            🏁 Terminer la partie
+        </button>
+
+    </div>
+
+    <!-- Équipes et joueurs -->
+    <div id="équipes"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        let toutesÉquipes = [];
+        let tousJoueurs = [];
+        let toutesParties = [];
+        let partiesFiltrees = [];
+        let toutesLésSéries = [];
+        let tousQuestionnaires = [];
+        let partieActuelle = null;
+        let joueurAyantBuzzé = null;
+
+        // Web Audio pour les sons
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const fréquencesParÉquipe = {
+            1: 220, 2: 330, 3: 440, 4: 550, 5: 660, 6: 770, 7: 880
+        };
+
+        function jouerSon(noÉquipe) {
+            const fréquence = fréquencesParÉquipe[noÉquipe] || 440;
+            const oscillateur = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillateur.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillateur.frequency.value = fréquence;
+            oscillateur.type = 'sine';
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+            oscillateur.start(audioCtx.currentTime);
+            oscillateur.stop(audioCtx.currentTime + 0.8);
+        }
+
+        // Réception état global
+        socket.on('état', (état) => {
+            partieActuelle = état.noPartie;
+            mettreÀJourMode(état.mode);
+            if (état.noPartie) {
+                document.getElementById('listeParties').value = état.noPartie;
+                afficherÉquipes(état.noPartie, état.joueursConnectés);
+            }
+            if (état.mode === 'jeu') {
+                mettreÀJourScores(état.scores);
+            }
+        });
+
+       // ============================================================
+// Reprise après plantage — afficher un message détaillé
+// avec double confirmation si l'animateur veut repartir à zéro
+// ============================================================
+socket.on('repriseDetectée', ({ nbRépondants, noSérie, noQuestion, scores }) => {
+    
+    // Première fenêtre — informer et proposer la reprise
+    const continuer = confirm(
+        `🔄 Reprise détectée pour cette partie !\n\n` +
+        `${nbRépondants} question(s) déjà répondue(s)\n` +
+        `Reprise à Série ${noSérie} — Question ${noQuestion}\n\n` +
+        `Cliquez OK pour continuer cette partie\n` +
+        `Cliquez Annuler pour repartir de zéro`
+    );
+
+    if (continuer) {
+        // Reprendre — mettre à jour les scores affichés
+        mettreÀJourScores(scores);
+        console.log('✅ Reprise confirmée');
+    } else {
+        // Deuxième confirmation — avertir que les points seront perdus
+        const confirmerEffacement = confirm(
+            `⚠️ ATTENTION !\n\n` +
+            `Vous êtes sur le point de supprimer\n` +
+            `${nbRépondants} réponse(s) déjà enregistrée(s).\n\n` +
+            `Les points seront perdus définitivement.\n\n` +
+            `Êtes-vous certain de vouloir repartir à zéro ?`
+        );
+
+        if (confirmerEffacement) {
+            // Repartir à zéro
+            socket.emit('réinitialiserPartie');
+            console.log('🗑️ Partie réinitialisée');
+        } else {
+            // L'animateur a changé d'avis — reprendre quand même
+            mettreÀJourScores(scores);
+            console.log('✅ Reprise confirmée après hésitation');
+        }
+    }
+});
+
+        socket.on('joueursConnectés', async (joueursConnectés) => {
+            tousJoueurs = await fetch('/api/joueurs').then(r => r.json());
+            if (partieActuelle) afficherÉquipes(partieActuelle, joueursConnectés);
+        });
+
+        socket.on('buzz', (joueur) => {
+            joueurAyantBuzzé = joueur;
+            jouerSon(joueur.noÉquipe);
+            const buzzer = document.getElementById('buzzer');
+            buzzer.textContent = `🔔 ${joueur.alias} (${joueur.nomÉquipe}) a buzzé !`;
+            buzzer.className = 'actif';
+
+            // Afficher les boutons de points
+            const { série, question } = obtenirQuestionCourante();
+            document.getElementById('btnBonne').textContent =
+                `✅ ${question ? question.points : 10} pts`;
+            document.getElementById('btnSecondaire').style.display =
+                (question && question.pointsSecondaires > 0) ? 'inline-block' : 'none';
+            document.getElementById('boutonsPoints').style.display = 'block';
+        });
+
+        // ============================================================
+        // Demande de confirmation à l'animateur quand une question
+        // a déjà une réponse enregistrée — évite les doublons
+        // ============================================================
+        socket.on('confirmerÉcrasement', ({ noÉquipe, noJoueur, points, ancienRépondant }) => {
+            const équipe = toutesÉquipes.find(e => e.noÉquipe === ancienRépondant.noÉquipe);
+            const joueur = tousJoueurs.find(j =>
+                j.noÉquipe === ancienRépondant.noÉquipe &&
+                j.noJoueur === ancienRépondant.noJoueur
+            );
+            const nomAncien = joueur ? joueur.alias : `Joueur ${ancienRépondant.noJoueur}`;
+            const nomÉquipe = équipe ? équipe.nomÉquipe : `Équipe ${ancienRépondant.noÉquipe}`;
+
+            const confirmer = confirm(
+                `⚠️ Cette question a déjà une réponse enregistrée !\n` +
+                `Ancien répondant : ${nomAncien} (${nomÉquipe})\n\n` +
+                `Voulez-vous remplacer cette réponse ?`
+            );
+
+            if (confirmer) {
+                socket.emit('confirmerÉcrasement', { noÉquipe, noJoueur, points });
+            }
+        });
+
+        socket.on('reset', () => {
+            joueurAyantBuzzé = null;
+            const buzzer = document.getElementById('buzzer');
+            buzzer.textContent = 'En attente d\'un buzzer...';
+            buzzer.className = '';
+            document.getElementById('boutonsPoints').style.display = 'none';
+        });
+
+        socket.on('réplique', (noÉquipe) => {
+            joueurAyantBuzzé = null;
+            const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
+            const buzzer = document.getElementById('buzzer');
+            buzzer.textContent = `↩️ Droit de réplique — ${équipe ? équipe.nomÉquipe : ''}`;
+            buzzer.className = 'réplique';
+            document.getElementById('boutonsPoints').style.display = 'none';
+        });
+
+        socket.on('scoresMisÀJour', (scores) => {
+            mettreÀJourScores(scores);
+        });
+
+        socket.on('questionMisÀJour', (info) => {
+            if (info) afficherInfoQuestion(info);
+        });
+
+        // Actions animateur
+        function choisirPartie() {
+            const noPartie = parseInt(document.getElementById('listeParties').value);
+            if (!noPartie) return;
+            socket.emit('choisirPartie', noPartie);
+        }
+
+        function démarrerPartie() {
+            socket.emit('démarrerPartie');
+        }
+
+        function réinitialiser() {
+            socket.emit('réinitialiser');
+        }
+
+        function bonneRéponse(points) {
+            if (!joueurAyantBuzzé) return;
+            socket.emit('attribuerPoints', {
+                noÉquipe: joueurAyantBuzzé.noÉquipe,
+                noJoueur: joueurAyantBuzzé.noJoueur,
+                points
+            });
+        }
+
+        function mauvaiseRéponse() {
+            if (!joueurAyantBuzzé) return;
+            socket.emit('mauvaiseRéponse', { noÉquipe: joueurAyantBuzzé.noÉquipe });
+        }
+
+        function questionPrécédente() {
+            socket.emit('questionPrécédente');
+        }
+        function questionSuivante() {
+            socket.emit('questionSuivante');
+        }
+
+        // Affichage
+        function mettreÀJourMode(mode) {
+            const badge = document.getElementById('modePartie');
+            const zoneJeu = document.getElementById('zoneJeu');
+            const zoneInit = document.getElementById('zoneInitialisation');
+            const labelParties = document.getElementById('labelToutesParties'); // à ajouter
+
+            if (mode === 'jeu') {
+                badge.textContent = '🎯 Partie en cours';
+                badge.className = 'jeu';
+                zoneJeu.style.display = 'block';
+                zoneInit.style.display = 'none';
+                labelParties.style.display = 'none';  // cacher le checkbox
+            } else {
+                badge.textContent = '🔧 Initialisation';
+                badge.className = 'initialisation';
+                zoneJeu.style.display = 'none';
+                zoneInit.style.display = 'block';
+                labelParties.style.display = 'inline'; // montrer le checkbox
+            }
+        }
+
+        function mettreÀJourScores(scores) {
+            if (!partieActuelle) return;
+            fetch('/api/parties').then(r => r.json()).then(parties => {
+                const partie = parties.find(p => p.noPartie === partieActuelle);
+                if (!partie) return;
+                const div = document.getElementById('scores');
+                [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
+                    const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
+                    const score = scores[noÉquipe] || 0;
+                    const id = `score-${noÉquipe}`;
+                    let el = document.getElementById(id);
+                    if (!el) {
+                        div.innerHTML += `
+                            <div class="score-équipe" id="${id}">
+                                <h3>${équipe ? équipe.nomÉquipe : ''}</h3>
+                                <div class="score-valeur" id="val-${noÉquipe}">${score}</div>
+                            </div>`;
+                    } else {
+                        document.getElementById(`val-${noÉquipe}`).textContent = score;
+                    }
+                });
+            });
+        }
+
+        function obtenirQuestionCourante() {
+            // On utilise les données déjà chargées
+            return { série: null, question: null }; // sera mis à jour via socket
+        }
+
+        let questionCouranteInfo = null;
+
+        function afficherInfoQuestion(info) {
+            questionCouranteInfo = info;
+            const { série, question, répondantExistant } = info;
+            if (!série || !question) return;
+
+            document.getElementById('titreSérie').textContent =
+                `Série ${série.noSérie} — ${série.typeSérie}`;
+            document.getElementById('titreQuestion').textContent =
+                `Question ${question.noQuestion} / ${série.questions.length} — ${question.points} pts`;
+
+            // Afficher le répondant existant si la question a déjà été répondue
+            const divRépondant = document.getElementById('répondantExistant');
+            if (répondantExistant) {
+                const équipe = toutesÉquipes.find(e => e.noÉquipe === répondantExistant.noÉquipe);
+                const joueur = tousJoueurs.find(j =>
+                    j.noÉquipe === répondantExistant.noÉquipe &&
+                    j.noJoueur === répondantExistant.noJoueur
+                );
+                const alias = joueur ? joueur.alias : `Joueur ${répondantExistant.noJoueur}`;
+                const nomÉquipe = équipe ? équipe.nomÉquipe : `Équipe ${répondantExistant.noÉquipe}`;
+                divRépondant.textContent = `✅ Déjà répondue par ${alias} (${nomÉquipe})`;
+                divRépondant.style.display = 'block';
+            } else {
+                divRépondant.textContent = '';
+                divRépondant.style.display = 'none';
+            }
+
+            // Trouver le thème dans le questionnaire
+            if (partieActuelle) {
+                fetch('/api/parties').then(r => r.json()).then(parties => {
+                    const partie = parties.find(p => p.noPartie === partieActuelle);
+                    if (!partie) return;
+                    fetch('/api/questionnaires').then(r => r.json()).then(questionnaires => {
+                        const q = questionnaires.find(
+                            q => q.noQuestionnaire === partie.noQuestionnaire
+                        );
+                        if (!q) return;
+                        const thèmeSérie = q.séries.find(s => s.noSérie === série.noSérie);
+                        if (thèmeSérie) {
+                            let thème = thèmeSérie.thème;
+                            if (thèmeSérie.sousThème) thème += ` — ${thèmeSérie.sousThème}`;
+                            document.getElementById('titreThème').textContent = thème;
+                        }
+                    });
+                });
+            }
+        }
+
+        function afficherÉquipes(noPartie, joueursConnectés) {
+            fetch('/api/parties').then(r => r.json()).then(parties => {
+                const partie = parties.find(p => p.noPartie === noPartie);
+                if (!partie) return;
+                const div = document.getElementById('équipes');
+                div.innerHTML = '';
+                [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
+                    const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
+                    const membres = tousJoueurs.filter(j =>
+                        j.noÉquipe === noÉquipe && !j.estÉquipe
+                    );
+                    const estConnecté = (j) => joueursConnectés.some(
+                        c => c.noÉquipe === j.noÉquipe && c.noJoueur === j.noJoueur
+                    );
+                    div.innerHTML += `
+                        <div class="équipe">
+                            <h2>${équipe ? équipe.nomÉquipe : ''}</h2>
+                            ${membres.map(j => `
+                                <div class="joueur ${estConnecté(j) ? 'connecté' : ''}">
+                                    ${estConnecté(j) ? '🟢' : '⚪'} ${j.alias}
+                                </div>`
+                    ).join('')}
+                        </div>`;
+                });
+            });
+        }
+
+        // Chargement initial
+        let toutesPartiesData = [];
+        let partiesFiltrées = [];
+
+        async function chargerDonnées() {
+            toutesÉquipes = await fetch('/api/equipes').then(r => r.json());
+            tousJoueurs = await fetch('/api/joueurs').then(r => r.json());
+            toutesPartiesData = await fetch('/api/parties').then(r => r.json());
+            toutesLésSéries = await fetch('/api/series').then(r => r.json());
+            tousQuestionnaires = await fetch('/api/questionnaires').then(r => r.json());
+
+            const aujourdhui = new Date();
+            aujourdhui.setDate(aujourdhui.getDate() - 6);
+            const dateMin = aujourdhui.toISOString().split('T')[0];
+            partiesFiltrées = toutesPartiesData.filter(p => p.date >= dateMin);
+
+            remplirSélecteur(partiesFiltrées);
+        }
+
+        function remplirSélecteur(liste) {
+            const select = document.getElementById('listeParties');
+            select.innerHTML = '<option value="">-- Choisir une partie --</option>';
+            liste.forEach(p => {
+                const éA = toutesÉquipes.find(e => e.noÉquipe === p.noÉquipeA);
+                const éB = toutesÉquipes.find(e => e.noÉquipe === p.noÉquipeB);
+                const option = document.createElement('option');
+                option.value = p.noPartie;
+                option.textContent =
+                    `#${p.noPartie} — ${p.date} — ${éA.nomÉquipe} vs ${éB.nomÉquipe}`;
+                select.appendChild(option);
+            });
+        }
+
+        function toggleToutesParties() {
+            const afficherTout = document.getElementById('toutesParties').checked;
+            remplirSélecteur(afficherTout ? toutesPartiesData : partiesFiltrées);
+        }
+
+        chargerDonnées();
+
+        function terminerPartie() {
+            if (confirm('Voulez-vous terminer la partie et sauvegarder les résultats ?')) {
+                socket.emit('terminerPartie');
+            }
+        }
+
+        socket.on('partieTerminée', ({ noPartie, scores }) => {
+            console.log(`Partie ${noPartie} terminée !`, scores);
+        });
+
+    </script>
+</body>
+
+</html>
