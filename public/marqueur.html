@@ -302,6 +302,10 @@
             🏁 Terminer la partie
         </button>
 
+        <button class="bouton" style="background:#2980b9;" onclick="téléchargerRépondants()">
+            💾 Télécharger répondants.json
+        </button>
+
     </div>
 
     <!-- Équipes et joueurs -->
@@ -499,12 +503,12 @@
         }
 
         function questionPrécédente() {
-    socket.emit('questionPrécédente', partieActuelle);
-}
+            socket.emit('questionPrécédente', partieActuelle);
+        }
 
-function questionSuivante() {
-    socket.emit('questionSuivante', partieActuelle);
-}
+        function questionSuivante() {
+            socket.emit('questionSuivante', partieActuelle);
+        }
 
         // Affichage
         function mettreÀJourMode(mode) {
@@ -528,29 +532,29 @@ function questionSuivante() {
             }
         }
 
-function mettreÀJourScores(scores) {
-    if (!partieActuelle) return;
-    fetch('/api/parties').then(r => r.json()).then(parties => {
-        const partie = parties.find(p => p.noPartie === partieActuelle);
-        if (!partie) return;
-        const div = document.getElementById('scores');
-        
-        // Vider les scores avant de reconstruire — évite l'accumulation
-        // quand on change de partie dans le dropdown
-        div.innerHTML = '';
-        
-        [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
-            const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
-            const score = scores[noÉquipe] || 0;
-            const id = `score-${noÉquipe}`;
-            div.innerHTML += `
+        function mettreÀJourScores(scores) {
+            if (!partieActuelle) return;
+            fetch('/api/parties').then(r => r.json()).then(parties => {
+                const partie = parties.find(p => p.noPartie === partieActuelle);
+                if (!partie) return;
+                const div = document.getElementById('scores');
+
+                // Vider les scores avant de reconstruire — évite l'accumulation
+                // quand on change de partie dans le dropdown
+                div.innerHTML = '';
+
+                [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
+                    const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
+                    const score = scores[noÉquipe] || 0;
+                    const id = `score-${noÉquipe}`;
+                    div.innerHTML += `
                 <div class="score-équipe" id="${id}">
                     <h3>${équipe ? équipe.nomÉquipe : ''}</h3>
                     <div class="score-valeur" id="val-${noÉquipe}">${score}</div>
                 </div>`;
-        });
-    });
-}
+                });
+            });
+        }
 
         function obtenirQuestionCourante() {
             // On utilise les données déjà chargées
@@ -674,11 +678,16 @@ function mettreÀJourScores(scores) {
 
         chargerDonnées();
 
-function terminerPartie() {
-    if (confirm('Voulez-vous terminer la partie et sauvegarder les résultats ?')) {
-        socket.emit('terminerPartie', partieActuelle);
-    }
-}
+        function terminerPartie() {
+            if (confirm('Voulez-vous terminer la partie et sauvegarder les résultats ?')) {
+                socket.emit('terminerPartie', partieActuelle);
+            }
+        }
+
+        // Télécharger le fichier répondants.json depuis le Volume Railway
+        function téléchargerRépondants() {
+            window.open('/api/telecharger/repondants', '_blank');
+        }
 
         socket.on('partieTerminée', ({ noPartie, scores }) => {
             console.log(`Partie ${noPartie} terminée !`, scores);

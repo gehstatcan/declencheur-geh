@@ -80,6 +80,18 @@ app.get('/api/joueurs',        (req, res) => res.json(joueurs));
 app.get('/api/parties',        (req, res) => res.json(parties));
 app.get('/api/series',         (req, res) => res.json(séries));
 app.get('/api/questionnaires', (req, res) => res.json(questionnaires));
+// ============================================================
+// Téléchargement du fichier répondants.json
+// Utile pour récupérer les données depuis le Volume Railway
+// ============================================================
+app.get('/api/telecharger/repondants', (req, res) => {
+    const cheminRépondants = path.join(dossierSaison, 'répondants.json');
+    try {
+        res.download(cheminRépondants, 'répondants.json');
+    } catch (e) {
+        res.status(500).json({ erreur: 'Fichier introuvable' });
+    }
+});
 
 // ============================================================
 // Sauvegarder un nouveau joueur dans joueurs.json
