@@ -560,8 +560,14 @@
         }
 
         function obtenirQuestionCourante() {
-            // On utilise les données déjà chargées
-            return { série: null, question: null }; // sera mis à jour via socket
+            // Utiliser les données reçues via socket.on('questionMisÀJour')
+            if (questionCouranteInfo) {
+                return {
+                    série: questionCouranteInfo.série,
+                    question: questionCouranteInfo.question
+                };
+            }
+            return { série: null, question: null };
         }
 
         let questionCouranteInfo = null;

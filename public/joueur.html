@@ -149,7 +149,8 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 6px; /* ← espace entre le select et le label */
+            gap: 6px;
+            /* ← espace entre le select et le label */
         }
 
         select,
@@ -381,8 +382,49 @@
         // Réception de l'état global de la partie
         // ============================================================
         socket.on("état", (état) => {
-            if (état.mode === "jeu") passerEnModeJeu();
-            else passerEnModeInscription();
+            if (état.mode === "jeu" && joueurActuel) {
+                // Partie en cours et joueur enregistré
+                passerEnModeJeu();
+            } else if (état.mode === "jeu" && !joueurActuel) {
+                // Partie en cours mais joueur pas encore enregistré — cas A/C/D/H
+                document.getElementById('statut').textContent =
+                    '⚠️ Partie en cours — Identifiez-vous pour jouer !';
+                passerEnModeInscription();
+            } else if (état.mode === "terminée") {
+                // 🏁 Partie terminée — afficher message final avec scores
+                document.getElementById('zoneJeu').style.display = 'none';
+                document.getElementById('zoneInscription').style.display = 'none';
+
+                // Construire le message avec les scores finaux
+                let message = '🏁 La partie est terminée. Merci d\'avoir joué !\n\n';
+
+                if (état.scores && Object.keys(état.scores).length > 0) {
+                    // Afficher le score de chaque équipe
+                    message = '🏁 La partie est terminée !';
+                    const statut = document.getElementById('statut');
+                    statut.innerHTML = `
+            <div>🏁 Partie terminée !</div>
+            <div style="margin-top:12px; font-size:0.8em;">
+                ${Object.entries(état.scores).map(([noÉquipe, score]) => {
+                        // Mettre en évidence le score du joueur actuel
+                        const estMonÉquipe = joueurActuel &&
+                            parseInt(noÉquipe) === joueurActuel.noÉquipe;
+                        return `<div style="
+                        margin: 6px 0;
+                        color: ${estMonÉquipe ? 'var(--buzz)' : 'var(--blanc)'}">
+                        ${estMonÉquipe ? '⭐ ' : ''}
+                        Équipe ${noÉquipe} : ${score} pts
+                    </div>`;
+                    }).join('')}
+            </div>`;
+                    return; // On a déjà mis à jour le statut
+                }
+
+                document.getElementById('statut').textContent = message;
+            } else {
+                // Mode initialisation
+                passerEnModeInscription();
+            }
         });
 
         // ============================================================
@@ -586,7 +628,7 @@
         }
 
         // ============================================================
-        // S'enregistrer comme joueur
+        // S'enregistrer comme joueur. S'exécute lorsque le joueur clique "joindre la partie".
         // ============================================================
         async function sEnregistrer() {
             const noÉquipe = parseInt(

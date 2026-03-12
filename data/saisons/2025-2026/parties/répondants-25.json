@@ -38,5 +38,53 @@
     "noJoueur": 10,
     "noÉquipe": 5,
     "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 1,
+    "noQuestion": 6,
+    "noJoueur": 1,
+    "noÉquipe": 1,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 6,
+    "noQuestion": 5,
+    "noJoueur": 1,
+    "noÉquipe": 1,
+    "pointsSecondaires": true
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 6,
+    "noQuestion": 6,
+    "noJoueur": 1,
+    "noÉquipe": 1,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 6,
+    "noQuestion": 7,
+    "noJoueur": 1,
+    "noÉquipe": 1,
+    "pointsSecondaires": true
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 6,
+    "noQuestion": 8,
+    "noJoueur": 1,
+    "noÉquipe": 1,
+    "pointsSecondaires": true
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 7,
+    "noQuestion": 1,
+    "noJoueur": 1,
+    "noÉquipe": 1,
+    "pointsSecondaires": false
   }
 ]

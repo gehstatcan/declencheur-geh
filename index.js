@@ -760,7 +760,7 @@ io.on("connection", (socket) => {
       );
 
       const état = obtenirÉtat(noPartie);
-      état.mode = "initialisation";
+      état.mode = "terminée";
       état.buzzVerrou = false;
       io.to(`partie-${noPartie}`).emit("état", état);
       io.to(`partie-${noPartie}`).emit("partieTerminée", {
