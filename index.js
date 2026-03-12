@@ -561,6 +561,14 @@ io.on('connection', (socket) => {
 // ============================================================
 // Démarrage du serveur
 // ============================================================
-http.listen(3000, () => {
+
+// Serveur local
+/* http.listen(3000, () => {
     console.log('Serveur démarré sur http://localhost:3000');
+}); */
+
+// Utiliser le port de Railway en production, 3000 en local
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+    console.log(`Serveur démarré sur le port ${PORT}`);
 });
