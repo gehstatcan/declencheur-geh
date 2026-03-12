@@ -687,11 +687,19 @@
             }
         }
 
-        // Télécharger le fichier répondants.json depuis le Volume Railway
+        // Télécharger le fichier répondants de la partie en cours
+        function téléchargerPartie() {
+            if (!partieActuelle) {
+                alert('Aucune partie sélectionnée !');
+                return;
+            }
+            window.open(`/api/telecharger/repondants-partie/${partieActuelle}`, '_blank');
+        }
+
+        // Télécharger le fichier cumulatif de toute la saison
         function téléchargerRépondants() {
             window.open('/api/telecharger/repondants', '_blank');
         }
-
         socket.on('partieTerminée', ({ noPartie, scores }) => {
             console.log(`Partie ${noPartie} terminée !`, scores);
         });
