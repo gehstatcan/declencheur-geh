@@ -737,9 +737,16 @@ io.on("connection", (socket) => {
         ...répondantsPartie,
       ];
 
+      // Trier par noPartie, noSérie, noQuestion pour faciliter la lecture
+      const fusionTriée = fusion.sort((a, b) => {
+        if (a.noPartie !== b.noPartie) return a.noPartie - b.noPartie;
+        if (a.noSérie !== b.noSérie) return a.noSérie - b.noSérie;
+        return a.noQuestion - b.noQuestion;
+      });
+
       fs.writeFileSync(
         cheminCumulatif,
-        JSON.stringify(fusion, null, 2),
+        JSON.stringify(fusionTriée, null, 2),
         "utf-8",
       );
 
