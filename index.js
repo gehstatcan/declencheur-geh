@@ -728,8 +728,15 @@ io.on("connection", (socket) => {
         répondantsCumulatifs = [];
       }
 
-      // Fusionner et sauvegarder
-      const fusion = [...répondantsCumulatifs, ...répondantsPartie];
+      // Fusionner en évitant les doublons — retirer d'abord les entrées
+      // existantes pour cette partie avant d'ajouter les nouvelles
+      const fusion = [
+        // Garder seulement les répondants des AUTRES parties
+        ...répondantsCumulatifs.filter((r) => r.noPartie !== noPartie),
+        // Ajouter les répondants de la partie en cours
+        ...répondantsPartie,
+      ];
+
       fs.writeFileSync(
         cheminCumulatif,
         JSON.stringify(fusion, null, 2),
