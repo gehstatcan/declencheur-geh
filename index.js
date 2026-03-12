@@ -13,6 +13,8 @@ app.use(express.json());
 // ============================================================
 const saison = '2025-2026';
 //const dossierSaison = path.join(__dirname, 'data', 'saisons', saison);
+
+// Volume Railway monté sur /data
 const dossierBase = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'data');
 const dossierSaison = path.join(dossierBase, 'saisons', saison);
 
