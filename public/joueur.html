@@ -144,6 +144,7 @@
         let toutesÉquipes = [];
         let tousJoueurs = [];
         let joueurActuel = null;
+        let noPartieActuelle = null; // numéro de la partie choisie par le joueur
 
         // Réception de l'état global
         socket.on("état", (état) => {
@@ -251,6 +252,10 @@
                 document.getElementById("listeParties").value,
             );
             if (!noPartie) return;
+
+            // Rejoindre la room Socket.io de cette partie
+            noPartieActuelle = noPartie;
+            socket.emit('rejoindrePartie', noPartie);
 
             fetch("/api/parties")
                 .then((r) => r.json())
@@ -362,12 +367,14 @@
             }
 
             joueurActuel = {
+                noPartie: noPartieActuelle,
                 noÉquipe,
                 noJoueur,
                 alias,
                 nomÉquipe: équipe.nomÉquipe,
             };
             socket.emit("sEnregistrer", joueurActuel);
+
             document.getElementById("statut").textContent =
                 `✅ Bienvenue ${alias} ! En attente du début de la partie...`;
             document.getElementById("zoneInscription").style.display = "none";
@@ -375,6 +382,7 @@
 
         function buzzer() {
             if (joueurActuel) {
+                // noPartie est inclus dans joueurActuel
                 socket.emit("buzz", joueurActuel);
             }
         }

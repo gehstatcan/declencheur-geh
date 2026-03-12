@@ -3,6 +3,22 @@
     "noPartie": 25,
     "noSérie": 1,
     "noQuestion": 1,
+    "noJoueur": 11,
+    "noÉquipe": 1,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 1,
+    "noQuestion": 2,
+    "noJoueur": 10,
+    "noÉquipe": 5,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 1,
+    "noQuestion": 3,
     "noJoueur": 10,
     "noÉquipe": 5,
     "pointsSecondaires": false
@@ -11,7 +27,15 @@
     "noPartie": 25,
     "noSérie": 1,
     "noQuestion": 4,
-    "noJoueur": 8,
+    "noJoueur": 10,
+    "noÉquipe": 5,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 1,
+    "noQuestion": 5,
+    "noJoueur": 10,
     "noÉquipe": 5,
     "pointsSecondaires": false
   }

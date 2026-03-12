@@ -354,46 +354,46 @@
             }
         });
 
-       // ============================================================
-// Reprise après plantage — afficher un message détaillé
-// avec double confirmation si l'animateur veut repartir à zéro
-// ============================================================
-socket.on('repriseDetectée', ({ nbRépondants, noSérie, noQuestion, scores }) => {
-    
-    // Première fenêtre — informer et proposer la reprise
-    const continuer = confirm(
-        `🔄 Reprise détectée pour cette partie !\n\n` +
-        `${nbRépondants} question(s) déjà répondue(s)\n` +
-        `Reprise à Série ${noSérie} — Question ${noQuestion}\n\n` +
-        `Cliquez OK pour continuer cette partie\n` +
-        `Cliquez Annuler pour repartir de zéro`
-    );
+        // ============================================================
+        // Reprise après plantage — afficher un message détaillé
+        // avec double confirmation si l'animateur veut repartir à zéro
+        // ============================================================
+        socket.on('repriseDetectée', ({ nbRépondants, noSérie, noQuestion, scores }) => {
 
-    if (continuer) {
-        // Reprendre — mettre à jour les scores affichés
-        mettreÀJourScores(scores);
-        console.log('✅ Reprise confirmée');
-    } else {
-        // Deuxième confirmation — avertir que les points seront perdus
-        const confirmerEffacement = confirm(
-            `⚠️ ATTENTION !\n\n` +
-            `Vous êtes sur le point de supprimer\n` +
-            `${nbRépondants} réponse(s) déjà enregistrée(s).\n\n` +
-            `Les points seront perdus définitivement.\n\n` +
-            `Êtes-vous certain de vouloir repartir à zéro ?`
-        );
+            // Première fenêtre — informer et proposer la reprise
+            const continuer = confirm(
+                `🔄 Reprise détectée pour cette partie !\n\n` +
+                `${nbRépondants} question(s) déjà répondue(s)\n` +
+                `Reprise à Série ${noSérie} — Question ${noQuestion}\n\n` +
+                `Cliquez OK pour continuer cette partie\n` +
+                `Cliquez Annuler pour repartir de zéro`
+            );
 
-        if (confirmerEffacement) {
-            // Repartir à zéro
-            socket.emit('réinitialiserPartie');
-            console.log('🗑️ Partie réinitialisée');
-        } else {
-            // L'animateur a changé d'avis — reprendre quand même
-            mettreÀJourScores(scores);
-            console.log('✅ Reprise confirmée après hésitation');
-        }
-    }
-});
+            if (continuer) {
+                // Reprendre — mettre à jour les scores affichés
+                mettreÀJourScores(scores);
+                console.log('✅ Reprise confirmée');
+            } else {
+                // Deuxième confirmation — avertir que les points seront perdus
+                const confirmerEffacement = confirm(
+                    `⚠️ ATTENTION !\n\n` +
+                    `Vous êtes sur le point de supprimer\n` +
+                    `${nbRépondants} réponse(s) déjà enregistrée(s).\n\n` +
+                    `Les points seront perdus définitivement.\n\n` +
+                    `Êtes-vous certain de vouloir repartir à zéro ?`
+                );
+
+                if (confirmerEffacement) {
+                    // Repartir à zéro
+                    socket.emit('réinitialiserPartie', partieActuelle);
+                    console.log('🗑️ Partie réinitialisée');
+                } else {
+                    // L'animateur a changé d'avis — reprendre quand même
+                    mettreÀJourScores(scores);
+                    console.log('✅ Reprise confirmée après hésitation');
+                }
+            }
+        });
 
         socket.on('joueursConnectés', async (joueursConnectés) => {
             tousJoueurs = await fetch('/api/joueurs').then(r => r.json());
@@ -436,7 +436,7 @@ socket.on('repriseDetectée', ({ nbRépondants, noSérie, noQuestion, scores }) 
             );
 
             if (confirmer) {
-                socket.emit('confirmerÉcrasement', { noÉquipe, noJoueur, points });
+                socket.emit('confirmerÉcrasement', { noPartie: partieActuelle, noÉquipe, noJoueur, points });
             }
         });
 
@@ -469,20 +469,21 @@ socket.on('repriseDetectée', ({ nbRépondants, noSérie, noQuestion, scores }) 
         function choisirPartie() {
             const noPartie = parseInt(document.getElementById('listeParties').value);
             if (!noPartie) return;
+            // Rejoindre la room de cette partie
+            socket.emit('rejoindrePartie', noPartie);
             socket.emit('choisirPartie', noPartie);
         }
-
         function démarrerPartie() {
-            socket.emit('démarrerPartie');
+            socket.emit('démarrerPartie', partieActuelle);
         }
-
         function réinitialiser() {
-            socket.emit('réinitialiser');
+            socket.emit('réinitialiser', partieActuelle);
         }
 
         function bonneRéponse(points) {
             if (!joueurAyantBuzzé) return;
             socket.emit('attribuerPoints', {
+                noPartie: partieActuelle,
                 noÉquipe: joueurAyantBuzzé.noÉquipe,
                 noJoueur: joueurAyantBuzzé.noJoueur,
                 points
@@ -491,15 +492,19 @@ socket.on('repriseDetectée', ({ nbRépondants, noSérie, noQuestion, scores }) 
 
         function mauvaiseRéponse() {
             if (!joueurAyantBuzzé) return;
-            socket.emit('mauvaiseRéponse', { noÉquipe: joueurAyantBuzzé.noÉquipe });
+            socket.emit('mauvaiseRéponse', {
+                noPartie: partieActuelle,
+                noÉquipe: joueurAyantBuzzé.noÉquipe
+            });
         }
 
         function questionPrécédente() {
-            socket.emit('questionPrécédente');
-        }
-        function questionSuivante() {
-            socket.emit('questionSuivante');
-        }
+    socket.emit('questionPrécédente', partieActuelle);
+}
+
+function questionSuivante() {
+    socket.emit('questionSuivante', partieActuelle);
+}
 
         // Affichage
         function mettreÀJourMode(mode) {
@@ -669,11 +674,11 @@ socket.on('repriseDetectée', ({ nbRépondants, noSérie, noQuestion, scores }) 
 
         chargerDonnées();
 
-        function terminerPartie() {
-            if (confirm('Voulez-vous terminer la partie et sauvegarder les résultats ?')) {
-                socket.emit('terminerPartie');
-            }
-        }
+function terminerPartie() {
+    if (confirm('Voulez-vous terminer la partie et sauvegarder les résultats ?')) {
+        socket.emit('terminerPartie', partieActuelle);
+    }
+}
 
         socket.on('partieTerminée', ({ noPartie, scores }) => {
             console.log(`Partie ${noPartie} terminée !`, scores);
