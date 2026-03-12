@@ -12,7 +12,51 @@ app.use(express.json());
 // Chargement des données de la saison
 // ============================================================
 const saison = '2025-2026';
-const dossierSaison = path.join(__dirname, 'data', 'saisons', saison);
+//const dossierSaison = path.join(__dirname, 'data', 'saisons', saison);
+const dossierBase = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'data');
+const dossierSaison = path.join(dossierBase, 'saisons', saison);
+
+// ============================================================
+// Initialisation du Volume — copier les données si nécessaire
+// S'assure que la structure de dossiers existe sur le Volume
+// ============================================================
+function initialiserVolume() {
+    const dossierParties = path.join(dossierSaison, 'parties');
+    
+    // Créer les dossiers si inexistants
+    if (!fs.existsSync(dossierSaison)) {
+        fs.mkdirSync(dossierSaison, { recursive: true });
+        console.log('📁 Dossier saison créé sur le Volume');
+    }
+    if (!fs.existsSync(dossierParties)) {
+        fs.mkdirSync(dossierParties, { recursive: true });
+        console.log('📁 Dossier parties créé sur le Volume');
+    }
+
+    // Copier les fichiers JSON statiques s'ils n'existent pas encore
+    const fichiers = ['équipes.json', 'joueurs.json', 'parties.json',
+                      'séries.json', 'questionnaires.json'];
+    
+    fichiers.forEach(fichier => {
+        const destination = path.join(dossierSaison, fichier);
+        const source = path.join(__dirname, 'data', 'saisons', saison, fichier);
+        
+        if (!fs.existsSync(destination)) {
+            fs.copyFileSync(source, destination);
+            console.log(`📄 ${fichier} copié sur le Volume`);
+        }
+    });
+
+    // Créer répondants.json vide si inexistant
+    const cheminRépondants = path.join(dossierSaison, 'répondants.json');
+    if (!fs.existsSync(cheminRépondants)) {
+        fs.writeFileSync(cheminRépondants, '[]', 'utf-8');
+        console.log('📄 répondants.json initialisé sur le Volume');
+    }
+}
+
+// Appeler l'initialisation au démarrage
+initialiserVolume();
 
 const équipes        = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'équipes.json'), 'utf-8'));
 const joueurs        = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'joueurs.json'), 'utf-8'));
