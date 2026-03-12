@@ -1,3 +1,8 @@
+// Charger les variables d'environnement en développement local
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
