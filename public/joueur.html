@@ -3,138 +3,361 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Joueur - Génie en Herbe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            background: #1a1a2e;
-            color: white;
-            margin: 0;
-            padding: 20px;
+        /* ============================================================
+           Variables de couleurs — thème sombre accessible WCAG AA
+           ============================================================ */
+        :root {
+            --fond: #0f0f1a;
+            --fond-carte: #1a1a2e;
+            --fond-champ: #16213e;
+            --accent: #e94560;
+            --buzz: #FFD700;
+            --buzz-texte: #000000;
+            --vert: #2ecc71;
+            --orange: #e67e22;
+            --blanc: #ffffff;
+            --gris: #aaaaaa;
+            --rayon: 16px;
         }
 
-        h1 {
-            color: #e94560;
-            margin-top: 20px;
+        /* ============================================================
+           Base
+           ============================================================ */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--blanc);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        /* ============================================================
+           En-tête avec icône SVG cerveau+ampoule
+           ============================================================ */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        header svg {
+            width: 52px;
+            height: 52px;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--blanc);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        /* ============================================================
+           Statut — grand, contrasté, accessible
+           aria-live pour lecteurs d'écran
+           ============================================================ */
+        #statut {
+            width: 100%;
+            max-width: 560px;
+            font-size: 1.4em;
+            font-weight: 600;
+            padding: 18px 24px;
+            border-radius: var(--rayon);
+            background: var(--fond-carte);
+            color: var(--blanc);
+            margin-bottom: 20px;
+            text-align: center;
+            transition: background 0.3s, color 0.3s;
+            /* Contraste blanc sur #1a1a2e = 13:1 ✅ WCAG AAA */
+        }
+
+        #statut.buzzé {
+            background: var(--buzz);
+            color: var(--buzz-texte);
+            font-size: 1.8em;
+            /* Contraste noir sur jaune = 15:1 ✅ WCAG AAA */
+        }
+
+        #statut.adverse {
+            background: #c0392b;
+            color: var(--blanc);
+        }
+
+        #statut.réplique {
+            background: var(--orange);
+            color: var(--buzz-texte);
+        }
+
+        /* ============================================================
+           Case à cocher toutes les parties
+           Alignée à gauche, disparaît en mode jeu
+           ============================================================ */
+        #labelToutesParties {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95em;
+            color: var(--gris);
+            width: auto;
+            cursor: pointer;
+            align-self: flex-end;
+            /* ← pousse vers la droite dans un conteneur flex */
+        }
+
+        #labelToutesParties input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* ============================================================
+           Zone inscription
+           ============================================================ */
+        #zoneInscription {
+            width: 100%;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+        }
+
+        #conteneurParties {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px; /* ← espace entre le select et le label */
         }
 
         select,
-        input {
+        input[type="text"] {
+            width: 100%;
+            font-family: 'Inter', sans-serif;
             font-size: 1em;
-            padding: 10px;
-            border-radius: 10px;
-            background: #16213e;
-            color: white;
-            border: 1px solid #e94560;
-            margin: 10px;
-            width: 80%;
+            padding: 14px 16px;
+            border-radius: var(--rayon);
+            background: var(--fond-champ);
+            color: var(--blanc);
+            border: 2px solid var(--accent);
+            outline: none;
+            transition: border-color 0.2s;
+            /* Contraste blanc sur #16213e = 13:1 ✅ */
         }
 
-        .bouton {
-            font-size: 1em;
-            padding: 12px 30px;
-            margin: 10px;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
+        select:focus,
+        input[type="text"]:focus {
+            border-color: var(--buzz);
         }
 
+        #nouveauNom {
+            display: none;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ============================================================
+           Bouton Je suis prêt
+           ============================================================ */
         #boutonPrêt {
-            background: #2ecc71;
-            width: 80%;
-            font-size: 1.2em;
+            display: none;
+            width: 100%;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6em;
+            letter-spacing: 2px;
+            padding: 16px;
+            background: var(--vert);
+            color: #000000;
+            border: none;
+            border-radius: var(--rayon);
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            /* Contraste noir sur vert = 7:1 ✅ WCAG AA */
         }
 
         #boutonPrêt:hover {
             background: #27ae60;
         }
 
-        #boutonBuzz {
-            font-size: 3em;
-            padding: 40px;
-            background: #e94560;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            width: 80%;
-            margin-top: 20px;
+        #boutonPrêt:active {
+            transform: scale(0.98);
+        }
+
+        /* ============================================================
+           Zone jeu
+           ============================================================ */
+        #zoneJeu {
             display: none;
+            width: 100%;
+            max-width: 560px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ============================================================
+           Bouton BUZZ — très grand, jaune vif, accessible
+           Contraste #FFD700 sur #0f0f1a = 16:1 ✅ WCAG AAA
+           ============================================================ */
+        #boutonBuzz {
+            width: 100%;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5em;
+            letter-spacing: 4px;
+            padding: 50px 20px;
+            background: var(--buzz);
+            color: var(--buzz-texte);
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            margin-top: 16px;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.35);
+            transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+            /* Accessible au clavier */
+            outline: none;
+        }
+
+        #boutonBuzz:focus-visible {
+            outline: 4px solid var(--blanc);
+            outline-offset: 4px;
+        }
+
+        #boutonBuzz:hover {
+            box-shadow: 0 14px 50px rgba(255, 215, 0, 0.5);
+            transform: translateY(-2px);
         }
 
         #boutonBuzz:active {
-            background: #c73652;
-            transform: scale(0.95);
+            transform: scale(0.97);
+            box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2);
         }
 
         #boutonBuzz:disabled {
-            background: #555;
+            background: #333344;
+            color: #666677;
             cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
-        #statut {
-            margin: 15px;
-            font-size: 1.1em;
-            padding: 10px;
-            border-radius: 10px;
-            background: #16213e;
+        /* ============================================================
+           Responsive — téléphone vs laptop
+           ============================================================ */
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            #statut {
+                font-size: 1.2em;
+            }
+
+            #statut.buzzé {
+                font-size: 1.5em;
+            }
+
+            #boutonBuzz {
+                font-size: 3.5em;
+                padding: 40px 20px;
+            }
         }
 
-        #zoneInscription {
-            display: block;
-        }
+        @media (min-width: 768px) {
+            #boutonBuzz {
+                font-size: 6em;
+                padding: 70px 40px;
+            }
 
-        #zoneJeu {
-            display: none;
-        }
-
-        #nouveauNom {
-            display: none;
+            #statut {
+                font-size: 1.6em;
+            }
         }
     </style>
 </head>
 
 <body>
-    <h1>🎯 Génie en Herbe</h1>
 
-    <div id="statut">Choisissez votre partie</div>
+    <!-- En-tête avec icône SVG cerveau+ampoule blanc -->
+    <header>
+        <img src="/ampouleQuiz.png" alt="Logo Génie en Herbe" style="width:52px; height:52px; filter: invert(1);">
+        <h1>GEH — Statcan</h1>
+    </header>
 
-    <label id="labelToutesParties" style="font-size: 0.9em; color: #aaa;">
-        <input type="checkbox" id="toutesParties" onchange="toggleToutesParties()">
-        Afficher toutes les parties
-    </label>
+    <!-- Statut — aria-live pour lecteurs d'écran -->
+    <div id="statut" role="status" aria-live="polite">
+        Choisissez votre partie
+    </div>
 
     <!-- Zone inscription -->
     <div id="zoneInscription">
-        <select id="listeParties" onchange="chargerÉquipes()">
-            <option value="">-- Choisir une partie --</option>
-        </select>
 
-        <select id="listeÉquipes" onchange="chargerJoueurs()" style="display: none">
+        <!-- Sélecteur de parties avec case à cocher alignée à droite -->
+        <div id="conteneurParties">
+            <select id="listeParties" onchange="chargerÉquipes()" aria-label="Choisir une partie">
+                <option value="">-- Choisir une partie --</option>
+            </select>
+            <label id="labelToutesParties">
+                Afficher toutes les parties
+                <input type="checkbox" id="toutesParties" onchange="toggleToutesParties()">
+            </label>
+        </div>
+
+        <select id="listeÉquipes" onchange="chargerJoueurs()" style="display:none" aria-label="Choisir votre équipe">
             <option value="">-- Choisir votre équipe --</option>
         </select>
 
-        <select id="listeJoueurs" onchange="vérifierNouveauJoueur()" style="display: none">
+        <select id="listeJoueurs" onchange="vérifierNouveauJoueur()" style="display:none"
+            aria-label="Choisir votre nom">
             <option value="">-- Choisir votre nom --</option>
         </select>
 
         <div id="nouveauNom">
-            <input id="champAlias" type="text" placeholder="Alias (affiché à l'écran)..." />
-            <input id="champPrénom" type="text" placeholder="Prénom..." />
-            <input id="champNom" type="text" placeholder="Nom de famille..." />
+            <input id="champAlias" type="text" placeholder="Alias (affiché à l'écran)..." aria-label="Alias" />
+            <input id="champPrénom" type="text" placeholder="Prénom..." aria-label="Prénom" />
+            <input id="champNom" type="text" placeholder="Nom de famille..." aria-label="Nom de famille" />
         </div>
 
-        <br />
-        <button class="bouton" id="boutonPrêt" onclick="sEnregistrer()" style="display: none">
-            ✅ Je suis prêt !
+        <button id="boutonPrêt" onclick="sEnregistrer()" aria-label="Joindre la partie">
+            ✅ JOINDRE LA PARTIE
+        </button>
+
+    </div><!-- fin zoneInscription -->
+
+    <!-- Zone jeu -->
+    <div id="zoneJeu">
+        <button id="boutonBuzz" onclick="buzzer()" aria-label="Buzzer pour répondre">
+            🔔 BUZZ !
         </button>
     </div>
 
     <!-- Zone jeu -->
     <div id="zoneJeu">
-        <button id="boutonBuzz" onclick="buzzer()">BUZZ !</button>
+        <button id="boutonBuzz" onclick="buzzer()" aria-label="Buzzer pour répondre">
+            🔔 BUZZ !
+        </button>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -144,88 +367,118 @@
         let toutesÉquipes = [];
         let tousJoueurs = [];
         let joueurActuel = null;
-        let noPartieActuelle = null; // numéro de la partie choisie par le joueur
+        let noPartieActuelle = null;
 
-        // Réception de l'état global
+        // ============================================================
+        // Feedback vibration — pour le joueur presque aveugle
+        // Fonctionne principalement sur mobile
+        // ============================================================
+        function vibrer(motif) {
+            if (navigator.vibrate) navigator.vibrate(motif);
+        }
+
+        // ============================================================
+        // Réception de l'état global de la partie
+        // ============================================================
         socket.on("état", (état) => {
-            if (état.mode === "jeu") {
-                passerEnModeJeu();
-            } else {
-                passerEnModeInscription();
-            }
+            if (état.mode === "jeu") passerEnModeJeu();
+            else passerEnModeInscription();
         });
 
-        // Buzzer bloqué après le premier buzz
+        // ============================================================
+        // Quelqu'un a buzzé — feedback visuel et vibration
+        // ============================================================
         socket.on("buzz", (joueur) => {
             const btn = document.getElementById("boutonBuzz");
-            if (
-                joueurActuel &&
+            const statut = document.getElementById("statut");
+
+            if (joueurActuel &&
                 joueur.noJoueur === joueurActuel.noJoueur &&
-                joueur.noÉquipe === joueurActuel.noÉquipe
-            ) {
-                document.getElementById("statut").textContent =
-                    "🔔 Vous avez buzzé !";
+                joueur.noÉquipe === joueurActuel.noÉquipe) {
+                // C'est moi qui ai buzzé — vibration longue
+                statut.textContent = "🔔 Vous avez buzzé !";
+                statut.className = "buzzé";
+                vibrer([200, 100, 200]);
             } else {
-                document.getElementById("statut").textContent =
-                    `🔔 ${joueur.alias} a buzzé en premier !`;
+                // Quelqu'un d'autre — vibration courte
+                statut.textContent = `🔔 ${joueur.alias} a buzzé en premier !`;
+                statut.className = "adverse";
+                vibrer([100]);
             }
             btn.disabled = true;
         });
 
+        // ============================================================
+        // Reset — réactiver le buzzer pour la prochaine question
+        // ============================================================
         socket.on('reset', () => {
-            document.getElementById('boutonBuzz').disabled = false;
-            document.getElementById('statut').textContent =
+            const btn = document.getElementById('boutonBuzz');
+            const statut = document.getElementById('statut');
+            btn.disabled = false;
+            statut.className = '';
+            statut.textContent =
                 joueurActuel ? `🎯 À vous de jouer, ${joueurActuel.alias} !` : '';
         });
 
+        // ============================================================
+        // Droit de réplique
+        // ============================================================
         socket.on('réplique', (noÉquipe) => {
             if (!joueurActuel) return;
             const btn = document.getElementById('boutonBuzz');
+            const statut = document.getElementById('statut');
 
             if (joueurActuel.noÉquipe === noÉquipe) {
-                // C'est mon équipe qui a le droit de réplique
                 btn.disabled = false;
-                document.getElementById('statut').textContent =
-                    '↩️ Droit de réplique — À vous de jouer !';
+                statut.textContent = '↩️ Droit de réplique — À vous !';
+                statut.className = 'réplique';
+                vibrer([100, 50, 100, 50, 100]);
             } else {
-                // Mon équipe ne peut pas répondre
                 btn.disabled = true;
-                document.getElementById('statut').textContent =
-                    '↩️ Droit de réplique — Équipe adverse...';
+                statut.textContent = '↩️ Droit de réplique — Équipe adverse...';
+                statut.className = 'adverse';
             }
         });
 
+        // ============================================================
+        // Passer en mode jeu — cacher inscription, montrer BUZZ
+        // ============================================================
         function passerEnModeJeu() {
             document.getElementById('zoneInscription').style.display = 'none';
-            document.getElementById('zoneJeu').style.display = 'block';
+            document.getElementById('zoneJeu').style.display = 'flex';
             document.getElementById('boutonBuzz').style.display = 'block';
-            // Cacher le checkbox une fois la partie lancée
+            // Cacher la case à cocher une fois en mode jeu
             document.getElementById('labelToutesParties').style.display = 'none';
             if (joueurActuel) {
-                document.getElementById('statut').textContent =
-                    `🎯 À vous de jouer, ${joueurActuel.alias} !`;
+                const statut = document.getElementById('statut');
+                statut.textContent = `🎯 À vous de jouer, ${joueurActuel.alias} !`;
+                statut.className = '';
             }
         }
 
+        // ============================================================
+        // Passer en mode inscription
+        // ============================================================
         function passerEnModeInscription() {
-            document.getElementById("zoneInscription").style.display = "block";
+            document.getElementById("zoneInscription").style.display = "flex";
             document.getElementById("zoneJeu").style.display = "none";
         }
 
+        // ============================================================
         // Chargement initial
+        // ============================================================
         let toutesParties = [];
         let partiesFiltrees = [];
 
         async function chargerDonnées() {
-            toutesÉquipes = await fetch("/api/equipes").then((r) => r.json());
-            tousJoueurs = await fetch("/api/joueurs").then((r) => r.json());
-            toutesParties = await fetch("/api/parties").then((r) => r.json());
+            toutesÉquipes = await fetch("/api/equipes").then(r => r.json());
+            tousJoueurs = await fetch("/api/joueurs").then(r => r.json());
+            toutesParties = await fetch("/api/parties").then(r => r.json());
 
             const ilxjours = new Date();
             ilxjours.setDate(ilxjours.getDate() - 5);
             const dateMin = ilxjours.toISOString().split('T')[0];
             partiesFiltrees = toutesParties.filter(p => p.date >= dateMin);
-
             remplirSélecteur(partiesFiltrees);
         }
 
@@ -237,7 +490,8 @@
                 const éB = toutesÉquipes.find(e => e.noÉquipe === p.noÉquipeB);
                 const option = document.createElement('option');
                 option.value = p.noPartie;
-                option.textContent = `#${p.noPartie} — ${p.date} — ${éA.nomÉquipe} vs ${éB.nomÉquipe}`;
+                option.textContent =
+                    `#${p.noPartie} — ${p.date} — ${éA.nomÉquipe} vs ${éB.nomÉquipe}`;
                 select.appendChild(option);
             });
         }
@@ -247,92 +501,98 @@
             remplirSélecteur(afficherTout ? toutesParties : partiesFiltrees);
         }
 
+        // ============================================================
+        // Charger les équipes après sélection de la partie
+        // ============================================================
         function chargerÉquipes() {
             const noPartie = parseInt(
-                document.getElementById("listeParties").value,
-            );
+                document.getElementById("listeParties").value);
             if (!noPartie) return;
 
             // Rejoindre la room Socket.io de cette partie
             noPartieActuelle = noPartie;
             socket.emit('rejoindrePartie', noPartie);
 
-            fetch("/api/parties")
-                .then((r) => r.json())
-                .then((parties) => {
-                    const partie = parties.find((p) => p.noPartie === noPartie);
-                    const selectÉquipes = document.getElementById("listeÉquipes");
-                    selectÉquipes.innerHTML =
-                        '<option value="">-- Choisir votre équipe --</option>';
+            fetch("/api/parties").then(r => r.json()).then(parties => {
+                const partie = parties.find(p => p.noPartie === noPartie);
+                const selectÉquipes = document.getElementById("listeÉquipes");
+                selectÉquipes.innerHTML =
+                    '<option value="">-- Choisir votre équipe --</option>';
 
-                    [partie.noÉquipeA, partie.noÉquipeB].forEach((noÉquipe) => {
-                        const équipe = toutesÉquipes.find((e) => e.noÉquipe === noÉquipe);
-                        const option = document.createElement("option");
-                        option.value = noÉquipe;
-                        option.textContent = équipe.nomÉquipe;
-                        selectÉquipes.appendChild(option);
-                    });
-
-                    selectÉquipes.style.display = "block";
-                    document.getElementById("statut").textContent =
-                        "Choisissez votre équipe";
+                [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
+                    const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
+                    const option = document.createElement("option");
+                    option.value = noÉquipe;
+                    option.textContent = équipe.nomÉquipe;
+                    selectÉquipes.appendChild(option);
                 });
+
+                selectÉquipes.style.display = "block";
+                document.getElementById("statut").textContent =
+                    "Choisissez votre équipe";
+            });
         }
 
+        // ============================================================
+        // Charger les joueurs après sélection de l'équipe
+        // ============================================================
         function chargerJoueurs() {
             const noÉquipe = parseInt(
-                document.getElementById("listeÉquipes").value,
-            );
+                document.getElementById("listeÉquipes").value);
             if (!noÉquipe) return;
 
             const membres = tousJoueurs.filter(
-                (j) => j.noÉquipe === noÉquipe && !j.estÉquipe,
-            );
+                j => j.noÉquipe === noÉquipe && !j.estÉquipe);
 
             const selectJoueurs = document.getElementById("listeJoueurs");
             selectJoueurs.innerHTML =
                 '<option value="">-- Choisir votre nom --</option>';
 
-            membres.forEach((j) => {
+            membres.forEach(j => {
                 const option = document.createElement("option");
                 option.value = j.noJoueur;
                 option.textContent = j.alias;
                 selectJoueurs.appendChild(option);
             });
 
-            // Option pour nouveau joueur
             const optionNouveau = document.createElement("option");
             optionNouveau.value = "nouveau";
             optionNouveau.textContent = "➕ Je suis un nouveau joueur";
             selectJoueurs.appendChild(optionNouveau);
 
             selectJoueurs.style.display = "block";
-            document.getElementById("statut").textContent = "Choisissez votre nom";
+            document.getElementById("statut").textContent =
+                "Choisissez votre nom";
         }
 
+        // ============================================================
+        // Afficher les champs nouveau joueur si nécessaire
+        // ============================================================
         function vérifierNouveauJoueur() {
             const val = document.getElementById("listeJoueurs").value;
             const divNouveau = document.getElementById("nouveauNom");
             const boutonPrêt = document.getElementById("boutonPrêt");
 
             if (val === "nouveau") {
-                divNouveau.style.display = "block";
-                boutonPrêt.style.display = "inline-block";
+                divNouveau.style.display = "flex";
+                boutonPrêt.style.display = "block";
             } else if (val) {
                 divNouveau.style.display = "none";
-                boutonPrêt.style.display = "inline-block";
+                boutonPrêt.style.display = "block";
             } else {
                 divNouveau.style.display = "none";
                 boutonPrêt.style.display = "none";
             }
         }
 
+        // ============================================================
+        // S'enregistrer comme joueur
+        // ============================================================
         async function sEnregistrer() {
             const noÉquipe = parseInt(
-                document.getElementById("listeÉquipes").value,
-            );
+                document.getElementById("listeÉquipes").value);
             const valJoueur = document.getElementById("listeJoueurs").value;
-            const équipe = toutesÉquipes.find((e) => e.noÉquipe === noÉquipe);
+            const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
 
             let alias, noJoueur;
 
@@ -347,22 +607,18 @@
                     return;
                 }
 
-                // Sauvegarder le nouveau joueur
                 const nouveauJoueur = await fetch("/api/joueurs/nouveau", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ noÉquipe, alias, prénom, nom }),
-                }).then((r) => r.json());
+                }).then(r => r.json());
 
                 noJoueur = nouveauJoueur.noJoueur;
-
-                // Ajouter à la liste locale
                 tousJoueurs.push(nouveauJoueur);
             } else {
                 noJoueur = parseInt(valJoueur);
                 const joueur = tousJoueurs.find(
-                    (j) => j.noÉquipe === noÉquipe && j.noJoueur === noJoueur,
-                );
+                    j => j.noÉquipe === noÉquipe && j.noJoueur === noJoueur);
                 alias = joueur.alias;
             }
 
@@ -373,35 +629,31 @@
                 alias,
                 nomÉquipe: équipe.nomÉquipe,
             };
-            socket.emit("sEnregistrer", joueurActuel);
 
+            socket.emit("sEnregistrer", joueurActuel);
+            // Cacher la case à cocher une fois le joueur enregistré
+            document.getElementById('conteneurParties').style.display = 'none';
             document.getElementById("statut").textContent =
                 `✅ Bienvenue ${alias} ! En attente du début de la partie...`;
             document.getElementById("zoneInscription").style.display = "none";
         }
 
+        // ============================================================
+        // Buzzer — émet l'événement au serveur
+        // ============================================================
         function buzzer() {
-            if (joueurActuel) {
-                // noPartie est inclus dans joueurActuel
-                socket.emit("buzz", joueurActuel);
-            }
+            if (joueurActuel) socket.emit("buzz", joueurActuel);
         }
 
-        // Écoute clavier
+        // ============================================================
+        // Écoute clavier — Enter ou Espace pour buzzer
+        // ============================================================
         document.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
                 const btn = document.getElementById("boutonBuzz");
-                if (btn.style.display !== "none" && !btn.disabled) {
-                    buzzer();
-                }
+                if (btn.style.display !== "none" && !btn.disabled) buzzer();
             }
         });
-
-        function toggleToutesParties() {
-            console.log('toggle appelé, toutesParties:', toutesParties.length, 'filtrees:', partiesFiltrees.length);
-            const afficherTout = document.getElementById('toutesParties').checked;
-            remplirSélecteur(afficherTout ? toutesParties : partiesFiltrees);
-        }
 
         chargerDonnées();
     </script>
