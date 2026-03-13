@@ -411,7 +411,13 @@
             joueurAyantBuzzé = joueur;
             jouerSon(joueur.noÉquipe);
             const buzzer = document.getElementById('buzzer');
-            buzzer.textContent = `🔔 ${joueur.alias} (${joueur.nomÉquipe}) a buzzé !`;
+
+            // Afficher le temps de réaction si disponible
+            const tempsTexte = joueur.tempsRéaction
+                ? ` ⚡ ${joueur.tempsRéaction}ms`
+                : '';
+            buzzer.textContent =
+                `🔔 ${joueur.alias} (${joueur.nomÉquipe}) a buzzé !${tempsTexte}`;
             buzzer.className = 'actif';
 
             // Afficher les boutons de points

@@ -369,6 +369,9 @@
         let tousJoueurs = [];
         let joueurActuel = null;
         let noPartieActuelle = null;
+        // Au début du script, avec les autres variables
+        let modeActuel = 'initialisation';
+
 
         // ============================================================
         // Feedback vibration — pour le joueur presque aveugle
@@ -382,6 +385,7 @@
         // Réception de l'état global de la partie
         // ============================================================
         socket.on("état", (état) => {
+            modeActuel = état.mode;
             if (état.mode === "jeu" && joueurActuel) {
                 // Partie en cours et joueur enregistré
                 passerEnModeJeu();
@@ -630,6 +634,10 @@
         // ============================================================
         // S'enregistrer comme joueur. S'exécute lorsque le joueur clique "joindre la partie".
         // ============================================================
+        // ============================================================
+        // S'enregistrer comme joueur pour la partie
+        // Si la partie est déjà en cours, passer directement en mode jeu
+        // ============================================================
         async function sEnregistrer() {
             const noÉquipe = parseInt(
                 document.getElementById("listeÉquipes").value);
@@ -673,18 +681,25 @@
             };
 
             socket.emit("sEnregistrer", joueurActuel);
-            // Cacher la case à cocher une fois le joueur enregistré
+
+            // Cacher la case à cocher et la zone inscription
             document.getElementById('conteneurParties').style.display = 'none';
-            document.getElementById("statut").textContent =
-                `✅ Bienvenue ${alias} ! En attente du début de la partie...`;
             document.getElementById("zoneInscription").style.display = "none";
+
+
+            document.getElementById("statut").textContent = `✅ Bienvenue ${alias} ! En attente du début de la partie...`;
+
         }
 
         // ============================================================
         // Buzzer — émet l'événement au serveur
         // ============================================================
         function buzzer() {
-            if (joueurActuel) socket.emit("buzz", joueurActuel);
+            if (joueurActuel) {
+                // Noter l'heure du clic pour calculer le temps de réaction
+                joueurActuel.tempsClic = Date.now();
+                socket.emit("buzz", joueurActuel);
+            }
         }
 
         // ============================================================

@@ -86,5 +86,21 @@
     "noJoueur": 1,
     "noÉquipe": 1,
     "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 7,
+    "noQuestion": 2,
+    "noJoueur": 10,
+    "noÉquipe": 5,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 25,
+    "noSérie": 7,
+    "noQuestion": 3,
+    "noJoueur": 4,
+    "noÉquipe": 1,
+    "pointsSecondaires": false
   }
 ]

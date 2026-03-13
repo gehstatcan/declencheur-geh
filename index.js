@@ -1,7 +1,13 @@
 // Charger les variables d'environnement en développement local
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
 }
+
+// ============================================================
+// Mode débogage — afficher le temps de réaction
+// Mettre à false en production pour éviter les disputes !
+// ============================================================
+const AFFICHER_TEMPS_RÉACTION = true;
 
 const express = require("express");
 const app = express();
@@ -172,10 +178,12 @@ function créerÉtat(noPartie) {
 }
 
 function obtenirÉtat(noPartie) {
-  if (!étatsParties[noPartie]) {
-    étatsParties[noPartie] = créerÉtat(noPartie);
-  }
-  return étatsParties[noPartie];
+    if (!étatsParties[noPartie]) {
+        console.log(`⚠️ Création nouvel état pour partie ${noPartie}`);
+        étatsParties[noPartie] = créerÉtat(noPartie);
+    }
+    console.log(`État partie ${noPartie}: ${étatsParties[noPartie].mode}`);
+    return étatsParties[noPartie];
 }
 
 // ============================================================
@@ -330,6 +338,10 @@ io.on("connection", (socket) => {
       "joueursConnectés",
       état.joueursConnectés,
     );
+    // Envoyer l'état actuel au joueur qui vient de s'enregistrer
+    // Permet de détecter si la partie est déjà en cours
+    console.log('État envoyé au joueur:', état.mode); 
+    socket.emit("état", état);
   });
 
   // --------------------------------------------------------
@@ -412,8 +424,7 @@ io.on("connection", (socket) => {
           };
 
           console.log(`🔄 Reprise détectée — ${répondants.length} répondants`);
-          console.log(
-            `   Reprise à Série ${état.noSérieActuelle} Q${état.noQuestionActuelle}`,
+          console.log(`   Reprise à Série ${état.noSérieActuelle} Q${état.noQuestionActuelle}`,
           );
         }
       } catch (e) {
@@ -517,6 +528,13 @@ io.on("connection", (socket) => {
     // Vérifier droit de réplique
     if (état.réplique !== null && joueur.noÉquipe !== état.réplique) return;
     état.buzzVerrou = true;
+
+    // Calculer le temps de réaction si mode débogage activé
+    if (AFFICHER_TEMPS_RÉACTION && joueur.tempsClic) {
+      joueur.tempsRéaction = Date.now() - joueur.tempsClic;
+      console.log(`🔔 ${joueur.alias} a buzzé en ${joueur.tempsRéaction}ms`);
+    }
+
     console.log(`🔔 ${joueur.alias} a buzzé ! (partie ${joueur.noPartie})`);
     io.to(`partie-${joueur.noPartie}`).emit("buzz", joueur);
   });
