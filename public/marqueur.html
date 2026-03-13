@@ -286,6 +286,13 @@
             </button>
         </div>
 
+        <!-- Bouton annuler — visible seulement si répondant existant -->
+        <div id="boutonAnnuler" style="display:none; margin-top:10px;">
+            <button class="bouton" style="background:#7f8c8d;" onclick="annulerRéponse()">
+                🗑️ Annuler la réponse
+            </button>
+        </div>
+
         <br>
         <button class="bouton bouton-action" onclick="questionPrécédente()">
             ⏮️ Question précédente
@@ -580,13 +587,62 @@
 
         function afficherInfoQuestion(info) {
             questionCouranteInfo = info;
-            const { série, question, répondantExistant } = info;
+            const { série, question, répondantExistant, estÉquipe } = info;
             if (!série || !question) return;
 
             document.getElementById('titreSérie').textContent =
                 `Série ${série.noSérie} — ${série.typeSérie}`;
             document.getElementById('titreQuestion').textContent =
                 `Question ${question.noQuestion} / ${série.questions.length} — ${question.points} pts`;
+
+            // Afficher bouton annuler si répondant existant
+            document.getElementById('boutonAnnuler').style.display =
+                répondantExistant ? 'block' : 'none';
+
+            // ============================================================
+            // Indicateur MODE ÉQUIPE
+            // ============================================================
+            let divModeÉquipe = document.getElementById('modeÉquipe');
+            if (!divModeÉquipe) {
+                divModeÉquipe = document.createElement('div');
+                divModeÉquipe.id = 'modeÉquipe';
+                document.getElementById('titreQuestion').after(divModeÉquipe);
+            }
+
+            if (estÉquipe) {
+                divModeÉquipe.innerHTML = `
+            <span style="background:#e94560; color:white; padding:4px 12px;
+                border-radius:6px; font-weight:bold;">
+                🏆 MODE ÉQUIPE
+            </span>`;
+                divModeÉquipe.style.display = 'block';
+            } else {
+                divModeÉquipe.style.display = 'none';
+            }
+
+            // ============================================================
+            // Bouton toggle Individuel/Équipe pour série 5 Q2-5
+            // ============================================================
+            let divToggle = document.getElementById('toggleÉquipe');
+            if (!divToggle) {
+                divToggle = document.createElement('div');
+                divToggle.id = 'toggleÉquipe';
+                divModeÉquipe.after(divToggle);
+            }
+
+            if (question && question.estÉquipe === null) {
+                divToggle.innerHTML = `
+            <button onclick="toggleModeÉquipe()" style="
+                background: ${estÉquipe ? '#2ecc71' : '#666'};
+                color: white; border: none; padding: 6px 16px;
+                border-radius:6px; cursor:pointer; font-size:0.9em;">
+                ${estÉquipe ? '🏆 Équipe — cliquer pour Individuel'
+                        : '👤 Individuel — cliquer pour Équipe'}
+            </button>`;
+                divToggle.style.display = 'block';
+            } else {
+                divToggle.style.display = 'none';
+            }
 
             // Afficher le répondant existant si la question a déjà été répondue
             const divRépondant = document.getElementById('répondantExistant');
@@ -624,6 +680,13 @@
                     });
                 });
             }
+        }
+
+        // ============================================================
+        // Toggle manuel Individuel/Équipe pour série 5
+        // ============================================================
+        function toggleModeÉquipe() {
+            socket.emit('toggleÉquipe', partieActuelle);
         }
 
         function afficherÉquipes(noPartie, joueursConnectés) {
@@ -684,6 +747,14 @@
                     `#${p.noPartie} — ${p.date} — ${éA.nomÉquipe} vs ${éB.nomÉquipe}`;
                 select.appendChild(option);
             });
+        }
+
+        // ============================================================
+        // Annuler la réponse d'une question — retire les points
+        // ============================================================
+        function annulerRéponse() {
+            if (!confirm('Annuler la réponse et retirer les points ?')) return;
+            socket.emit('annulerRéponse', partieActuelle);
         }
 
         function toggleToutesParties() {

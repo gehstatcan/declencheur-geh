@@ -229,6 +229,7 @@ function avancerQuestion(état) {
 // ============================================================
 // Retourne la série et la question courante
 // Inclut le répondant existant si la question a déjà été répondue
+// Calcule estÉquipe dynamiquement pour la série 5
 // ============================================================
 function questionCourante(état) {
   const série = séries.find((s) => s.noSérie === état.noSérieActuelle);
@@ -239,6 +240,7 @@ function questionCourante(état) {
 
   // Vérifier si cette question a déjà été répondue
   let répondantExistant = null;
+  let répondants = [];
   const cheminPartie = path.join(
     dossierSaison,
     "parties",
@@ -246,7 +248,7 @@ function questionCourante(état) {
   );
   try {
     const contenu = fs.readFileSync(cheminPartie, "utf-8").trim();
-    const répondants = contenu ? JSON.parse(contenu) : [];
+    répondants = contenu ? JSON.parse(contenu) : [];
     répondantExistant =
       répondants.find(
         (r) =>
@@ -255,9 +257,33 @@ function questionCourante(état) {
       ) || null;
   } catch (e) {
     répondantExistant = null;
+    répondants = [];
   }
 
-  return { série, question, répondantExistant };
+  // Calculer estÉquipe pour cette question
+  // Série 5 — estÉquipe null = dépend de Q1
+  // Si Q1 non répondue → équipe, sinon individuel
+  // L'animateur peut overrider via état.overrideÉquipe
+  let estÉquipe = série.estÉquipe; // valeur par défaut de la série
+
+  if (question && question.estÉquipe !== undefined) {
+    if (question.estÉquipe === null) {
+      // Série 5 Q2-5 — vérifier si Q1 a été répondue
+      const q1Répondue = répondants.some(
+        (r) => r.noSérie === état.noSérieActuelle && r.noQuestion === 1,
+      );
+      // Override manuel de l'animateur prioritaire
+      if (état.overrideÉquipe !== undefined && état.overrideÉquipe !== null) {
+        estÉquipe = état.overrideÉquipe;
+      } else {
+        estÉquipe = q1Répondue; // équipe si Q1 répondue
+      }
+    } else {
+      estÉquipe = question.estÉquipe; // valeur explicite (Q1 = false)
+    }
+  }
+
+  return { série, question, répondantExistant, estÉquipe };
 }
 
 // ============================================================
@@ -726,6 +752,63 @@ io.on("connection", (socket) => {
     console.log(`⏮️ Question précédente (partie ${noPartie})`);
   });
 
+  socket.on("annulerRéponse", (noPartie) => {
+    const état = obtenirÉtat(noPartie);
+    const cheminPartie = path.join(
+      dossierSaison,
+      "parties",
+      `répondants-${noPartie}.json`,
+    );
+
+    try {
+      const contenu = fs.readFileSync(cheminPartie, "utf-8").trim();
+      let répondants = contenu ? JSON.parse(contenu) : [];
+
+      // Trouver le répondant à supprimer
+      const idx = répondants.findIndex(
+        (r) =>
+          r.noSérie === état.noSérieActuelle &&
+          r.noQuestion === état.noQuestionActuelle,
+      );
+
+      if (idx !== -1) {
+        const répondant = répondants[idx];
+
+        // Retirer les points de l'équipe
+        const série = séries.find((s) => s.noSérie === répondant.noSérie);
+        const question = série
+          ? série.questions.find((q) => q.noQuestion === répondant.noQuestion)
+          : null;
+        const points = répondant.pointsSecondaires
+          ? question
+            ? question.pointsSecondaires
+            : 5
+          : question
+            ? question.points
+            : 10;
+
+        if (état.scores[répondant.noÉquipe]) {
+          état.scores[répondant.noÉquipe] -= points;
+        }
+
+        // Supprimer le répondant
+        répondants.splice(idx, 1);
+        fs.writeFileSync(cheminPartie, JSON.stringify(répondants, null, 2));
+
+        console.log(
+          `🗑️ Réponse annulée — Série ${état.noSérieActuelle} Q${état.noQuestionActuelle}`,
+        );
+      }
+    } catch (e) {
+      console.error("Erreur annulation:", e);
+    }
+
+    // Mettre à jour les scores et la question
+    io.to(`partie-${noPartie}`).emit("scoresMAJ", état.scores);
+    const info = questionCourante(état);
+    io.to(`partie-${noPartie}`).emit("questionMisÀJour", info);
+  });
+
   // --------------------------------------------------------
   // Reset buzzer seulement
   // --------------------------------------------------------
@@ -821,6 +904,15 @@ io.on("connection", (socket) => {
     } else {
       console.log("Déconnexion");
     }
+  });
+
+  socket.on("toggleÉquipe", (noPartie) => {
+    const état = obtenirÉtat(noPartie);
+    // Inverser l'override
+    const info = questionCourante(état);
+    état.overrideÉquipe = !info.estÉquipe;
+    const nouvelleInfo = questionCourante(état);
+    io.to(`partie-${noPartie}`).emit("questionMisÀJour", nouvelleInfo);
   });
 });
 
