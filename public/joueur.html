@@ -612,6 +612,18 @@
         }
 
         // ============================================================
+        // Le serveur demande au joueur de se réenregistrer
+        // Arrive quand l'animateur revient après une déconnexion
+        // ============================================================
+        socket.on('réenregistrer', () => {
+            if (joueurActuel) {
+                // Réenregistrer silencieusement sans déranger le joueur
+                socket.emit('sEnregistrer', joueurActuel);
+                console.log('🔄 Réenregistrement automatique');
+            }
+        });
+        
+        // ============================================================
         // Afficher les champs nouveau joueur si nécessaire
         // ============================================================
         function vérifierNouveauJoueur() {

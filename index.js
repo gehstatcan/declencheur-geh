@@ -178,12 +178,12 @@ function créerÉtat(noPartie) {
 }
 
 function obtenirÉtat(noPartie) {
-    if (!étatsParties[noPartie]) {
-        console.log(`⚠️ Création nouvel état pour partie ${noPartie}`);
-        étatsParties[noPartie] = créerÉtat(noPartie);
-    }
-    console.log(`État partie ${noPartie}: ${étatsParties[noPartie].mode}`);
-    return étatsParties[noPartie];
+  if (!étatsParties[noPartie]) {
+    console.log(`⚠️ Création nouvel état pour partie ${noPartie}`);
+    étatsParties[noPartie] = créerÉtat(noPartie);
+  }
+  console.log(`État partie ${noPartie}: ${étatsParties[noPartie].mode}`);
+  return étatsParties[noPartie];
 }
 
 // ============================================================
@@ -338,9 +338,14 @@ io.on("connection", (socket) => {
       "joueursConnectés",
       état.joueursConnectés,
     );
+
+    // Ajout pour trouver si un joueur se déconnecte et l'identifier
+    état.joueursConnectés.push(joueur);
+    socket.joueur = joueur; // ← stocker l'identité du joueur dans le socket
+
     // Envoyer l'état actuel au joueur qui vient de s'enregistrer
     // Permet de détecter si la partie est déjà en cours
-    console.log('État envoyé au joueur:', état.mode); 
+    console.log("État envoyé au joueur:", état.mode);
     socket.emit("état", état);
   });
 
@@ -424,7 +429,8 @@ io.on("connection", (socket) => {
           };
 
           console.log(`🔄 Reprise détectée — ${répondants.length} répondants`);
-          console.log(`   Reprise à Série ${état.noSérieActuelle} Q${état.noQuestionActuelle}`,
+          console.log(
+            `   Reprise à Série ${état.noSérieActuelle} Q${état.noQuestionActuelle}`,
           );
         }
       } catch (e) {
@@ -447,6 +453,12 @@ io.on("connection", (socket) => {
     if (reprise) {
       socket.emit("repriseDetectée", reprise);
     }
+
+    // Demander aux joueurs déjà connectés de se réenregistrer
+    // et réactiver les buzzers pour tous les joueurs.
+    // Utile en cas de crash de "marqueur"
+    io.to(`partie-${noPartie}`).emit("réenregistrer");
+    io.to(`partie-${noPartie}`).emit("reset");
 
     console.log(`📋 Partie ${noPartie} sélectionnée`);
   });
@@ -791,7 +803,24 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Déconnexion");
+    // Retirer le joueur déconnecté — repassera en gris chez le marqueur
+    if (socket.noPartie && socket.joueur) {
+      const état = obtenirÉtat(socket.noPartie);
+      état.joueursConnectés = état.joueursConnectés.filter(
+        (j) =>
+          !(
+            j.noÉquipe === socket.joueur.noÉquipe &&
+            j.noJoueur === socket.joueur.noJoueur
+          ),
+      );
+      io.to(`partie-${socket.noPartie}`).emit(
+        "joueursConnectés",
+        état.joueursConnectés,
+      );
+      console.log(`👋 ${socket.joueur.alias} déconnecté`);
+    } else {
+      console.log("Déconnexion");
+    }
   });
 });
 
