@@ -3,117 +3,234 @@
 
 <head>
     <meta charset="UTF-8">
+
     <title>Marqueur - Génie en Herbe</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
     <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            background: #1a1a2e;
-            color: white;
+        /* ============================================================
+       Variables de couleurs — thème sombre accessible WCAG AA
+       Identique à joueur.html
+       ============================================================ */
+        :root {
+            --fond: #0f0f1a;
+            --fond-carte: #1a1a2e;
+            --fond-champ: #16213e;
+            --accent: #e94560;
+            --buzz: #FFD700;
+            --buzz-texte: #000000;
+            --vert: #2ecc71;
+            --orange: #e67e22;
+            --blanc: #ffffff;
+            --gris: #aaaaaa;
+            --rayon: 16px;
+        }
+
+        /* ============================================================
+       Base
+       ============================================================ */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
-        h1 {
-            color: #e94560;
-            margin-top: 20px;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--blanc);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
         }
 
-        /* Mode */
+        /* ============================================================
+       En-tête
+       ============================================================ */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--blanc);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        /* ============================================================
+       Mode partie
+       ============================================================ */
         #modePartie {
             font-size: 0.9em;
-            margin: 10px;
+            margin-bottom: 16px;
             padding: 8px 20px;
             border-radius: 20px;
             display: inline-block;
+            font-family: 'Inter', sans-serif;
         }
 
         #modePartie.initialisation {
-            background: #e67e22;
+            background: var(--orange);
+            color: var(--buzz-texte);
         }
 
         #modePartie.jeu {
-            background: #2ecc71;
+            background: var(--vert);
+            color: var(--buzz-texte);
         }
 
-        /* Sélecteur */
+        /* ============================================================
+       Sélecteur de partie
+       ============================================================ */
         select {
+            width: 100%;
+            max-width: 560px;
+            font-family: 'Inter', sans-serif;
             font-size: 1em;
-            padding: 10px;
-            border-radius: 10px;
-            background: #16213e;
-            color: white;
-            border: 1px solid #e94560;
+            padding: 14px 16px;
+            border-radius: var(--rayon);
+            background: var(--fond-champ);
+            color: var(--blanc);
+            border: 2px solid var(--accent);
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 8px;
         }
 
-        /* Scores */
+        select:focus {
+            border-color: var(--buzz);
+        }
+
+        #labelToutesParties {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95em;
+            color: var(--gris);
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        #labelToutesParties input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* ============================================================
+       Scores
+       ============================================================ */
         #scores {
             display: flex;
             justify-content: center;
-            gap: 60px;
+            flex-wrap: wrap;
+            gap: 16px;
             margin: 20px 0;
+            width: 100%;
         }
 
         .score-équipe {
-            background: #16213e;
-            padding: 15px 30px;
-            border-radius: 10px;
-            min-width: 180px;
+            background: var(--fond-carte);
+            padding: 15px 24px;
+            border-radius: var(--rayon);
+            min-width: 160px;
+            text-align: center;
         }
 
         .score-équipe h3 {
-            color: #e94560;
-            margin: 0 0 10px 0;
+            color: var(--accent);
+            margin: 0 0 8px 0;
             font-size: 0.9em;
+            font-family: 'Inter', sans-serif;
         }
 
         .score-valeur {
+            font-family: 'Bebas Neue', sans-serif;
             font-size: 3em;
-            font-weight: bold;
+            font-weight: normal;
+            letter-spacing: 2px;
         }
 
-        /* Série et thème */
+        /* ============================================================
+       Info question
+       ============================================================ */
         #infoQuestion {
-            background: #16213e;
-            padding: 15px;
-            border-radius: 10px;
+            background: var(--fond-carte);
+            padding: 16px 20px;
+            border-radius: var(--rayon);
             margin: 10px auto;
-            max-width: 600px;
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
         }
 
         #infoQuestion .série {
-            font-size: 1.3em;
-            color: #e94560;
-            font-weight: bold;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4em;
+            color: var(--accent);
+            letter-spacing: 1px;
         }
 
         #infoQuestion .thème {
             font-size: 1em;
-            color: #aaa;
-            margin-top: 5px;
+            color: var(--gris);
+            margin-top: 6px;
         }
 
         #infoQuestion .question {
             font-size: 1em;
-            margin-top: 5px;
+            margin-top: 6px;
+            color: var(--blanc);
         }
 
-        /* Buzzer */
+        #répondantExistant {
+            margin-top: 10px;
+            padding: 8px;
+            background: var(--vert);
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: var(--buzz-texte);
+            display: none;
+        }
+
+        /* ============================================================
+       Buzzer
+       ============================================================ */
         #buzzer {
-            font-size: 2em;
-            margin: 15px auto;
-            padding: 20px;
-            background: #16213e;
-            border-radius: 10px;
-            max-width: 600px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1em;
+            letter-spacing: 2px;
+            margin: 16px auto;
+            padding: 15px;
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            transition: background 0.3s;
         }
 
         #buzzer.actif {
-            background: #e94560;
+            background: var(--accent);
+            animation: flash 0.5s;
         }
 
         #buzzer.réplique {
-            background: #e67e22;
+            background: var(--orange);
+            color: var(--buzz-texte);
         }
 
         @keyframes flash {
@@ -126,28 +243,40 @@
             }
         }
 
-        #buzzer.actif {
-            animation: flash 0.5s;
-        }
-
-        /* Boutons points */
+        /* ============================================================
+       Boutons points
+       ============================================================ */
         #boutonsPoints {
             display: none;
             margin: 10px 0;
+            text-align: center;
+        }
+
+        #boutonAnnuler {
+            display: none;
+            margin-top: 10px;
+            text-align: center;
         }
 
         .bouton {
+            font-family: 'Inter', sans-serif;
             font-size: 1em;
-            padding: 12px 25px;
+            padding: 12px 24px;
             margin: 5px;
-            color: white;
+            color: var(--blanc);
             border: none;
-            border-radius: 10px;
+            border-radius: var(--rayon);
             cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .bouton:active {
+            transform: scale(0.97);
         }
 
         .bouton-bonne {
-            background: #2ecc71;
+            background: var(--vert);
+            color: var(--buzz-texte);
         }
 
         .bouton-bonne:hover {
@@ -155,15 +284,16 @@
         }
 
         .bouton-secondaire {
-            background: #f39c12;
+            background: var(--orange);
+            color: var(--buzz-texte);
         }
 
         .bouton-secondaire:hover {
-            background: #d68910;
+            background: #d35400;
         }
 
         .bouton-mauvaise {
-            background: #e74c3c;
+            background: var(--accent);
         }
 
         .bouton-mauvaise:hover {
@@ -171,109 +301,165 @@
         }
 
         .bouton-action {
-            background: #0f3460;
+            background: var(--fond-champ);
+            border: 1px solid var(--gris);
         }
 
         .bouton-action:hover {
-            background: #16213e;
+            background: var(--fond-carte);
         }
 
         .bouton-orange {
-            background: #e67e22;
+            background: var(--orange);
+            color: var(--buzz-texte);
         }
 
         .bouton-orange:hover {
             background: #d35400;
         }
 
-        /* Équipes */
+        /* ============================================================
+       Équipes et joueurs
+       ============================================================ */
         #équipes {
             display: flex;
             justify-content: center;
-            gap: 40px;
-            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 24px;
+            width: 100%;
         }
 
         .équipe {
-            background: #16213e;
-            padding: 20px;
-            border-radius: 10px;
-            min-width: 220px;
+            background: var(--fond-carte);
+            padding: 16px;
+            border-radius: var(--rayon);
+            min-width: 200px;
+            text-align: center;
         }
 
         .équipe h2 {
-            color: #e94560;
-            font-size: 1em;
-            margin-bottom: 15px;
+            color: var(--accent);
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ============================================================
+       Zone jeu
+       ============================================================ */
+        #zoneJeu {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ============================================================
+            Zone équipes — scores + joueurs côte à côte
+        ============================================================ */
+        #zoneÉquipes {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 24px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .bloc-équipe {
+            flex: 1;
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            padding: 20px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .bloc-équipe h2 {
+            color: var(--accent);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+
+        .score-valeur {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4.5em;
+            letter-spacing: 2px;
+            line-height: 1;
+            margin-bottom: 12px;
         }
 
         .joueur {
             padding: 8px 12px;
-            margin: 5px;
-            font-size: 0.95em;
+            margin: 4px auto;
+            font-size: 2em;
             border-radius: 8px;
-            background: #2c2c54;
-            color: #aaa;
+            background: var(--fond-champ);
+            color: var(--blanc);
         }
 
         .joueur.connecté {
-            background: #2ecc71;
-            color: white;
+            background: var(--vert);
+            color: var(--buzz-texte);
             font-weight: bold;
-        }
-
-        #zoneJeu {
-            display: none;
         }
     </style>
 </head>
 
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+    rel="stylesheet">
+
 <body>
-    <h1>🎯 Génie en Herbe</h1>
+    <!-- En-tête identique à joueur.html -->
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; filter:invert(1);">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
 
     <div id="modePartie" class="initialisation">🔧 Initialisation</div>
 
-
-    <label id="labelToutesParties" style="font-size: 0.9em; color: #aaa;">
-        <input type="checkbox" id="toutesParties" onchange="toggleToutesParties()">
-        Afficher toutes les parties
-    </label>
-
     <!-- Sélecteur de partie -->
-    <div id="sélecteurPartie">
+    <div id="sélecteurPartie" style="width:100%; max-width:700px; text-align:center;">
         <select id="listeParties" onchange="choisirPartie()">
             <option value="">-- Choisir une partie --</option>
         </select>
+        <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+            <label id="labelToutesParties">
+                Afficher toutes les parties
+                <input type="checkbox" id="toutesParties" onchange="toggleToutesParties()">
+            </label>
+        </div>
     </div>
 
     <!-- Zone initialisation -->
-    <div id="zoneInitialisation">
-        <br>
+    <div id="zoneInitialisation" style="margin-top:16px;">
         <button class="bouton bouton-bonne" onclick="démarrerPartie()">
             ▶️ Démarrer la partie
         </button>
     </div>
 
+    <!-- Série, thème, question -->
+    <div id="infoQuestion">
+        <div class="série" id="titreSérie">—</div>
+        <div class="thème" id="titreThème">—</div>
+        <div class="question" id="titreQuestion">—</div>
+        <div id="répondantExistant"></div>
+    </div>
+
+    <!-- Scores + joueurs côte à côte -->
+    <div id="zoneÉquipes">
+        <!-- Généré dynamiquement par afficherÉquipes() -->
+    </div>
+
     <!-- Zone de jeu -->
     <div id="zoneJeu">
-
-        <!-- Scores -->
-        <div id="scores"></div>
-
-        <!-- Série, thème, question -->
-        <div id="infoQuestion">
-            <div class="série" id="titreSérie">—</div>
-            <div class="thème" id="titreThème">—</div>
-            <div class="question" id="titreQuestion">—</div>
-            <div id="répondantExistant" style="display:none; margin-top:8px; 
-         padding:8px; background:#27ae60; border-radius:8px; font-size:0.9em;">
-            </div>
-        </div>
 
         <!-- Buzzer -->
         <div id="buzzer">En attente d'un buzzer...</div>
 
-        <!-- Boutons points (apparaissent après un buzz) -->
+        <!-- Boutons points -->
         <div id="boutonsPoints">
             <button class="bouton bouton-bonne" id="btnBonne" onclick="bonneRéponse(10)">
                 ✅ 10 pts
@@ -286,37 +472,45 @@
             </button>
         </div>
 
-        <!-- Bouton annuler — visible seulement si répondant existant -->
-        <div id="boutonAnnuler" style="display:none; margin-top:10px;">
+        <!-- Bouton annuler -->
+        <div id="boutonAnnuler">
             <button class="bouton" style="background:#7f8c8d;" onclick="annulerRéponse()">
                 🗑️ Annuler la réponse
             </button>
         </div>
 
-        <br>
-        <button class="bouton bouton-action" onclick="questionPrécédente()">
-            ⏮️ Question précédente
-        </button>
-        <button class="bouton bouton-action" onclick="questionSuivante()">
-            ⏭️ Question suivante
-        </button>
-
-        <button class="bouton bouton-orange" onclick="réinitialiser()">
-            🔄 Retour initialisation
-        </button>
-
-        <button class="bouton" style="background:#8e44ad;" onclick="terminerPartie()">
-            🏁 Terminer la partie
-        </button>
+        <div style="text-align:center; margin-top:16px;">
+            <button class="bouton bouton-action" onclick="sériePrécédente()">
+                ⏮️ Série précédente
+            </button>
+            <button class="bouton bouton-action" onclick="questionPrécédente()">
+                ◀️ Question précédente
+            </button>
+            <button class="bouton bouton-action" onclick="questionSuivante()">
+                Question suivante ▶️
+            </button>
+            <button class="bouton bouton-action" onclick="sérieSuivante()">
+                Série suivante ⏭️
+            </button>
+            <br>
+            <button class="bouton bouton-orange" onclick="réinitialiser()">
+                🔄 Retour initialisation
+            </button>
+            <button class="bouton" style="background:#8e44ad;" onclick="terminerPartie()">
+                🏁 Terminer la partie
+            </button>
+        </div>
 
     </div>
 
-    <button class="bouton" style="background:#2980b9;" onclick="téléchargerPartie()">
-        💾 Télécharger partie en cours
-    </button>
-    <button class="bouton" style="background:#1a5276;" onclick="téléchargerRépondants()">
-        💾 Télécharger cumulatif
-    </button>
+    <div style="margin-top:16px;">
+        <button class="bouton" style="background:#2980b9;" onclick="téléchargerPartie()">
+            💾 Télécharger partie en cours
+        </button>
+        <button class="bouton" style="background:#1a5276;" onclick="téléchargerRépondants()">
+            💾 Télécharger cumulatif
+        </button>
+    </div>
 
     <!-- Équipes et joueurs -->
     <div id="équipes"></div>
@@ -333,6 +527,11 @@
         let tousQuestionnaires = [];
         let partieActuelle = null;
         let joueurAyantBuzzé = null;
+        let modeActuel = 'initialisation';
+        let derniersScores = {};
+        // Conserver la liste des joueurs connectés entre les événements socket
+        // Évite de passer [] par erreur lors des appels à afficherÉquipes()
+        let derniersJoueursConnectés = [];
 
         // Web Audio pour les sons
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -357,11 +556,14 @@
 
         // Réception état global
         socket.on('état', (état) => {
+            modeActuel = état.mode;
+            derniersScores = état.scores || {};
+            derniersJoueursConnectés = état.joueursConnectés || []; // Sauvegarder les joueurs connectés reçus du serveur
             partieActuelle = état.noPartie;
             mettreÀJourMode(état.mode);
             if (état.noPartie) {
                 document.getElementById('listeParties').value = état.noPartie;
-                afficherÉquipes(état.noPartie, état.joueursConnectés);
+                afficherÉquipes(état.noPartie, état.joueursConnectés, état.scores);
             }
             if (état.mode === 'jeu') {
                 mettreÀJourScores(état.scores);
@@ -411,7 +613,8 @@
 
         socket.on('joueursConnectés', async (joueursConnectés) => {
             tousJoueurs = await fetch('/api/joueurs').then(r => r.json());
-            if (partieActuelle) afficherÉquipes(partieActuelle, joueursConnectés);
+            derniersJoueursConnectés = joueursConnectés; // Mettre à jour la liste des joueurs connectés, Arrivée d'un retardataire ou déconnexion d'un joueur
+            if (partieActuelle) afficherÉquipes(partieActuelle, joueursConnectés, derniersScores);
         });
 
         socket.on('buzz', (joueur) => {
@@ -419,13 +622,12 @@
             jouerSon(joueur.noÉquipe);
             const buzzer = document.getElementById('buzzer');
 
-            // Afficher le temps de réaction si disponible
-            const tempsTexte = joueur.tempsRéaction
-                ? ` ⚡ ${joueur.tempsRéaction}ms`
-                : '';
-            buzzer.textContent =
-                `🔔 ${joueur.alias} (${joueur.nomÉquipe}) a buzzé !${tempsTexte}`;
+            //const tempsTexte = joueur.tempsRéaction ? ` ⚡ ${joueur.tempsRéaction}ms` : ''; //Pour avoir le temps de réaction
+            const tempsTexte = '' //Sans le temps de réaction
+            buzzer.textContent = `🔔 ${joueur.alias} (${joueur.nomÉquipe}) a buzzé !${tempsTexte}`;
             buzzer.className = 'actif';
+
+            afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
 
             // Afficher les boutons de points
             const { série, question } = obtenirQuestionCourante();
@@ -442,12 +644,19 @@
         // ============================================================
         socket.on('confirmerÉcrasement', ({ noÉquipe, noJoueur, points, ancienRépondant }) => {
             const équipe = toutesÉquipes.find(e => e.noÉquipe === ancienRépondant.noÉquipe);
-            const joueur = tousJoueurs.find(j =>
-                j.noÉquipe === ancienRépondant.noÉquipe &&
-                j.noJoueur === ancienRépondant.noJoueur
-            );
-            const nomAncien = joueur ? joueur.alias : `Joueur ${ancienRépondant.noJoueur}`;
             const nomÉquipe = équipe ? équipe.nomÉquipe : `Équipe ${ancienRépondant.noÉquipe}`;
+
+            // Si noJoueur = 99, c'est une réponse d'équipe — pas de joueur individuel
+            let nomAncien;
+            if (ancienRépondant.noJoueur === 99) {
+                nomAncien = 'Équipe';
+            } else {
+                const joueur = tousJoueurs.find(j =>
+                    j.noÉquipe === ancienRépondant.noÉquipe &&
+                    j.noJoueur === ancienRépondant.noJoueur
+                );
+                nomAncien = joueur ? joueur.alias : `Joueur ${ancienRépondant.noJoueur}`;
+            }
 
             const confirmer = confirm(
                 `⚠️ Cette question a déjà une réponse enregistrée !\n` +
@@ -462,6 +671,7 @@
 
         socket.on('reset', () => {
             joueurAyantBuzzé = null;
+            afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
             const buzzer = document.getElementById('buzzer');
             buzzer.textContent = 'En attente d\'un buzzer...';
             buzzer.className = '';
@@ -478,7 +688,9 @@
         });
 
         socket.on('scoresMisÀJour', (scores) => {
+            derniersScores = scores;
             mettreÀJourScores(scores);
+            afficherÉquipes(partieActuelle, derniersJoueursConnectés, scores); // Mettre à jour les scores dans les blocs équipes
         });
 
         socket.on('questionMisÀJour', (info) => {
@@ -518,6 +730,7 @@
             });
         }
 
+        // Navigation
         function questionPrécédente() {
             socket.emit('questionPrécédente', partieActuelle);
         }
@@ -526,25 +739,40 @@
             socket.emit('questionSuivante', partieActuelle);
         }
 
+        function sériePrécédente() {
+            socket.emit('sériePrécédente', partieActuelle);
+        }
+
+        function sérieSuivante() {
+            socket.emit('sérieSuivante', partieActuelle);
+        }
+
         // Affichage
         function mettreÀJourMode(mode) {
             const badge = document.getElementById('modePartie');
             const zoneJeu = document.getElementById('zoneJeu');
             const zoneInit = document.getElementById('zoneInitialisation');
-            const labelParties = document.getElementById('labelToutesParties'); // à ajouter
+            const labelParties = document.getElementById('labelToutesParties');
+            const sélecteurPartie = document.getElementById('sélecteurPartie');
+
+            document.getElementById('infoQuestion').style.display =
+                mode === 'jeu' ? 'block' : 'none';
 
             if (mode === 'jeu') {
-                badge.textContent = '🎯 Partie en cours';
+                badge.textContent = 'Partie en cours';
                 badge.className = 'jeu';
                 zoneJeu.style.display = 'block';
                 zoneInit.style.display = 'none';
+                sélecteurPartie.style.display = 'none';
                 labelParties.style.display = 'none';  // cacher le checkbox
             } else {
                 badge.textContent = '🔧 Initialisation';
                 badge.className = 'initialisation';
                 zoneJeu.style.display = 'none';
                 zoneInit.style.display = 'block';
+                sélecteurPartie.style.display = 'block';
                 labelParties.style.display = 'inline'; // montrer le checkbox
+                document.getElementById('infoQuestion').style.display = 'none'; //cacher la série
             }
         }
 
@@ -612,10 +840,11 @@
             if (estÉquipe) {
                 divModeÉquipe.innerHTML = `
             <span style="background:#e94560; color:white; padding:4px 12px;
-                border-radius:6px; font-weight:bold;">
+                border-radius:6px; font-weight:bold; margin-top:10px; ">
                 🏆 MODE ÉQUIPE
             </span>`;
                 divModeÉquipe.style.display = 'block';
+                divModeÉquipe.style.marginTop = '10px';
             } else {
                 divModeÉquipe.style.display = 'none';
             }
@@ -633,6 +862,7 @@
             if (question && question.estÉquipe === null) {
                 divToggle.innerHTML = `
             <button onclick="toggleModeÉquipe()" style="
+            margin-top: 8px;  ← ajouter
                 background: ${estÉquipe ? '#2ecc71' : '#666'};
                 color: white; border: none; padding: 6px 16px;
                 border-radius:6px; cursor:pointer; font-size:0.9em;">
@@ -689,29 +919,55 @@
             socket.emit('toggleÉquipe', partieActuelle);
         }
 
-        function afficherÉquipes(noPartie, joueursConnectés) {
+        function afficherÉquipes(noPartie, joueursConnectés, scores) {
             fetch('/api/parties').then(r => r.json()).then(parties => {
                 const partie = parties.find(p => p.noPartie === noPartie);
                 if (!partie) return;
-                const div = document.getElementById('équipes');
+                const div = document.getElementById('zoneÉquipes');
                 div.innerHTML = '';
                 [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
                     const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
-                    const membres = tousJoueurs.filter(j =>
-                        j.noÉquipe === noÉquipe && !j.estÉquipe
-                    );
-                    const estConnecté = (j) => joueursConnectés.some(
-                        c => c.noÉquipe === j.noÉquipe && c.noJoueur === j.noJoueur
-                    );
+                    const membres = tousJoueurs.filter(j => {
+                        if (j.noÉquipe !== noÉquipe || j.estÉquipe) return false;
+                        if (modeActuel === 'jeu') {
+                            // En mode jeu — seulement les joueurs connectés à la partie
+                            return joueursConnectés.some(
+                                c => c.noÉquipe === j.noÉquipe && c.noJoueur === j.noJoueur);
+                        }
+                        return true; // En initialisation — tous les joueurs
+                    });
+                    const score = scores ? (scores[noÉquipe] || 0) : 0;
+
+                    const joueursHTML = membres.map(j => {
+                        let classe = '';
+                        let icône = '⚪';
+
+                        if (modeActuel === 'initialisation') {
+                            // Mode initialisation — vert si connecté
+                            const connecté = joueursConnectés.some(
+                                c => c.noÉquipe === j.noÉquipe && c.noJoueur === j.noJoueur);
+                            if (connecté) { classe = 'connecté'; icône = '🟢'; }
+                        } else {
+                            // Mode jeu — vert seulement si c'est le buzzeur
+                            const estBuzzeur = joueurAyantBuzzé &&
+                                joueurAyantBuzzé.noÉquipe === j.noÉquipe &&
+                                joueurAyantBuzzé.noJoueur === j.noJoueur;
+                            if (estBuzzeur) { classe = 'connecté'; icône = '🟢'; }
+                        }
+
+                        //return `<div class="joueur ${classe}">${icône} ${j.alias}</div>`;  //avec icône
+                        return `<div class="joueur ${classe}">${j.alias}</div>`; //sans icône
+
+
+
+                    }).join('');
+
                     div.innerHTML += `
-                        <div class="équipe">
-                            <h2>${équipe ? équipe.nomÉquipe : ''}</h2>
-                            ${membres.map(j => `
-                                <div class="joueur ${estConnecté(j) ? 'connecté' : ''}">
-                                    ${estConnecté(j) ? '🟢' : '⚪'} ${j.alias}
-                                </div>`
-                    ).join('')}
-                        </div>`;
+                <div class="bloc-équipe">
+                    <h2>${équipe ? équipe.nomÉquipe : ''}</h2>
+                    <div class="score-valeur">${score}</div>
+                    ${joueursHTML}
+                </div>`;
                 });
             });
         }

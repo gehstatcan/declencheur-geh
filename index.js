@@ -756,6 +756,32 @@ io.on("connection", (socket) => {
     console.log(`⏮️ Question précédente (partie ${noPartie})`);
   });
 
+  socket.on("sériePrécédente", (noPartie) => {
+    const état = obtenirÉtat(noPartie);
+    // Reculer à la série précédente, question 1
+    if (état.noSérieActuelle > 1) {
+      état.noSérieActuelle--;
+      état.noQuestionActuelle = 1;
+      état.buzzVerrou = false;
+      const info = questionCourante(état);
+      io.to(`partie-${noPartie}`).emit("questionMisÀJour", info);
+      io.to(`partie-${noPartie}`).emit("reset");
+    }
+  });
+
+  socket.on("sérieSuivante", (noPartie) => {
+    const état = obtenirÉtat(noPartie);
+    // Avancer à la série suivante, question 1
+    if (état.noSérieActuelle < séries.length) {
+      état.noSérieActuelle++;
+      état.noQuestionActuelle = 1;
+      état.buzzVerrou = false;
+      const info = questionCourante(état);
+      io.to(`partie-${noPartie}`).emit("questionMisÀJour", info);
+      io.to(`partie-${noPartie}`).emit("reset");
+    }
+  });
+
   socket.on("annulerRéponse", (noPartie) => {
     const état = obtenirÉtat(noPartie);
     const cheminPartie = path.join(
@@ -808,7 +834,7 @@ io.on("connection", (socket) => {
     }
 
     // Mettre à jour les scores et la question
-    io.to(`partie-${noPartie}`).emit("scoresMAJ", état.scores);
+    io.to(`partie-${noPartie}`).emit("scoresMisÀJour", état.scores);
     const info = questionCourante(état);
     io.to(`partie-${noPartie}`).emit("questionMisÀJour", info);
   });
