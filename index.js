@@ -582,6 +582,11 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on("attribuerPoints", ({ noPartie, noÉquipe, noJoueur, points }) => {
     const état = obtenirÉtat(noPartie);
+
+    // Si mode équipe, les points vont à noJoueur = 99
+    const info = questionCourante(état);
+    const noJoueurFinal = info && info.estÉquipe ? 99 : noJoueur;
+
     const cheminPartie = path.join(
       dossierSaison,
       "parties",
@@ -604,11 +609,10 @@ io.on("connection", (socket) => {
     );
 
     if (indexDoublon >= 0) {
-      // Avertir l'animateur et demander confirmation
       socket.emit("confirmerÉcrasement", {
         noPartie,
         noÉquipe,
-        noJoueur,
+        noJoueur: noJoueurFinal, // ← utiliser noJoueurFinal
         points,
         ancienRépondant: répondants[indexDoublon],
       });
@@ -617,7 +621,7 @@ io.on("connection", (socket) => {
 
     enregistrerRépondant(état, répondants, cheminPartie, {
       noÉquipe,
-      noJoueur,
+      noJoueur: noJoueurFinal, // ← utiliser noJoueurFinal
       points,
     });
   });
