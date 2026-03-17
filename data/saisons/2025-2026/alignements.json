@@ -5,6 +5,7 @@
     "joueurs": [
       1,
       2,
+      3,
       4,
       5
     ]
@@ -14,9 +15,23 @@
     "noÉquipe": 2,
     "joueurs": [
       1,
-      2,
       7,
       10
+    ]
+  },
+  {
+    "noPartie": 2,
+    "noÉquipe": 4,
+    "joueurs": [
+      1
+    ]
+  },
+  {
+    "noPartie": 2,
+    "noÉquipe": 7,
+    "joueurs": [
+      2,
+      4
     ]
   }
 ]

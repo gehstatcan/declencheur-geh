@@ -94,8 +94,8 @@
         }
 
         #statut.buzzé {
-            background: var(--buzz);
-            color: var(--buzz-texte);
+            background: var(--vert);
+            color: var(--blanc);
             font-size: 1.8em;
             /* Contraste noir sur jaune = 15:1 ✅ WCAG AAA */
         }
@@ -231,8 +231,8 @@
             letter-spacing: 4px;
             padding: 50px 20px;
             background: var(--buzz);
-            color: var(--buzz-texte);
-            border: none;
+            color: var(--buzz-texte) !important;
+            border: 3px solid rgba(0, 0, 0, 0.2);
             border-radius: 24px;
             cursor: pointer;
             margin-top: 16px;
@@ -373,7 +373,6 @@
         // Au début du script, avec les autres variables
         let modeActuel = 'initialisation';
 
-
         // ============================================================
         // Feedback vibration — pour le joueur presque aveugle
         // Fonctionne principalement sur mobile
@@ -397,19 +396,18 @@
                     '⚠️ Partie en cours — Identifiez-vous pour jouer !';
                 passerEnModeInscription();
             } else if (état.mode === "terminée") {
-                // 🏁 Partie terminée — afficher message final avec scores
                 document.getElementById('zoneJeu').style.display = 'none';
                 document.getElementById('zoneInscription').style.display = 'none';
-                document.getElementById('statut').innerHTML = `
-                    <div>🏁 Partie terminée !</div>`;
-                // Le détail sera affiché via socket.on('partieTerminée')
-
+                afficherRésuméPartie(état.noPartie);
             } else {
                 // Mode initialisation
                 passerEnModeInscription();
+                // Avertir si la partie a déjà des répondants
+                if (état.aDesRépondants) {
+                    document.getElementById('statut').textContent =
+                        '⚠️ Cette partie semble déjà terminée. Vérifiez le numéro de partie !';
+                }
             }
-
-
         });
 
         // ============================================================
@@ -423,7 +421,7 @@
                 joueur.noJoueur === joueurActuel.noJoueur &&
                 joueur.noÉquipe === joueurActuel.noÉquipe) {
                 // C'est moi qui ai buzzé — vibration longue
-                statut.textContent = "🔔 Vous avez buzzé !";
+                statut.textContent = `🎯 À toi de répondre, ${joueurActuel.alias} !`;
                 statut.className = "buzzé";
                 vibrer([200, 100, 200]);
             } else {
@@ -592,6 +590,116 @@
                 "Choisissez votre nom";
         }
 
+        async function afficherRésuméPartie(noPartie) {
+            const statut = document.getElementById('statut');
+            statut.style.display = 'block';
+            statut.className = '';
+            statut.innerHTML = '<div>🏁 Chargement du résumé...</div>';
+
+            try {
+                // Charger calendrier pour les scores
+                const parties = await fetch('/api/stats/calendrier').then(r => r.json());
+                const partie = parties.find(p => p.noPartie === noPartie);
+
+                // Charger compteurs pour les alias des joueurs
+                const compteurs = await fetch('/api/stats/compteurs').then(r => r.json());
+
+                // Charger points de cette partie spécifique
+                const ptsPartie = await fetch(`/api/stats/partie/${noPartie}`).then(r => r.json());
+
+                // Charger alignements pour savoir qui a joué
+                const alignements = await fetch('/api/alignements').then(r => r.json());
+                const alignPartie = alignements.filter(a => a.noPartie === noPartie);
+
+                if (!partie || !partie.terminée) {
+                    statut.innerHTML = `<div>🏁 Cette partie est terminée.</div>`;
+                    return;
+                }
+
+                const scoreMax = Math.max(partie.scoreA || 0, partie.scoreB || 0);
+
+                const résumé = [
+                    { nomÉquipe: partie.nomÉquipeA, score: partie.scoreA },
+                    { nomÉquipe: partie.nomÉquipeB, score: partie.scoreB }
+                ].map(é => {
+                    const équipeStats = compteurs.find(c => c.nomÉquipe === é.nomÉquipe);
+                    const align = alignPartie.find(a => a.noÉquipe === équipeStats?.noÉquipe);
+
+                    const joueurs = align && équipeStats
+                        ? [
+                            // Joueurs individuels
+                            ...align.joueurs
+                                .filter(nj => nj !== 99)
+                                .map(nj => {
+                                    const j = équipeStats.joueurs.find(j => j.noJoueur === nj);
+                                    const ptsP = ptsPartie.find(p =>
+                                        p.noÉquipe === équipeStats.noÉquipe && p.noJoueur === nj);
+                                    return {
+                                        alias: j?.alias || `Joueur ${nj}`,
+                                        points: ptsP?.points || 0
+                                    };
+                                })
+                                .sort((a, b) => b.points - a.points),
+                            // Points collectifs
+                            ...(() => {
+                                const collectif = ptsPartie.find(p =>
+                                    p.noÉquipe === équipeStats.noÉquipe && p.noJoueur === 99);
+                                return collectif && collectif.points > 0
+                                    ? [{ alias: '👥 ' + é.nomÉquipe, points: collectif.points }]
+                                    : [];
+                            })()
+                        ]
+                        : [];
+                    return { ...é, joueurs };
+                });
+
+                const estGagnant = (score) => score === scoreMax;
+
+                statut.innerHTML = `
+            <div style="margin-bottom:16px; font-family:'Bebas Neue',sans-serif;
+                 font-size:1.4em; letter-spacing:1px;">
+                🏁 Partie terminée !
+            </div>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                ${résumé.map(é => `
+                <div style="
+                    background: ${estGagnant(é.score) ? 'var(--vert)' : 'var(--fond-carte)'};
+                    color: ${estGagnant(é.score) ? 'var(--blanc)' : 'var(--blanc)'};
+                    padding: 14px 16px;
+                    border-radius: 14px;
+                    min-width: 180px;
+                    flex: 1;
+                    max-width: 260px;
+                    text-align: left;">
+                    <div style="font-weight:700; font-size:1em;
+                         margin-bottom:4px; text-align:center;">
+                        ${estGagnant(é.score) ? '🏆 ' : ''}${é.nomÉquipe}
+                    </div>
+                    <div style="font-family:'Bebas Neue',sans-serif;
+                         font-size:2.5em; text-align:center;
+                         margin-bottom:10px; letter-spacing:2px;">
+                        ${é.score} pts
+                    </div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.15);
+                         padding-top:8px;">
+                        ${é.joueurs.map(j => `
+                        <div style="display:flex; justify-content:space-between;
+                             padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.1);
+                             font-size:0.85em;">
+                            <span>${j.alias}</span>
+                            <span style="font-weight:600; margin-left:12px;">
+                                ${j.points > 0 ? j.points + ' pts' : '—'}
+                            </span>
+                        </div>`).join('')}
+                    </div>
+                </div>`).join('')}
+            </div>`;
+            } catch (e) {
+                statut.innerHTML = `<div>🏁 Partie terminée.</div>`;
+                console.error('Erreur résumé:', e);
+            }
+        }
+
         // ============================================================
         // Le serveur demande au joueur de se réenregistrer
         // Arrive quand l'animateur revient après une déconnexion
@@ -610,65 +718,9 @@
         socket.on('partieTerminée', ({ scores, résumé }) => {
             document.getElementById('zoneJeu').style.display = 'none';
             document.getElementById('zoneInscription').style.display = 'none';
-
-            if (!résumé || résumé.length === 0) {
-                document.getElementById('statut').textContent =
-                    '🏁 La partie est terminée. Merci d\'avoir joué !';
-                return;
-            }
-
-            const scoreMax = Math.max(...résumé.map(e => e.score));
-
-            const statut = document.getElementById('statut');
-            statut.innerHTML = `
-        <div style="margin-bottom:16px; font-family:'Bebas Neue',sans-serif;
-             font-size:1.4em; letter-spacing:1px;">
-            🏁 Partie terminée !
-        </div>
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-            ${résumé.map(é => {
-                const estGagnant = é.score === scoreMax;
-                const joueursHTML = é.joueurs.map(j => `
-                <div style="
-                    display:flex;
-                    justify-content:space-between;
-                    padding: 4px 0;
-                    border-bottom: 1px solid rgba(255,255,255,0.1);
-                    font-size:0.85em;
-                    ${j.estCollectif ? 'font-style:italic; opacity:0.8;' : ''}">
-                    <span>${j.estCollectif ? '👥 ' : ''}${j.alias}</span>
-                    <span style="font-weight:600; margin-left:12px;">
-                        ${j.points > 0 ? j.points + ' pts' : '—'}
-                    </span>
-                </div>`).join('');
-
-                return `
-                <div style="
-                    background: ${estGagnant ? 'var(--buzz)' : 'var(--fond-carte)'};
-                    color: ${estGagnant ? 'var(--buzz-texte)' : 'var(--blanc)'};
-                    padding: 14px 16px;
-                    border-radius: 14px;
-                    min-width: 180px;
-                    flex: 1;
-                    max-width: 260px;
-                    text-align: left;">
-                    <div style="font-weight:700; font-size:1em;
-                         margin-bottom:4px; text-align:center;">
-                        ${estGagnant ? '🏆 ' : ''}${é.nomÉquipe}
-                    </div>
-                    <div style="font-family:'Bebas Neue',sans-serif;
-                         font-size:2.5em; text-align:center;
-                         margin-bottom:10px; letter-spacing:2px;">
-                        ${é.score} pts
-                    </div>
-                    <div style="border-top: 1px solid rgba(255,255,255,0.2);
-                         padding-top:8px;">
-                        ${joueursHTML}
-                    </div>
-                </div>`;
-            }).join('')}
-        </div>`;
+            afficherRésuméPartie(noPartieActuelle);
         });
+
         // ============================================================
         // Afficher les champs nouveau joueur si nécessaire
         // ============================================================

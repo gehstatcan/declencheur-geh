@@ -692,6 +692,39 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
   }
 });
 
+app.get('/api/stats/partie/:noPartie', (req, res) => {
+    try {
+        const noPartie = parseInt(req.params.noPartie);
+        const cheminPartie = path.join(
+            dossierSaison, 'parties', `répondants-${noPartie}.json`);
+        
+        let répondants = [];
+        try {
+            const contenu = fs.readFileSync(cheminPartie, 'utf-8').trim();
+            répondants = contenu ? JSON.parse(contenu) : [];
+        } catch (e) { répondants = []; }
+
+        // Calculer points par joueur pour cette partie
+        const ptsJoueur = {};
+        répondants.forEach(r => {
+            const clé = `${r.noÉquipe}-${r.noJoueur}`;
+            if (!ptsJoueur[clé]) ptsJoueur[clé] = { noÉquipe: r.noÉquipe, noJoueur: r.noJoueur, points: 0 };
+            const série = séries.find(s => s.noSérie === r.noSérie);
+            const question = série
+                ? série.questions.find(q => q.noQuestion === r.noQuestion)
+                : null;
+            const pts = r.pointsSecondaires
+                ? question?.pointsSecondaires ?? 0
+                : question?.points ?? 0;
+            ptsJoueur[clé].points += pts;
+        });
+
+        res.json(Object.values(ptsJoueur));
+    } catch (e) {
+        res.status(500).json({ erreur: e.message });
+    }
+});
+
 // ============================================================
 // États des parties en cours — un état par noPartie
 // Chaque partie a sa propre room Socket.io : "partie-25", etc.
@@ -713,10 +746,33 @@ function créerÉtat(noPartie) {
 
 function obtenirÉtat(noPartie) {
   if (!étatsParties[noPartie]) {
-    console.log(`⚠️ Création nouvel état pour partie ${noPartie}`);
-    étatsParties[noPartie] = créerÉtat(noPartie);
+    // Vérifier si cette partie est terminée (dans alignements.json)
+    let estTerminée = false;
+    try {
+      const cheminAlign = path.join(dossierSaison, "alignements.json");
+      const alignements = JSON.parse(fs.readFileSync(cheminAlign, "utf-8"));
+      estTerminée = alignements.some((a) => a.noPartie === noPartie);
+      console.log(
+        `obtenirÉtat(${noPartie}) — estTerminée: ${estTerminée}, alignements trouvés: ${alignements.length}`,
+      );
+    } catch (e) {
+      estTerminée = false;
+      console.log(`obtenirÉtat(${noPartie}) — erreur: ${e.message}`);
+    }
+
+    étatsParties[noPartie] = {
+      noPartie,
+      mode: estTerminée ? "terminée" : "initialisation",
+      joueursConnectés: [],
+      scores: {},
+      noSérieActuelle: 1,
+      noQuestionActuelle: 1,
+      réplique: null,
+      buzzVerrou: false,
+      overrideÉquipe: null,
+    };
   }
-  console.log(`État partie ${noPartie}: ${étatsParties[noPartie].mode}`);
+
   return étatsParties[noPartie];
 }
 
@@ -876,6 +932,21 @@ io.on("connection", (socket) => {
     socket.noPartie = noPartie;
     socket.join(`partie-${noPartie}`);
     console.log(`Socket a rejoint la room partie-${noPartie}`);
+
+    // Vérifier si cette partie a déjà des répondants
+    const cheminPartie = path.join(
+      dossierSaison,
+      "parties",
+      `répondants-${noPartie}.json`,
+    );
+    let aDesRépondants = false;
+    try {
+      const contenu = fs.readFileSync(cheminPartie, "utf-8").trim();
+      const répondants = contenu ? JSON.parse(contenu) : [];
+      aDesRépondants = répondants.length > 0;
+    } catch (e) {
+      aDesRépondants = false;
+    }
 
     // Envoyer l'état actuel de cette partie
     const état = obtenirÉtat(noPartie);
