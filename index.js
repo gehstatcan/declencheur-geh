@@ -16,6 +16,12 @@ const io = require("socket.io")(http);
 const fs = require("fs");
 const path = require("path");
 
+const multer = require('multer');
+const XLSX = require('xlsx');
+
+// Configuration multer — stockage en mémoire (pas sur disque)
+const upload = multer({ storage: multer.memoryStorage() });
+
 app.use(express.static("public"));
 app.use(express.json());
 
@@ -135,6 +141,112 @@ app.get("/api/telecharger/repondants-partie/:noPartie", (req, res) => {
   } else {
     res.status(404).json({ erreur: "Fichier introuvable" });
   }
+});
+
+// ============================================================
+// Upload questionnaire Excel — extrait thèmes et questions
+// ============================================================
+app.post('/api/upload/questionnaire', upload.single('fichier'), (req, res) => {
+    try {
+        // Lire le fichier Excel depuis la mémoire
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const feuille = workbook.Sheets['Vers BD'];
+        const données = XLSX.utils.sheet_to_json(feuille, { header: 1 });
+
+        // --------------------------------------------------------
+        // Extraire tblThèmes
+        // --------------------------------------------------------
+        let noQuestionnaire = null;
+        const thèmesExtraits = [];
+        const questionsExtraites = [];
+        let section = null;
+
+        données.forEach(ligne => {
+            if (ligne[0] === 'tblThèmes') { section = 'thèmes'; return; }
+            if (ligne[0] === 'tblQuestionnaires') { section = 'questions'; return; }
+            if (ligne[0] === 'NoQuestionnaire') return; // entête
+
+            if (section === 'thèmes') {
+                const noQ = parseInt(ligne[0]);
+                const noS = parseInt(ligne[1]);
+                const thème = ligne[2] && ligne[2] !== 0 ? String(ligne[2]) : '';
+                const sousThème = ligne[3] && ligne[3] !== 0 ? String(ligne[3]) : '';
+                if (!isNaN(noQ) && !isNaN(noS)) {
+                    if (noQuestionnaire === null) noQuestionnaire = noQ;
+                    thèmesExtraits.push({ noSérie: noS, thème, sousThème });
+                }
+            }
+
+            if (section === 'questions') {
+                const noQ = parseInt(ligne[0]);
+                const noS = parseInt(ligne[1]);
+                const noQuestion = parseInt(ligne[2]);
+                const texte = ligne[3] ? String(ligne[3]) : '';
+                const réponse = ligne[4] ? String(ligne[4]) : '';
+                if (!isNaN(noQ) && !isNaN(noS) && !isNaN(noQuestion) && texte) {
+                    questionsExtraites.push({ noSérie: noS, noQuestion, texte, réponse });
+                }
+            }
+        });
+
+        // --------------------------------------------------------
+        // Mettre à jour thèmes.json
+        // --------------------------------------------------------
+        const cheminThèmes = path.join(dossierSaison, 'thèmes.json');
+        let thèmes = [];
+        try {
+            thèmes = JSON.parse(fs.readFileSync(cheminThèmes, 'utf-8'));
+        } catch (e) { thèmes = []; }
+
+        // Retirer l'ancien questionnaire si existe
+        thèmes = thèmes.filter(t => t.noQuestionnaire !== noQuestionnaire);
+        thèmes.push({ noQuestionnaire, séries: thèmesExtraits });
+        thèmes.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
+        fs.writeFileSync(cheminThèmes, JSON.stringify(thèmes, null, 2));
+
+        // --------------------------------------------------------
+        // Mettre à jour questions.json
+        // --------------------------------------------------------
+        const cheminQuestions = path.join(dossierSaison, 'questions.json');
+        let questions = [];
+        try {
+            questions = JSON.parse(fs.readFileSync(cheminQuestions, 'utf-8'));
+        } catch (e) { questions = []; }
+
+        // Grouper les questions par série
+        const sériesMap = {};
+        questionsExtraites.forEach(q => {
+            if (!sériesMap[q.noSérie]) sériesMap[q.noSérie] = [];
+            sériesMap[q.noSérie].push({ 
+                noQuestion: q.noQuestion, 
+                texte: q.texte, 
+                réponse: q.réponse 
+            });
+        });
+
+        const sériesQuestions = Object.keys(sériesMap).map(noSérie => ({
+            noSérie: parseInt(noSérie),
+            questions: sériesMap[noSérie].sort((a, b) => a.noQuestion - b.noQuestion)
+        })).sort((a, b) => a.noSérie - b.noSérie);
+
+        // Retirer l'ancien questionnaire si existe
+        questions = questions.filter(q => q.noQuestionnaire !== noQuestionnaire);
+        questions.push({ noQuestionnaire, séries: sériesQuestions });
+        questions.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
+        fs.writeFileSync(cheminQuestions, JSON.stringify(questions, null, 2));
+
+        console.log(`📥 Questionnaire ${noQuestionnaire} importé — ${thèmesExtraits.length} séries, ${questionsExtraites.length} questions`);
+        res.json({ 
+            succès: true, 
+            noQuestionnaire,
+            nbSéries: thèmesExtraits.length,
+            nbQuestions: questionsExtraites.length
+        });
+
+    } catch (e) {
+        console.error('Erreur upload questionnaire:', e);
+        res.status(500).json({ erreur: e.message });
+    }
 });
 
 // ============================================================
