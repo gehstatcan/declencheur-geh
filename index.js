@@ -271,6 +271,244 @@ app.post("/api/joueurs/nouveau", (req, res) => {
 });
 
 // ============================================================
+// Routes API — Statistiques
+// ============================================================
+
+// Calendrier — parties avec scores calculés
+app.get('/api/stats/calendrier', (req, res) => {
+    try {
+        const parties = JSON.parse(fs.readFileSync(
+            path.join(dossierSaison, 'parties.json'), 'utf-8'));
+        const équipes = JSON.parse(fs.readFileSync(
+            path.join(dossierSaison, 'équipes.json'), 'utf-8'));
+
+        // Lire les répondants cumulatifs
+        let répondants = [];
+        try {
+            const contenu = fs.readFileSync(
+                path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+            répondants = contenu ? JSON.parse(contenu) : [];
+        } catch (e) { répondants = []; }
+
+        // Calculer les scores par partie
+        const résultats = parties.map(partie => {
+            const rép = répondants.filter(r => r.noPartie === partie.noPartie);
+
+            // Calculer les points de chaque équipe
+            const scores = {};
+            rép.forEach(r => {
+                if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
+                const série = séries.find(s => s.noSérie === r.noSérie);
+                const question = série
+                    ? série.questions.find(q => q.noQuestion === r.noQuestion)
+                    : null;
+                const points = r.pointsSecondaires
+                    ? question ? question.pointsSecondaires : 5
+                    : question ? question.points : 10;
+                scores[r.noÉquipe] += points;
+            });
+
+            const équipeA = équipes.find(e => e.noÉquipe === partie.noÉquipeA);
+            const équipeB = équipes.find(e => e.noÉquipe === partie.noÉquipeB);
+            const scoreA = scores[partie.noÉquipeA] || null;
+            const scoreB = scores[partie.noÉquipeB] || null;
+            const terminée = rép.length > 0;
+
+            return {
+                noPartie: partie.noPartie,
+                date: partie.date,
+                nomÉquipeA: équipeA ? équipeA.nomÉquipe : '',
+                nomÉquipeB: équipeB ? équipeB.nomÉquipe : '',
+                scoreA,
+                scoreB,
+                terminée,
+                lienTeams: partie.lienTeams || null,
+                noQuestionnaire: partie.noQuestionnaire
+            };
+        });
+
+        // Trier par date
+        résultats.sort((a, b) => a.date.localeCompare(b.date));
+        res.json(résultats);
+
+    } catch (e) {
+        console.error('Erreur stats calendrier:', e);
+        res.status(500).json({ erreur: e.message });
+    }
+});
+
+// ============================================================
+// Classement — G/GP/PN/PP/P
+// ============================================================
+app.get('/api/stats/classement', (req, res) => {
+    try {
+        const parties = JSON.parse(fs.readFileSync(
+            path.join(dossierSaison, 'parties.json'), 'utf-8'));
+        const équipes = JSON.parse(fs.readFileSync(
+            path.join(dossierSaison, 'équipes.json'), 'utf-8'));
+
+        let répondants = [];
+        try {
+            const contenu = fs.readFileSync(
+                path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+            répondants = contenu ? JSON.parse(contenu) : [];
+        } catch (e) { répondants = []; }
+
+        // Initialiser le classement pour chaque équipe
+        const classement = {};
+        équipes.forEach(é => {
+            classement[é.noÉquipe] = {
+                noÉquipe: é.noÉquipe,
+                nomÉquipe: é.nomÉquipe,
+                MJ: 0,   // Matchs joués
+                G: 0, GP: 0, PN: 0, PP: 0, P: 0,
+                pts: 0,  // Points au classement
+                ptsMarqués: 0,
+                ptsSubis: 0,
+                ptsPossibles: 0
+            };
+        });
+
+        // Calculer les scores par partie
+        const partiesTerminées = parties.filter(p =>
+            répondants.some(r => r.noPartie === p.noPartie)
+        );
+
+        partiesTerminées.forEach(partie => {
+            const rép = répondants.filter(r => r.noPartie === partie.noPartie);
+            const scores = {};
+            rép.forEach(r => {
+                if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
+                const série = séries.find(s => s.noSérie === r.noSérie);
+                const question = série
+                    ? série.questions.find(q => q.noQuestion === r.noQuestion)
+                    : null;
+                const points = r.pointsSecondaires
+                    ? question ? question.pointsSecondaires : 5
+                    : question ? question.points : 10;
+                scores[r.noÉquipe] += points;
+            });
+
+            const sA = scores[partie.noÉquipeA] || 0;
+            const sB = scores[partie.noÉquipeB] || 0;
+            const écart = Math.abs(sA - sB);
+            const gagnant = sA > sB ? partie.noÉquipeA
+                : sB > sA ? partie.noÉquipeB : null;
+
+            [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
+                if (!classement[noÉquipe]) return;
+                const c = classement[noÉquipe];
+                const monScore = scores[noÉquipe] || 0;
+                const scoreAdv = noÉquipe === partie.noÉquipeA ? sB : sA;
+
+                c.MJ++;
+                c.ptsMarqués += monScore;
+                c.ptsSubis += scoreAdv;
+                c.ptsPossibles += 4;
+
+                if (gagnant === null) {
+                    // Nulle
+                    c.PN++; c.pts += 2;
+                } else if (gagnant === noÉquipe) {
+                    // Victoire
+                    if (écart > 40) { c.G++; c.pts += 4; }
+                    else { c.GP++; c.pts += 3; }
+                } else {
+                    // Défaite
+                    if (écart > 40) { c.P++; }
+                    else { c.PP++; c.pts += 1; }
+                }
+            });
+        });
+
+        // Calculer le % et trier
+        const résultat = Object.values(classement)
+            .filter(c => c.MJ > 0)
+            .map(c => ({
+                ...c,
+                pct: c.ptsPossibles > 0
+                    ? Math.round(c.pts / c.ptsPossibles * 100) : 0
+            }))
+            .sort((a, b) => b.pts - a.pts || b.pct - a.pct);
+
+        res.json(résultat);
+
+    } catch (e) {
+        console.error('Erreur stats classement:', e);
+        res.status(500).json({ erreur: e.message });
+    }
+});
+
+// ============================================================
+// Compteurs — points par équipe et par joueur
+// ============================================================
+app.get('/api/stats/compteurs', (req, res) => {
+    try {
+        const équipes = JSON.parse(fs.readFileSync(
+            path.join(dossierSaison, 'équipes.json'), 'utf-8'));
+        const joueurs = JSON.parse(fs.readFileSync(
+            path.join(dossierSaison, 'joueurs.json'), 'utf-8'));
+
+        let répondants = [];
+        try {
+            const contenu = fs.readFileSync(
+                path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+            répondants = contenu ? JSON.parse(contenu) : [];
+        } catch (e) { répondants = []; }
+
+        // Points par joueur
+        const ptsJoueur = {};
+        répondants.forEach(r => {
+            const clé = `${r.noÉquipe}-${r.noJoueur}`;
+            if (!ptsJoueur[clé]) ptsJoueur[clé] = 0;
+            const série = séries.find(s => s.noSérie === r.noSérie);
+            const question = série
+                ? série.questions.find(q => q.noQuestion === r.noQuestion)
+                : null;
+            const points = r.pointsSecondaires
+                ? question ? question.pointsSecondaires : 5
+                : question ? question.points : 10;
+            ptsJoueur[clé] += points;
+        });
+
+        // Construire résultat par équipe
+        const résultat = équipes.map(é => {
+            const membresÉquipe = joueurs.filter(j => j.noÉquipe === é.noÉquipe);
+            const joueursStats = membresÉquipe.map(j => {
+                const clé = `${j.noÉquipe}-${j.noJoueur}`;
+                return {
+                    noJoueur: j.noJoueur,
+                    alias: j.alias,
+                    prénom: j.prénom,
+                    nom: j.nom,
+                    points: ptsJoueur[clé] || 0
+                };
+            }).sort((a, b) => b.points - a.points);
+
+            // Points équipe (noJoueur = 99)
+            const ptsÉquipe = ptsJoueur[`${é.noÉquipe}-99`] || 0;
+
+            const totalÉquipe = joueursStats.reduce(
+                (sum, j) => sum + j.points, 0) + ptsÉquipe;
+
+            return {
+                noÉquipe: é.noÉquipe,
+                nomÉquipe: é.nomÉquipe,
+                totalÉquipe,
+                ptsÉquipeCollectif: ptsÉquipe,
+                joueurs: joueursStats
+            };
+        }).sort((a, b) => b.totalÉquipe - a.totalÉquipe);
+
+        res.json(résultat);
+
+    } catch (e) {
+        console.error('Erreur stats compteurs:', e);
+        res.status(500).json({ erreur: e.message });
+    }
+});
+
+// ============================================================
 // États des parties en cours — un état par noPartie
 // Chaque partie a sa propre room Socket.io : "partie-25", etc.
 // ============================================================

@@ -508,5 +508,85 @@
         "sousThème": ""
       }
     ]
+  },
+  {
+    "noQuestionnaire": 7,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "",
+        "sousThème": "Une année, décennie ou siècle"
+      },
+      {
+        "noSérie": 6,
+        "thème": "",
+        "sousThème": "Arts et littérature"
+      },
+      {
+        "noSérie": 7,
+        "thème": "",
+        "sousThème": "Arts et littérature"
+      },
+      {
+        "noSérie": 8,
+        "thème": "Marguerite Duras",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Point Jersey",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Bernard Werber",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Rein",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Adib Alkhalidey",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Joule",
+        "sousThème": "High definition multimedia interface (interface multimédia haute définition)"
+      },
+      {
+        "noSérie": 14,
+        "thème": "",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "",
+        "sousThème": "Divers"
+      }
+    ]
   }
 ]

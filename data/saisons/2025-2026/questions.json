@@ -1,0 +1,502 @@
+[
+  {
+    "noQuestionnaire": 7,
+    "séries": [
+      {
+        "noSérie": 1,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Épelez \"rendu compte\" dans la phrase suivante : Mes tantes se sont rendu compte à temps qu'un train approchait de leur voiture.",
+            "réponse": "Rendu compte"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Dans le mot \"misanthrope\", que signifie la racine grecque anthrôpos?",
+            "réponse": "Être humain ou homme"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Comment appelle-t-on un document annexé à une lettre ou à un autre type de document?",
+            "réponse": "Pièce jointe"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quelle est la valeur numérique du chiffre romain L?",
+            "réponse": "50"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Comment écrit-on \"quart(s)\" dans 6/4?",
+            "réponse": "Quarts"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Épelez \"quelle\" dans la phrase suivante : Quelle que sera sa décision, je l'accepterai.",
+            "réponse": "Quelle (la majuscule n'est pas exigée)"
+          },
+          {
+            "noQuestion": 7,
+            "texte": "Épelez \"ensemble\" dans la phrase suivante : Nous travaillons ensemble depuis de longues années.",
+            "réponse": "Ensemble"
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Donnez le genre respectif des mots suivants : \"arpège\" et \"octave\".",
+            "réponse": "Masculin, féminin"
+          }
+        ]
+      },
+      {
+        "noSérie": 2,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "À plus ou moins deux ans, en quelle année la voie maritime du Saint-Laurent a-t-elle été ouverte à la navigation?",
+            "réponse": "1959 (accepter entre 1957 et 1961)"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quel pays d’Asie centrale est l’un des deux seuls pays doublement enclavés au monde et a pour capitale Tachkent?",
+            "réponse": "Ouzbékistan"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Avec quel pays la France métropolitaine partage-t-elle la plus longue frontière?",
+            "réponse": "Espagne"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Dans quelle région administrative du Québec se situe le Parc national des Monts-Valin?",
+            "réponse": "Saguenay-Lac-Saint-Jean"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quelle est la capitale de l'Alaska?",
+            "réponse": "Juneau"
+          }
+        ]
+      },
+      {
+        "noSérie": 3,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "À la plus récente cérémonie des BAFTA Film Awards, quel acteur a été récompensé dans la catégorie du meilleur acteur et de l'étoile montante pour son rôle dans le film I Swear? ",
+            "réponse": "Robert Aramayo"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quelle chanteuse célébrera son 80e anniversaire le 25 avril prochain à l'émission En direct de l'univers?",
+            "réponse": "Ginette Reno"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Dans quelle catégorie a triomphé l'acteur québécois Théodore Pellerin lors de la plus récente cérémonie des Césars, en France?",
+            "réponse": "Meilleur espoir masculin"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quel designer d'intérieur coanime Vendre ou rénover au Québec aux côtés de Maïka Desnoyers?",
+            "réponse": "Daniel Corbin"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Dans quelle nouvelle téléréalité diffusée sur Crave dix créateurs de contenu sont-ils parachutés au milieu de la forêt sans leur téléphone?",
+            "réponse": "Hors réseau"
+          }
+        ]
+      },
+      {
+        "noSérie": 4,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Au moins 2 questions dans chacun des thèmes.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "En quelle année a été signée la Déclaration universelle des droits de l'homme?",
+            "réponse": "1948"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Qui a fondé le scoutisme?",
+            "réponse": "Robert Baden Powell"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quel traité est signé en 1701 à Montréal entre les Premières Nations et la Nouvelle-France?",
+            "réponse": "Grande Paix de Montréal"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Avant d'adopter l'Euro le 1er janvier 2023, quelle était la monnaie officielle de la Croatie? ",
+            "réponse": "Kuna"
+          }
+        ]
+      },
+      {
+        "noSérie": 5,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Choisir une année (décennie ou siècle pour les époques plus anciennes) et poser 5 questions relatives à cette période. Les questions doivent être diversifiées, sports, politiques, arts, etc. La première question vaut 5 points.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quel film de 1988 mettant en scène Tom Cruise et Dustin Hoffman a remporté l'Oscar du meilleur film l'année suivante?",
+            "réponse": "Rain Man (L'Homme de la pluie)"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Quel climatologue américain a signalé dès 1988 le commencement du réchauffement climatique devant le Sénat des États-Unis?",
+            "réponse": "James Hansen"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quelle navette soviétique a effectué son premier vol sans équipage en 1988?",
+            "réponse": "Buran"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Nommez deux des trois pays signataires de l'accord tripartite ayant mené à l'indépendance de la Namibie.",
+            "réponse": "Angola, Cuba et Afrique du Sud"
+          }
+        ]
+      },
+      {
+        "noSérie": 6,
+        "questions": [
+          {
+            "noQuestion": 2,
+            "texte": "Qui sont les candidats à la chefferie de la CAQ?",
+            "réponse": "Christine Fréchette et Bernard Drainville"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Qui est l'actuel maire de la ville de Québec?",
+            "réponse": "Bruno Marchand"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Dans quelle circonscription québécoise la dernière élection fédérale a-t-elle été annulée?",
+            "réponse": "Terrebonne"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quel est le nom du président du Vénézuela capturé par les Américains?",
+            "réponse": "Nicolàs Maduro"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Nommez l'un des deux porte-drapeaux canadiens de la cérémonie de clôture des Jeux olympiques de 2026.",
+            "réponse": "Steven Dubois ou Valérie Maltais"
+          },
+          {
+            "noQuestion": 7,
+            "texte": "À quelle date le budget du Québec de 2026-2027 sera-t-il déposé?",
+            "réponse": "18 mars 2026"
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Quel est le titre du film inspiré d'une œuvre d'Émily Brontë en salle actuellement?",
+            "réponse": "Wuthering Heights (Les Hauts de Hurle-Vent)"
+          }
+        ]
+      },
+      {
+        "noSérie": 7,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Collective",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Au moins 2 questions dans chacun des thèmes.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Qui est l'auteur de la bande dessinée Le chat?",
+            "réponse": "Philippe Geluck"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "À quel écrivain américain associez-vous les romans De si jolis chevaux, Des villes dans la plaine et La route?",
+            "réponse": "Cormac McCarthy"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quel musée montréalais devrait rouvrir ses portes en 2028 après des travaux d'agrandissement?",
+            "réponse": "Musée d'art contemporain"
+          }
+        ]
+      },
+      {
+        "noSérie": 8,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Collective",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Au moins 2 questions dans chacun des thèmes.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Dans quelle ville auront lieu les Jeux olympiques d'hiver de 2034?",
+            "réponse": "Salt Lake City"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quel sport pratique Victoria Mboko?",
+            "réponse": "Tennis "
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Comment s'appelle le jeu de société dont une case s'appelle \"Allez en prison\"?",
+            "réponse": "Monopoly"
+          }
+        ]
+      },
+      {
+        "noSérie": 9,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Question à indice",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Dès le 1er indice, il ne doit pas y avoir plusieurs réponses possibles. Le premier indice devrait être très difficile!",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Né à Toulouse, cet écrivain se lance dans l'écriture à un jeune âge par la rédaction de nouvelles, notammnent Le château magique en 1969 et Les enquêtes de Taupin en 1970.",
+            "réponse": ""
+          }
+        ]
+      },
+      {
+        "noSérie": 10,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Vis-à-vis",
+            "réponse": "Nommez l'organe affecté par les maladies suivantes."
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Il est normal que ces 4 questions soient parmi les plus faciles du questionnaire",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Cirrhose",
+            "réponse": "Foie"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Conjonctivite",
+            "réponse": "Œil/yeux"
+          }
+        ]
+      },
+      {
+        "noSérie": 11,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Collective",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Les 5 questions doivent couvrir l'ensemble du thème. Varier les sujets, formulations, longueurs, difficultés, etc.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Qui a fondé l'Orchestre symphonique de Montréal?",
+            "réponse": "Wilfred Pelletier"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Qui a réalisé le documentaire The Last Waltz, qui relate le dernier concert du groupe The Band?",
+            "réponse": "Martin Scorsese"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Nommez le groupe duquel font partie ou ont déjà fait partie les musiciens suivants : Fred Fortin, Luc Brien, Suzie McLelove et Johnny Maldoror.",
+            "réponse": "Les Breastfeeders"
+          }
+        ]
+      },
+      {
+        "noSérie": 12,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Série 12",
+            "réponse": "Sciences"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Collective",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Les 5 questions doivent couvrir l'ensemble du thème. Varier les sujets, formulations, longueurs, difficultés, etc.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quelle planète du système solaire possède la plus grande tempête connue, appelée la Grande Tache rouge?",
+            "réponse": "Jupiter"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quel gaz constitue environ 78 % de l’atmosphère terrestre?",
+            "réponse": "Azote"
+          }
+        ]
+      },
+      {
+        "noSérie": 13,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Deux séries d'associations de 4 éléments. L'inconnue correctement identifiée et bien associée vaut 20 points, les autres bonnes associations valent 10 points chacune.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Sous-thème 1 (doit être précis et non relié au sous-thème 2)",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Triton",
+            "réponse": "A"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Phobos",
+            "réponse": "B"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Titan",
+            "réponse": "D (Saturne)"
+          }
+        ]
+      },
+      {
+        "noSérie": 14,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Sous-thème 2 (doit être précis et non relié au sous-thème 1)",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Associez le film ayant remporté l'Oscar du meilleur film à son réalisateur.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Slumdog Millionaire",
+            "réponse": "C"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "The Artist",
+            "réponse": "A"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "American Beauty",
+            "réponse": "B"
+          },
+          {
+            "noQuestion": 7,
+            "texte": "Argo",
+            "réponse": "D (Ben Affleck)"
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Michel Hazanavicius",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 9,
+            "texte": "Sam Mendes",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 10,
+            "texte": "Danny Boyle",
+            "réponse": ""
+          }
+        ]
+      },
+      {
+        "noSérie": 15,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 7,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
+            "réponse": ""
+          }
+        ]
+      }
+    ]
+  }
+]
