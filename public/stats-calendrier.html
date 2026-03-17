@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calendrier — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            /* ← bleu marine */
+            --vert: #27ae60;
+            --orange: #e67e22;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            font-size: 0.95em;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--gris);
+            background: var(--fond-carte);
+            border: 1px solid var(--fond-champ);
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--fond-champ);
+            color: var(--texte);
+        }
+
+        nav a.actif {
+            background: var(--accent);
+            color: var(--blanc);
+            border-color: var(--accent);
+        }
+
+        h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .tableau-conteneur {
+            width: 100%;
+            max-width: 960px;
+            background: var(--blanc);
+            border-radius: var(--rayon);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        thead th {
+            background: var(--fond-champ);
+            color: var(--accent);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.05em;
+            letter-spacing: 1px;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        tbody tr.ligne-partie {
+            border-bottom: 1px solid var(--fond-carte);
+            transition: background 0.15s;
+        }
+
+        tbody tr.ligne-partie:hover {
+            background: var(--fond);
+        }
+
+        tbody tr.ligne-expand {
+            display: none;
+            background: var(--fond);
+        }
+
+        tbody tr.ligne-expand.visible {
+            display: table-row;
+        }
+
+        td {
+            padding: 10px 14px;
+            vertical-align: middle;
+        }
+
+        td.date {
+            color: var(--gris);
+            font-size: 0.88em;
+            white-space: nowrap;
+            width: 110px;
+        }
+
+        td.équipe {
+            font-weight: 600;
+            color: var(--texte);
+        }
+
+        td.score {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            letter-spacing: 1px;
+            text-align: center;
+            white-space: nowrap;
+            width: 120px;
+        }
+
+        .score-gagnant {
+            color: var(--vert);
+        }
+
+        .score-perdant {
+            color: var(--gris);
+        }
+
+        .score-avenir {
+            color: var(--gris);
+            font-size: 0.6em;
+            font-family: 'Inter', sans-serif;
+        }
+
+        td.liens {
+            text-align: center;
+            white-space: nowrap;
+            width: 120px;
+        }
+
+        .lien-bouton {
+            display: inline-block;
+            font-size: 0.78em;
+            padding: 3px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 2px;
+            transition: background 0.2s;
+        }
+
+        .lien-teams {
+            background: #4b6cb7;
+            color: white;
+        }
+
+        .lien-teams:hover {
+            background: #3a5498;
+        }
+
+        .lien-match {
+            background: var(--fond-champ);
+            color: var(--texte);
+            border: 1px solid #ccc;
+        }
+
+        .lien-match:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Bouton expand */
+        .btn-expand {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .btn-expand:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-expand.ouvert {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Zone expand joueurs */
+        .zone-joueurs {
+            padding: 12px 16px 16px 52px;
+            background: var(--fond);
+            border-top: 1px solid var(--fond-champ);
+        }
+
+        .grille-joueurs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 40px;
+        }
+
+        .colonne-équipe h4 {
+            font-size: 0.85em;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--fond-champ);
+        }
+
+        .joueur-ligne {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88em;
+            padding: 3px 0;
+            color: var(--texte);
+        }
+
+        .joueur-ligne .pts {
+            font-weight: 600;
+            color: var(--accent);
+            margin-left: 8px;
+        }
+
+        .joueur-ligne .pts-zero {
+            color: var(--gris);
+            font-weight: normal;
+        }
+
+        tr.aujourd-hui td {
+            border-top: 2px solid var(--orange);
+        }
+
+        .note-bas {
+            margin-top: 12px;
+            font-size: 0.82em;
+            color: var(--gris);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <nav>
+        <a href="stats-calendrier.html" class="actif">📅 Calendrier</a>
+        <a href="stats-classement.html">🏆 Classement</a>
+        <a href="stats-compteurs.html">📊 Compteurs</a>
+    </nav>
+
+    <h2>📅 Calendrier 2025-2026</h2>
+
+    <div class="tableau-conteneur">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px;"></th>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th style="text-align:right;">Équipe A</th>
+                    <th style="text-align:center;">Score</th>
+                    <th>Équipe B</th>
+                    <th style="text-align:center;">Liens</th>
+                </tr>
+            </thead>
+            <tbody id="corpsTableau">
+                <tr>
+                    <td colspan="7" style="text-align:center; color:var(--gris); padding:40px;">
+                        Chargement...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="note-bas">
+        ➕ Expand pour voir les points par joueur &nbsp;|&nbsp;
+        📋 Feuille de match disponible pour les parties terminées
+    </div>
+
+    <script>
+        let donnéesParties = [];
+        let donnéesCompteurs = [];
+
+        async function chargerCalendrier() {
+            [donnéesParties, donnéesCompteurs] = await Promise.all([
+                fetch('/api/stats/calendrier').then(r => r.json()),
+                fetch('/api/stats/compteurs').then(r => r.json())
+            ]);
+
+            const tbody = document.getElementById('corpsTableau');
+            const aujourdhui = new Date().toISOString().split('T')[0];
+
+            tbody.innerHTML = donnéesParties.map((p, i) => {
+                const estTerminée = p.terminée;
+                const estAujourdhui = p.date === aujourdhui;
+
+                // Score
+                let scoreHtml = '';
+                if (estTerminée && p.scoreA !== null && p.scoreB !== null) {
+                    const aGagne = p.scoreA > p.scoreB;
+                    const bGagne = p.scoreB > p.scoreA;
+                    scoreHtml = `
+                        <span class="${aGagne ? 'score-gagnant' : 'score-perdant'}">${p.scoreA}</span>
+                        <span style="color:var(--gris); font-size:0.7em;
+                              font-family:'Inter',sans-serif;"> — </span>
+                        <span class="${bGagne ? 'score-gagnant' : 'score-perdant'}">${p.scoreB}</span>`;
+                } else {
+                    scoreHtml = `<span class="score-avenir">à venir</span>`;
+                }
+
+                // Liens
+                let liensHtml = '';
+                if (p.lienTeams) {
+                    liensHtml += `<a href="${p.lienTeams}" target="_blank"
+                        class="lien-bouton lien-teams">📹 Teams</a>`;
+                }
+                if (estTerminée) {
+                    liensHtml += `<a href="stats-match.html?partie=${p.noPartie}"
+                        class="lien-bouton lien-match">📋 Feuille</a>`;
+                }
+
+                return `
+                    <tr class="ligne-partie ${estAujourdhui ? 'aujourd-hui' : ''}"
+                        id="ligne-${p.noPartie}">
+                        <td style="width:40px; padding:8px;">
+                        <button class="btn-expand" id="btn-${p.noPartie}"
+                            onclick="toggleExpand(${p.noPartie})"
+                            title="Voir les joueurs"
+                            ${!estTerminée ? 'style="visibility:hidden"' : ''}>+</button>
+                        </td>
+                        <td style="color:var(--gris); font-size:0.85em;">${p.noPartie}</td>
+                        <td class="date">${formaterDate(p.date)}</td>
+                        <td class="équipe" style="text-align:right;">${p.nomÉquipeA}</td>
+                        <td class="score">${scoreHtml}</td>
+                        <td class="équipe">${p.nomÉquipeB}</td>
+                        <td class="liens">${liensHtml}</td>
+                    </tr>
+                    <tr class="ligne-expand" id="expand-${p.noPartie}">
+                        <td colspan="7" style="padding:0;">
+                            <div class="zone-joueurs" id="joueurs-${p.noPartie}">
+                                Chargement...
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function toggleExpand(noPartie) {
+            const ligneExpand = document.getElementById(`expand-${noPartie}`);
+            const btn = document.getElementById(`btn-${noPartie}`);
+            const estOuvert = ligneExpand.classList.contains('visible');
+
+            if (estOuvert) {
+                ligneExpand.classList.remove('visible');
+                btn.classList.remove('ouvert');
+                btn.textContent = '+';
+            } else {
+                ligneExpand.classList.add('visible');
+                btn.classList.add('ouvert');
+                btn.textContent = '−';
+                afficherJoueurs(noPartie);
+            }
+        }
+
+        function afficherJoueurs(noPartie) {
+            const partie = donnéesParties.find(p => p.noPartie === noPartie);
+            if (!partie) return;
+
+            const div = document.getElementById(`joueurs-${noPartie}`);
+
+            // Trouver les données des deux équipes
+            const équipeA = donnéesCompteurs.find(e =>
+                e.nomÉquipe === partie.nomÉquipeA);
+            const équipeB = donnéesCompteurs.find(e =>
+                e.nomÉquipe === partie.nomÉquipeB);
+
+            // Pour une partie terminée, calculer les points par joueur
+            // depuis répondants — pour l'instant on affiche les stats saison
+            const rendreListe = (équipe) => {
+                if (!équipe) return '<em style="color:var(--gris)">Aucune donnée</em>';
+                // Filtrer joueur 99 et joueurs à 0 pts si partie pas terminée
+                const joueurs = équipe.joueurs
+                    .filter(j => j.noJoueur !== 99 && (partie.terminée ? true : true))
+                    .map(j => `
+                        <div class="joueur-ligne">
+                            <span>${j.alias}</span>
+                            <span class="pts ${j.points === 0 ? 'pts-zero' : ''}">
+                                ${j.points} pts
+                            </span>
+                        </div>`).join('');
+                return joueurs || '<em style="color:var(--gris)">Aucun joueur</em>';
+            };
+
+            div.innerHTML = `
+                <div class="grille-joueurs">
+                    <div class="colonne-équipe">
+                        <h4>${partie.nomÉquipeA}</h4>
+                        ${rendreListe(équipeA)}
+                    </div>
+                    <div class="colonne-équipe">
+                        <h4>${partie.nomÉquipeB}</h4>
+                        ${rendreListe(équipeB)}
+                    </div>
+                </div>`;
+        }
+
+        function formaterDate(dateStr) {
+            const d = new Date(dateStr + 'T12:00:00');
+            return d.toLocaleDateString('fr-CA', {
+                weekday: 'short', month: 'short', day: 'numeric'
+            });
+        }
+
+        chargerCalendrier();
+    </script>
+
+</body>
+
+</html>
