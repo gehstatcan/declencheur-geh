@@ -1,5 +1,520 @@
 [
   {
+    "noQuestionnaire": 1,
+    "séries": [
+      {
+        "noSérie": 1,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Épelez \"rendu compte\" dans la phrase suivante : Mes tantes se sont rendu compte à temps qu'un train approchait de leur voiture.",
+            "réponse": "Rendu compte"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Dans le mot \"misanthrope\", que signifie la racine grecque anthrôpos?",
+            "réponse": "Être humain ou homme"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Comment appelle-t-on un document annexé à une lettre ou à un autre type de document?",
+            "réponse": "Pièce jointe"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quelle est la valeur numérique du chiffre romain L?",
+            "réponse": "50"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Comment écrit-on \"quart(s)\" dans 6/4?",
+            "réponse": "Quarts"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Épelez \"quelle\" dans la phrase suivante : Quelle que sera sa décision, je l'accepterai.",
+            "réponse": "Quelle (la majuscule n'est pas exigée)"
+          },
+          {
+            "noQuestion": 7,
+            "texte": "Épelez \"ensemble\" dans la phrase suivante : Nous travaillons ensemble depuis de longues années.",
+            "réponse": "Ensemble"
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Donnez le genre respectif des mots suivants : \"arpège\" et \"octave\".",
+            "réponse": "Masculin, féminin"
+          }
+        ]
+      },
+      {
+        "noSérie": 2,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "À plus ou moins deux ans, en quelle année la voie maritime du Saint-Laurent a-t-elle été ouverte à la navigation?",
+            "réponse": "1959 (accepter entre 1957 et 1961)"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quel pays d’Asie centrale est l’un des deux seuls pays doublement enclavés au monde et a pour capitale Tachkent?",
+            "réponse": "Ouzbékistan"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Avec quel pays la France métropolitaine partage-t-elle la plus longue frontière?",
+            "réponse": "Espagne"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Dans quelle région administrative du Québec se situe le Parc national des Monts-Valin?",
+            "réponse": "Saguenay-Lac-Saint-Jean"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quelle est la capitale de l'Alaska?",
+            "réponse": "Juneau"
+          }
+        ]
+      },
+      {
+        "noSérie": 3,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "À la plus récente cérémonie des BAFTA Film Awards, quel acteur a été récompensé dans la catégorie du meilleur acteur et de l'étoile montante pour son rôle dans le film I Swear? ",
+            "réponse": "Robert Aramayo"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quelle chanteuse célébrera son 80e anniversaire le 25 avril prochain à l'émission En direct de l'univers?",
+            "réponse": "Ginette Reno"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Dans quelle catégorie a triomphé l'acteur québécois Théodore Pellerin lors de la plus récente cérémonie des Césars, en France?",
+            "réponse": "Meilleur espoir masculin"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quel designer d'intérieur coanime Vendre ou rénover au Québec aux côtés de Maïka Desnoyers?",
+            "réponse": "Daniel Corbin"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Dans quelle nouvelle téléréalité diffusée sur Crave dix créateurs de contenu sont-ils parachutés au milieu de la forêt sans leur téléphone?",
+            "réponse": "Hors réseau"
+          }
+        ]
+      },
+      {
+        "noSérie": 4,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "En quelle année a été signée la Déclaration universelle des droits de l'homme?",
+            "réponse": "1948"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Qui a fondé le scoutisme?",
+            "réponse": "Robert Baden Powell"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Quel traité est signé en 1701 à Montréal entre les Premières Nations et la Nouvelle-France?",
+            "réponse": "Grande Paix de Montréal"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Avant d'adopter l'Euro le 1er janvier 2023, quelle était la monnaie officielle de la Croatie? ",
+            "réponse": "Kuna"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "En psychologie analytique, qui a introduit le concept de l'« Ombre »?",
+            "réponse": "Carl Gustav Jung"
+          }
+        ]
+      },
+      {
+        "noSérie": 5,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Quel film de 1988 mettant en scène Tom Cruise et Dustin Hoffman a remporté l'Oscar du meilleur film l'année suivante?",
+            "réponse": "Rain Man (L'Homme de la pluie)"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quel climatologue américain a signalé dès 1988 le commencement du réchauffement climatique devant le Sénat des États-Unis?",
+            "réponse": "James Hansen"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Quelle navette soviétique a effectué son premier vol sans équipage en 1988?",
+            "réponse": "Buran"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Nommez deux des trois pays signataires de l'accord tripartite ayant mené à l'indépendance de la Namibie.",
+            "réponse": "Angola, Cuba et Afrique du Sud"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quel boxeur américain a remporté la médaille d'argent aux Jeux olympiques de Séoul après une décision controversée, pour ensuite devenir champion du monde dans plusieurs catégories de poids?",
+            "réponse": "Roy Jones Jr."
+          }
+        ]
+      },
+      {
+        "noSérie": 6,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Qui sont les candidats à la chefferie de la CAQ?",
+            "réponse": "Christine Fréchette et Bernard Drainville"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Qui est l'actuel maire de la ville de Québec?",
+            "réponse": "Bruno Marchand"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Dans quelle circonscription québécoise la dernière élection fédérale a-t-elle été annulée?",
+            "réponse": "Terrebonne"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quel est le nom du président du Vénézuela capturé par les Américains?",
+            "réponse": "Nicolàs Maduro"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Nommez l'un des deux porte-drapeaux canadiens de la cérémonie de clôture des Jeux olympiques de 2026.",
+            "réponse": "Steven Dubois ou Valérie Maltais"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "À quelle date le budget du Québec de 2026-2027 sera-t-il déposé?",
+            "réponse": "18 mars 2026"
+          },
+          {
+            "noQuestion": 7,
+            "texte": "Quel est le titre du film inspiré d'une œuvre d'Émily Brontë en salle actuellement?",
+            "réponse": "Wuthering Heights (Les Hauts de Hurle-Vent)"
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Comment s'appelle l’auteur-compositeur-interprète décédé le 5 mars 2026 et auteur de la chanson \"Un nouveau jour va se lever\"?",
+            "réponse": "Jacques Michel"
+          }
+        ]
+      },
+      {
+        "noSérie": 7,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Qui est l'auteur de la bande dessinée Le chat?",
+            "réponse": "Philippe Geluck"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "À quel écrivain américain associez-vous les romans De si jolis chevaux, Des villes dans la plaine et La route?",
+            "réponse": "Cormac McCarthy"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Quel musée montréalais devrait rouvrir ses portes en 2028 après des travaux d'agrandissement?",
+            "réponse": "Musée d'art contemporain"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Comment appelle-t-ton communément les lanières de peau non tannée servant traditionnellement à la fabrication de raquettes, de chaussures et de sièges de chaise?",
+            "réponse": "Babiche"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Décédée le 3 mars 1996, quelle écrivaine a laissé derrière elle les romans La vie tranquille, Le Square et L'Amant?",
+            "réponse": "Marguerite Duras"
+          }
+        ]
+      },
+      {
+        "noSérie": 8,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Dans quelle ville auront lieu les Jeux olympiques d'hiver de 2034?",
+            "réponse": "Salt Lake City"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quel sport pratique Victoria Mboko?",
+            "réponse": "Tennis "
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Comment s'appelle le jeu de société dont une case s'appelle \"Allez en prison\"?",
+            "réponse": "Monopoly"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Comment s'appelle le jeu très populaire dans lequel vous devez aligner des bonbons colorés pour les faire exploser et marquer des points?",
+            "réponse": "Candy Crush"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "En tricot, comment s'appelle ce point qui se réalise en alternant un rang de mailles à l'endroit et un rang de mailles à l'envers?",
+            "réponse": "Point Jersey"
+          }
+        ]
+      },
+      {
+        "noSérie": 9,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Né à Toulouse, cet écrivain se lance dans l'écriture à un jeune âge par la rédaction de nouvelles, notammnent Le château magique en 1969 et Les enquêtes de Taupin en 1970.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Mes personnages comme Edmond Wells ou Michael Pinson explorent des thèmes comme la science, le paranormal et la spiritualité.",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Mes publications comprennent L'Encyclopédie du savoir relatif et absolu, Demain les chats, Les Thanatonautes et la trilogie des Fourmis.",
+            "réponse": "Bernard Werber"
+          }
+        ]
+      },
+      {
+        "noSérie": 10,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Cirrhose",
+            "réponse": "Foie"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Conjonctivite",
+            "réponse": "Œil/yeux"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Myocardite",
+            "réponse": "Cœur"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Néphrite",
+            "réponse": "Rein"
+          }
+        ]
+      },
+      {
+        "noSérie": 11,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Qui a fondé l'Orchestre symphonique de Montréal?",
+            "réponse": "Wilfred Pelletier"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Qui a réalisé le documentaire The Last Waltz, qui relate le dernier concert du groupe The Band?",
+            "réponse": "Martin Scorsese"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Nommez le groupe duquel font partie ou ont déjà fait partie les musiciens suivants : Fred Fortin, Luc Brien, Suzie McLelove et Johnny Maldoror.",
+            "réponse": "Les Breastfeeders"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quel producteur influent est connu pour le « Wall of Sound » ?",
+            "réponse": "Phil Spector"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "En plus d'être humoriste, cet artiste a fait paraître l'album Plexus lunaire en novembre 2025.",
+            "réponse": "Adib Alkhalidey"
+          }
+        ]
+      },
+      {
+        "noSérie": 12,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Quelle planète du système solaire possède la plus grande tempête connue, appelée la Grande Tache rouge?",
+            "réponse": "Jupiter"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quel gaz constitue environ 78 % de l’atmosphère terrestre?",
+            "réponse": "Azote"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Comment se nomme le phénomène par lequel les plantes fabriquent leur propre nourriture à partir de la lumière du soleil?",
+            "réponse": "Photosynthèse"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Comment s’appelle l’unité de mesure de l’énergie dans le système international?",
+            "réponse": "Joule"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "En informatique, que signifie le sigle HDMI?",
+            "réponse": "High definition multimedia interface (interface multimédia haute définition)"
+          }
+        ]
+      },
+      {
+        "noSérie": 13,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Callisto",
+            "réponse": "C"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Triton",
+            "réponse": "A"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Phobos",
+            "réponse": "B"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Mars",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Jupiter",
+            "réponse": ""
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Inconnue",
+            "réponse": ""
+          }
+        ]
+      },
+      {
+        "noSérie": 14,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Qui a écrit la série Avant le crash avec sa conjointe Kim Lévesque-Lizotte?",
+            "réponse": "Éric Bruneau"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Au hockey, quel duo de frères a été le plus productif de l'histoire de la LNH en ce qui concerne le nombre de points?",
+            "réponse": "Gretzky - Wayne et Brent - 2861 points (2857 pour Wayne et 4 pour Brent)"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Quelle est la capitale de l'Idaho?",
+            "réponse": "Boise"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Comment s’appelle le passage de la phase solide à la phase liquide?",
+            "réponse": "Fusion"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quel type de jazz, qui allie l'harmonie et l'improvisation du jazz avec le rock, le funk et le r'n'b, a fait son apparition aux États-Unis à la fin des années 1960?",
+            "réponse": "Fusion"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Comment appelle-t-on la scission d'un noyau atomique lourd en deux noyaux plus légers sous l'impact d'un neutron?",
+            "réponse": "Fission"
+          },
+          {
+            "noQuestion": 7,
+            "texte": "Quel peintre québécois est reconnu pour sa série Bleu-blanc-rouge?",
+            "réponse": "Serge Lemoyne"
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Quel homme d'affaires souhaite réduire la taille du conseil d'administration d'Air Transat en plus de vouloir y faire son entrée?",
+            "réponse": "Pierre Karl Péladeau"
+          },
+          {
+            "noQuestion": 9,
+            "texte": "Originaire de Russie, quelle race de chat de grande taille est qualifiée comme étant la race la plus hypoallergénique?",
+            "réponse": "Sibérien"
+          },
+          {
+            "noQuestion": 10,
+            "texte": "Combient font la racine carrée de 4 multipliée par la racine carrée de 36?",
+            "réponse": "12"
+          }
+        ]
+      },
+      {
+        "noSérie": 15,
+        "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          },
+          {
+            "noQuestion": 2,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          },
+          {
+            "noQuestion": 3,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          },
+          {
+            "noQuestion": 4,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          },
+          {
+            "noQuestion": 5,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          },
+          {
+            "noQuestion": 6,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          },
+          {
+            "noQuestion": 7,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          },
+          {
+            "noQuestion": 8,
+            "texte": "Quel grand chanteur québécois a récemment annoncé être atteint d'un cancer des cordes vocales?",
+            "réponse": "Claude Dubois"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "noQuestionnaire": 7,
     "séries": [
       {

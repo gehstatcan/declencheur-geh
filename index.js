@@ -16,8 +16,8 @@ const io = require("socket.io")(http);
 const fs = require("fs");
 const path = require("path");
 
-const multer = require('multer');
-const XLSX = require('xlsx');
+const multer = require("multer");
+const XLSX = require("xlsx");
 
 // Configuration multer — stockage en mémoire (pas sur disque)
 const upload = multer({ storage: multer.memoryStorage() });
@@ -146,107 +146,122 @@ app.get("/api/telecharger/repondants-partie/:noPartie", (req, res) => {
 // ============================================================
 // Upload questionnaire Excel — extrait thèmes et questions
 // ============================================================
-app.post('/api/upload/questionnaire', upload.single('fichier'), (req, res) => {
+app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
+  try {
+    // Lire le fichier Excel depuis la mémoire
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const feuille = workbook.Sheets["Vers BD"];
+    const données = XLSX.utils.sheet_to_json(feuille, { header: 1 });
+
+    // --------------------------------------------------------
+    // Extraire tblThèmes
+    // --------------------------------------------------------
+    let noQuestionnaire = null;
+    const thèmesExtraits = [];
+    const questionsExtraites = [];
+    let section = null;
+
+    données.forEach((ligne) => {
+      if (ligne[0] === "tblThèmes") {
+        section = "thèmes";
+        return;
+      }
+      if (ligne[0] === "tblQuestionnaires") {
+        section = "questions";
+        return;
+      }
+      if (ligne[0] === "NoQuestionnaire") return; // entête
+
+      if (section === "thèmes") {
+        const noQ = parseInt(ligne[0]);
+        const noS = parseInt(ligne[1]);
+        const thème = ligne[2] && ligne[2] !== 0 ? String(ligne[2]) : "";
+        const sousThème = ligne[3] && ligne[3] !== 0 ? String(ligne[3]) : "";
+        if (!isNaN(noQ) && !isNaN(noS)) {
+          if (noQuestionnaire === null) noQuestionnaire = noQ;
+          thèmesExtraits.push({ noSérie: noS, thème, sousThème });
+        }
+      }
+
+      if (section === "questions") {
+        const noQ = parseInt(ligne[0]);
+        const noS = parseInt(ligne[1]);
+        const noQuestion = parseInt(ligne[2]);
+        const texte = ligne[3] ? String(ligne[3]) : "";
+        const réponse = ligne[4] ? String(ligne[4]) : "";
+        if (!isNaN(noQ) && !isNaN(noS) && !isNaN(noQuestion) && texte) {
+          questionsExtraites.push({ noSérie: noS, noQuestion, texte, réponse });
+        }
+      }
+    });
+
+    // --------------------------------------------------------
+    // Mettre à jour thèmes.json
+    // --------------------------------------------------------
+    const cheminThèmes = path.join(dossierSaison, "thèmes.json");
+    let thèmes = [];
     try {
-        // Lire le fichier Excel depuis la mémoire
-        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-        const feuille = workbook.Sheets['Vers BD'];
-        const données = XLSX.utils.sheet_to_json(feuille, { header: 1 });
-
-        // --------------------------------------------------------
-        // Extraire tblThèmes
-        // --------------------------------------------------------
-        let noQuestionnaire = null;
-        const thèmesExtraits = [];
-        const questionsExtraites = [];
-        let section = null;
-
-        données.forEach(ligne => {
-            if (ligne[0] === 'tblThèmes') { section = 'thèmes'; return; }
-            if (ligne[0] === 'tblQuestionnaires') { section = 'questions'; return; }
-            if (ligne[0] === 'NoQuestionnaire') return; // entête
-
-            if (section === 'thèmes') {
-                const noQ = parseInt(ligne[0]);
-                const noS = parseInt(ligne[1]);
-                const thème = ligne[2] && ligne[2] !== 0 ? String(ligne[2]) : '';
-                const sousThème = ligne[3] && ligne[3] !== 0 ? String(ligne[3]) : '';
-                if (!isNaN(noQ) && !isNaN(noS)) {
-                    if (noQuestionnaire === null) noQuestionnaire = noQ;
-                    thèmesExtraits.push({ noSérie: noS, thème, sousThème });
-                }
-            }
-
-            if (section === 'questions') {
-                const noQ = parseInt(ligne[0]);
-                const noS = parseInt(ligne[1]);
-                const noQuestion = parseInt(ligne[2]);
-                const texte = ligne[3] ? String(ligne[3]) : '';
-                const réponse = ligne[4] ? String(ligne[4]) : '';
-                if (!isNaN(noQ) && !isNaN(noS) && !isNaN(noQuestion) && texte) {
-                    questionsExtraites.push({ noSérie: noS, noQuestion, texte, réponse });
-                }
-            }
-        });
-
-        // --------------------------------------------------------
-        // Mettre à jour thèmes.json
-        // --------------------------------------------------------
-        const cheminThèmes = path.join(dossierSaison, 'thèmes.json');
-        let thèmes = [];
-        try {
-            thèmes = JSON.parse(fs.readFileSync(cheminThèmes, 'utf-8'));
-        } catch (e) { thèmes = []; }
-
-        // Retirer l'ancien questionnaire si existe
-        thèmes = thèmes.filter(t => t.noQuestionnaire !== noQuestionnaire);
-        thèmes.push({ noQuestionnaire, séries: thèmesExtraits });
-        thèmes.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
-        fs.writeFileSync(cheminThèmes, JSON.stringify(thèmes, null, 2));
-
-        // --------------------------------------------------------
-        // Mettre à jour questions.json
-        // --------------------------------------------------------
-        const cheminQuestions = path.join(dossierSaison, 'questions.json');
-        let questions = [];
-        try {
-            questions = JSON.parse(fs.readFileSync(cheminQuestions, 'utf-8'));
-        } catch (e) { questions = []; }
-
-        // Grouper les questions par série
-        const sériesMap = {};
-        questionsExtraites.forEach(q => {
-            if (!sériesMap[q.noSérie]) sériesMap[q.noSérie] = [];
-            sériesMap[q.noSérie].push({ 
-                noQuestion: q.noQuestion, 
-                texte: q.texte, 
-                réponse: q.réponse 
-            });
-        });
-
-        const sériesQuestions = Object.keys(sériesMap).map(noSérie => ({
-            noSérie: parseInt(noSérie),
-            questions: sériesMap[noSérie].sort((a, b) => a.noQuestion - b.noQuestion)
-        })).sort((a, b) => a.noSérie - b.noSérie);
-
-        // Retirer l'ancien questionnaire si existe
-        questions = questions.filter(q => q.noQuestionnaire !== noQuestionnaire);
-        questions.push({ noQuestionnaire, séries: sériesQuestions });
-        questions.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
-        fs.writeFileSync(cheminQuestions, JSON.stringify(questions, null, 2));
-
-        console.log(`📥 Questionnaire ${noQuestionnaire} importé — ${thèmesExtraits.length} séries, ${questionsExtraites.length} questions`);
-        res.json({ 
-            succès: true, 
-            noQuestionnaire,
-            nbSéries: thèmesExtraits.length,
-            nbQuestions: questionsExtraites.length
-        });
-
+      thèmes = JSON.parse(fs.readFileSync(cheminThèmes, "utf-8"));
     } catch (e) {
-        console.error('Erreur upload questionnaire:', e);
-        res.status(500).json({ erreur: e.message });
+      thèmes = [];
     }
+
+    // Retirer l'ancien questionnaire si existe
+    thèmes = thèmes.filter((t) => t.noQuestionnaire !== noQuestionnaire);
+    thèmes.push({ noQuestionnaire, séries: thèmesExtraits });
+    thèmes.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
+    fs.writeFileSync(cheminThèmes, JSON.stringify(thèmes, null, 2));
+
+    // --------------------------------------------------------
+    // Mettre à jour questions.json
+    // --------------------------------------------------------
+    const cheminQuestions = path.join(dossierSaison, "questions.json");
+    let questions = [];
+    try {
+      questions = JSON.parse(fs.readFileSync(cheminQuestions, "utf-8"));
+    } catch (e) {
+      questions = [];
+    }
+
+    // Grouper les questions par série
+    const sériesMap = {};
+    questionsExtraites.forEach((q) => {
+      if (!sériesMap[q.noSérie]) sériesMap[q.noSérie] = [];
+      sériesMap[q.noSérie].push({
+        noQuestion: q.noQuestion,
+        texte: q.texte,
+        réponse: q.réponse,
+      });
+    });
+
+    const sériesQuestions = Object.keys(sériesMap)
+      .map((noSérie) => ({
+        noSérie: parseInt(noSérie),
+        questions: sériesMap[noSérie].sort(
+          (a, b) => a.noQuestion - b.noQuestion,
+        ),
+      }))
+      .sort((a, b) => a.noSérie - b.noSérie);
+
+    // Retirer l'ancien questionnaire si existe
+    questions = questions.filter((q) => q.noQuestionnaire !== noQuestionnaire);
+    questions.push({ noQuestionnaire, séries: sériesQuestions });
+    questions.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
+    fs.writeFileSync(cheminQuestions, JSON.stringify(questions, null, 2));
+
+    console.log(
+      `📥 Questionnaire ${noQuestionnaire} importé — ${thèmesExtraits.length} séries, ${questionsExtraites.length} questions`,
+    );
+    res.json({
+      succès: true,
+      noQuestionnaire,
+      nbSéries: thèmesExtraits.length,
+      nbQuestions: questionsExtraites.length,
+    });
+  } catch (e) {
+    console.error("Erreur upload questionnaire:", e);
+    res.status(500).json({ erreur: e.message });
+  }
 });
 
 // ============================================================
@@ -270,242 +285,411 @@ app.post("/api/joueurs/nouveau", (req, res) => {
   res.json(nouveauJoueur);
 });
 
+app.get("/api/alignements", (req, res) => {
+  try {
+    const cheminAlignements = path.join(dossierSaison, "alignements.json");
+    let alignements = [];
+    try {
+      const contenu = fs.readFileSync(cheminAlignements, "utf-8").trim();
+      alignements = contenu ? JSON.parse(contenu) : [];
+    } catch (e) {
+      alignements = [];
+    }
+    res.json(alignements);
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
 // ============================================================
 // Routes API — Statistiques
 // ============================================================
 
 // Calendrier — parties avec scores calculés
-app.get('/api/stats/calendrier', (req, res) => {
+app.get("/api/stats/calendrier", (req, res) => {
+  try {
+    const parties = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+    );
+    const équipes = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+    );
+
+    // Lire les répondants cumulatifs
+    let répondants = [];
     try {
-        const parties = JSON.parse(fs.readFileSync(
-            path.join(dossierSaison, 'parties.json'), 'utf-8'));
-        const équipes = JSON.parse(fs.readFileSync(
-            path.join(dossierSaison, 'équipes.json'), 'utf-8'));
-
-        // Lire les répondants cumulatifs
-        let répondants = [];
-        try {
-            const contenu = fs.readFileSync(
-                path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
-            répondants = contenu ? JSON.parse(contenu) : [];
-        } catch (e) { répondants = []; }
-
-        // Calculer les scores par partie
-        const résultats = parties.map(partie => {
-            const rép = répondants.filter(r => r.noPartie === partie.noPartie);
-
-            // Calculer les points de chaque équipe
-            const scores = {};
-            rép.forEach(r => {
-                if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
-                const série = séries.find(s => s.noSérie === r.noSérie);
-                const question = série
-                    ? série.questions.find(q => q.noQuestion === r.noQuestion)
-                    : null;
-                const points = r.pointsSecondaires
-                    ? question ? question.pointsSecondaires : 5
-                    : question ? question.points : 10;
-                scores[r.noÉquipe] += points;
-            });
-
-            const équipeA = équipes.find(e => e.noÉquipe === partie.noÉquipeA);
-            const équipeB = équipes.find(e => e.noÉquipe === partie.noÉquipeB);
-            const scoreA = scores[partie.noÉquipeA] || null;
-            const scoreB = scores[partie.noÉquipeB] || null;
-            const terminée = rép.length > 0;
-
-            return {
-                noPartie: partie.noPartie,
-                date: partie.date,
-                nomÉquipeA: équipeA ? équipeA.nomÉquipe : '',
-                nomÉquipeB: équipeB ? équipeB.nomÉquipe : '',
-                scoreA,
-                scoreB,
-                terminée,
-                lienTeams: partie.lienTeams || null,
-                noQuestionnaire: partie.noQuestionnaire
-            };
-        });
-
-        // Trier par date
-        résultats.sort((a, b) => a.date.localeCompare(b.date));
-        res.json(résultats);
-
+      const contenu = fs
+        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
-        console.error('Erreur stats calendrier:', e);
-        res.status(500).json({ erreur: e.message });
+      répondants = [];
     }
+
+    // Calculer les scores par partie
+    const résultats = parties.map((partie) => {
+      const rép = répondants.filter((r) => r.noPartie === partie.noPartie);
+
+      // Calculer les points de chaque équipe
+      const scores = {};
+      rép.forEach((r) => {
+        if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
+        const série = séries.find((s) => s.noSérie === r.noSérie);
+        const question = série
+          ? série.questions.find((q) => q.noQuestion === r.noQuestion)
+          : null;
+        const points = r.pointsSecondaires
+          ? question
+            ? question.pointsSecondaires
+            : 5
+          : question
+            ? question.points
+            : 10;
+        scores[r.noÉquipe] += points;
+      });
+
+      const équipeA = équipes.find((e) => e.noÉquipe === partie.noÉquipeA);
+      const équipeB = équipes.find((e) => e.noÉquipe === partie.noÉquipeB);
+      const scoreA = scores[partie.noÉquipeA] || null;
+      const scoreB = scores[partie.noÉquipeB] || null;
+      const terminée = rép.length > 0;
+
+      return {
+        noPartie: partie.noPartie,
+        date: partie.date,
+        nomÉquipeA: équipeA ? équipeA.nomÉquipe : "",
+        nomÉquipeB: équipeB ? équipeB.nomÉquipe : "",
+        scoreA,
+        scoreB,
+        terminée,
+        lienTeams: partie.lienTeams || null,
+        noQuestionnaire: partie.noQuestionnaire,
+      };
+    });
+
+    // Trier par date
+    résultats.sort((a, b) => a.date.localeCompare(b.date));
+    res.json(résultats);
+  } catch (e) {
+    console.error("Erreur stats calendrier:", e);
+    res.status(500).json({ erreur: e.message });
+  }
 });
 
 // ============================================================
 // Classement — G/GP/PN/PP/P
 // ============================================================
-app.get('/api/stats/classement', (req, res) => {
+app.get("/api/stats/classement", (req, res) => {
+  try {
+    const parties = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+    );
+    const équipes = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+    );
+
+    let répondants = [];
     try {
-        const parties = JSON.parse(fs.readFileSync(
-            path.join(dossierSaison, 'parties.json'), 'utf-8'));
-        const équipes = JSON.parse(fs.readFileSync(
-            path.join(dossierSaison, 'équipes.json'), 'utf-8'));
-
-        let répondants = [];
-        try {
-            const contenu = fs.readFileSync(
-                path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
-            répondants = contenu ? JSON.parse(contenu) : [];
-        } catch (e) { répondants = []; }
-
-        // Initialiser le classement pour chaque équipe
-        const classement = {};
-        équipes.forEach(é => {
-            classement[é.noÉquipe] = {
-                noÉquipe: é.noÉquipe,
-                nomÉquipe: é.nomÉquipe,
-                MJ: 0,   // Matchs joués
-                G: 0, GP: 0, PN: 0, PP: 0, P: 0,
-                pts: 0,  // Points au classement
-                ptsMarqués: 0,
-                ptsSubis: 0,
-                ptsPossibles: 0
-            };
-        });
-
-        // Calculer les scores par partie
-        const partiesTerminées = parties.filter(p =>
-            répondants.some(r => r.noPartie === p.noPartie)
-        );
-
-        partiesTerminées.forEach(partie => {
-            const rép = répondants.filter(r => r.noPartie === partie.noPartie);
-            const scores = {};
-            rép.forEach(r => {
-                if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
-                const série = séries.find(s => s.noSérie === r.noSérie);
-                const question = série
-                    ? série.questions.find(q => q.noQuestion === r.noQuestion)
-                    : null;
-                const points = r.pointsSecondaires
-                    ? question ? question.pointsSecondaires : 5
-                    : question ? question.points : 10;
-                scores[r.noÉquipe] += points;
-            });
-
-            const sA = scores[partie.noÉquipeA] || 0;
-            const sB = scores[partie.noÉquipeB] || 0;
-            const écart = Math.abs(sA - sB);
-            const gagnant = sA > sB ? partie.noÉquipeA
-                : sB > sA ? partie.noÉquipeB : null;
-
-            [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
-                if (!classement[noÉquipe]) return;
-                const c = classement[noÉquipe];
-                const monScore = scores[noÉquipe] || 0;
-                const scoreAdv = noÉquipe === partie.noÉquipeA ? sB : sA;
-
-                c.MJ++;
-                c.ptsMarqués += monScore;
-                c.ptsSubis += scoreAdv;
-                c.ptsPossibles += 4;
-
-                if (gagnant === null) {
-                    // Nulle
-                    c.PN++; c.pts += 2;
-                } else if (gagnant === noÉquipe) {
-                    // Victoire
-                    if (écart > 40) { c.G++; c.pts += 4; }
-                    else { c.GP++; c.pts += 3; }
-                } else {
-                    // Défaite
-                    if (écart > 40) { c.P++; }
-                    else { c.PP++; c.pts += 1; }
-                }
-            });
-        });
-
-        // Calculer le % et trier
-        const résultat = Object.values(classement)
-            .filter(c => c.MJ > 0)
-            .map(c => ({
-                ...c,
-                pct: c.ptsPossibles > 0
-                    ? Math.round(c.pts / c.ptsPossibles * 100) : 0
-            }))
-            .sort((a, b) => b.pts - a.pts || b.pct - a.pct);
-
-        res.json(résultat);
-
+      const contenu = fs
+        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
-        console.error('Erreur stats classement:', e);
-        res.status(500).json({ erreur: e.message });
+      répondants = [];
     }
+
+    // Initialiser le classement pour chaque équipe
+    const classement = {};
+    équipes.forEach((é) => {
+      classement[é.noÉquipe] = {
+        noÉquipe: é.noÉquipe,
+        nomÉquipe: é.nomÉquipe,
+        MJ: 0, // Matchs joués
+        G: 0,
+        GP: 0,
+        PN: 0,
+        PP: 0,
+        P: 0,
+        pts: 0, // Points au classement
+        ptsMarqués: 0,
+        ptsSubis: 0,
+        ptsPossibles: 0,
+      };
+    });
+
+    // Calculer les scores par partie
+    const partiesTerminées = parties.filter((p) =>
+      répondants.some((r) => r.noPartie === p.noPartie),
+    );
+
+    partiesTerminées.forEach((partie) => {
+      const rép = répondants.filter((r) => r.noPartie === partie.noPartie);
+      const scores = {};
+      rép.forEach((r) => {
+        if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
+        const série = séries.find((s) => s.noSérie === r.noSérie);
+        const question = série
+          ? série.questions.find((q) => q.noQuestion === r.noQuestion)
+          : null;
+        const points = r.pointsSecondaires
+          ? question
+            ? question.pointsSecondaires
+            : 5
+          : question
+            ? question.points
+            : 10;
+        scores[r.noÉquipe] += points;
+      });
+
+      const sA = scores[partie.noÉquipeA] || 0;
+      const sB = scores[partie.noÉquipeB] || 0;
+      const écart = Math.abs(sA - sB);
+      const gagnant =
+        sA > sB ? partie.noÉquipeA : sB > sA ? partie.noÉquipeB : null;
+
+      [partie.noÉquipeA, partie.noÉquipeB].forEach((noÉquipe) => {
+        if (!classement[noÉquipe]) return;
+        const c = classement[noÉquipe];
+        const monScore = scores[noÉquipe] || 0;
+        const scoreAdv = noÉquipe === partie.noÉquipeA ? sB : sA;
+
+        c.MJ++;
+        c.ptsMarqués += monScore;
+        c.ptsSubis += scoreAdv;
+        c.ptsPossibles += 4;
+
+        if (gagnant === null) {
+          // Nulle
+          c.PN++;
+          c.pts += 2;
+        } else if (gagnant === noÉquipe) {
+          // Victoire
+          if (écart > 40) {
+            c.G++;
+            c.pts += 4;
+          } else {
+            c.GP++;
+            c.pts += 3;
+          }
+        } else {
+          // Défaite
+          if (écart > 40) {
+            c.P++;
+          } else {
+            c.PP++;
+            c.pts += 1;
+          }
+        }
+      });
+    });
+
+    // Calculer le % et trier
+    const résultat = Object.values(classement)
+      .filter((c) => c.MJ > 0)
+      .map((c) => ({
+        ...c,
+        pct:
+          c.ptsPossibles > 0 ? Math.round((c.pts / c.ptsPossibles) * 100) : 0,
+      }))
+      .sort((a, b) => b.pts - a.pts || b.pct - a.pct);
+
+    res.json(résultat);
+  } catch (e) {
+    console.error("Erreur stats classement:", e);
+    res.status(500).json({ erreur: e.message });
+  }
 });
 
 // ============================================================
 // Compteurs — points par équipe et par joueur
 // ============================================================
-app.get('/api/stats/compteurs', (req, res) => {
+app.get("/api/stats/compteurs", (req, res) => {
+  try {
+    const équipes = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+    );
+    const joueurs = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "joueurs.json"), "utf-8"),
+    );
+
+    let répondants = [];
     try {
-        const équipes = JSON.parse(fs.readFileSync(
-            path.join(dossierSaison, 'équipes.json'), 'utf-8'));
-        const joueurs = JSON.parse(fs.readFileSync(
-            path.join(dossierSaison, 'joueurs.json'), 'utf-8'));
-
-        let répondants = [];
-        try {
-            const contenu = fs.readFileSync(
-                path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
-            répondants = contenu ? JSON.parse(contenu) : [];
-        } catch (e) { répondants = []; }
-
-        // Points par joueur
-        const ptsJoueur = {};
-        répondants.forEach(r => {
-            const clé = `${r.noÉquipe}-${r.noJoueur}`;
-            if (!ptsJoueur[clé]) ptsJoueur[clé] = 0;
-            const série = séries.find(s => s.noSérie === r.noSérie);
-            const question = série
-                ? série.questions.find(q => q.noQuestion === r.noQuestion)
-                : null;
-            const points = r.pointsSecondaires
-                ? question ? question.pointsSecondaires : 5
-                : question ? question.points : 10;
-            ptsJoueur[clé] += points;
-        });
-
-        // Construire résultat par équipe
-        const résultat = équipes.map(é => {
-            const membresÉquipe = joueurs.filter(j => j.noÉquipe === é.noÉquipe);
-            const joueursStats = membresÉquipe.map(j => {
-                const clé = `${j.noÉquipe}-${j.noJoueur}`;
-                return {
-                    noJoueur: j.noJoueur,
-                    alias: j.alias,
-                    prénom: j.prénom,
-                    nom: j.nom,
-                    points: ptsJoueur[clé] || 0
-                };
-            }).sort((a, b) => b.points - a.points);
-
-            // Points équipe (noJoueur = 99)
-            const ptsÉquipe = ptsJoueur[`${é.noÉquipe}-99`] || 0;
-
-            const totalÉquipe = joueursStats.reduce(
-                (sum, j) => sum + j.points, 0) + ptsÉquipe;
-
-            return {
-                noÉquipe: é.noÉquipe,
-                nomÉquipe: é.nomÉquipe,
-                totalÉquipe,
-                ptsÉquipeCollectif: ptsÉquipe,
-                joueurs: joueursStats
-            };
-        }).sort((a, b) => b.totalÉquipe - a.totalÉquipe);
-
-        res.json(résultat);
-
+      const contenu = fs
+        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
-        console.error('Erreur stats compteurs:', e);
-        res.status(500).json({ erreur: e.message });
+      répondants = [];
     }
+
+    const ptsJoueur = {};
+    répondants.forEach((r) => {
+      const clé = `${r.noÉquipe}-${r.noJoueur}`;
+      if (!ptsJoueur[clé]) ptsJoueur[clé] = 0;
+      const série = séries.find((s) => s.noSérie === r.noSérie);
+      const question = série
+        ? série.questions.find((q) => q.noQuestion === r.noQuestion)
+        : null;
+      const points = r.pointsSecondaires
+        ? question
+          ? question.pointsSecondaires
+          : 5
+        : question
+          ? question.points
+          : 10;
+      ptsJoueur[clé] += points;
+    });
+
+    const partiesJoueur = {};
+    répondants.forEach((r) => {
+      const clé = `${r.noÉquipe}-${r.noJoueur}`;
+      if (!partiesJoueur[clé]) partiesJoueur[clé] = new Set();
+      partiesJoueur[clé].add(r.noPartie);
+    });
+
+    const résultat = équipes
+      .map((é) => {
+        const membresÉquipe = joueurs.filter((j) => j.noÉquipe === é.noÉquipe);
+        const joueursStats = membresÉquipe
+          .map((j) => {
+            const clé = `${j.noÉquipe}-${j.noJoueur}`;
+            const pts = ptsJoueur[clé] || 0;
+            const pj = partiesJoueur[clé] ? partiesJoueur[clé].size : 0;
+            return {
+              noJoueur: j.noJoueur,
+              noÉquipe: j.noÉquipe,
+              alias: j.alias,
+              prénom: j.prénom,
+              nom: j.nom,
+              points: pts,
+              pj,
+              ptsPJ: pj > 0 ? Math.round((pts / pj) * 100) / 100 : 0,
+            };
+          })
+          .sort((a, b) => b.points - a.points);
+
+        const ptsÉquipe = ptsJoueur[`${é.noÉquipe}-99`] || 0;
+        const totalÉquipe =
+          joueursStats.reduce((sum, j) => sum + j.points, 0) + ptsÉquipe;
+
+        return {
+          noÉquipe: é.noÉquipe,
+          nomÉquipe: é.nomÉquipe,
+          totalÉquipe,
+          ptsÉquipeCollectif: ptsÉquipe,
+          joueurs: joueursStats,
+        };
+      })
+      .sort((a, b) => b.totalÉquipe - a.totalÉquipe);
+
+    res.json(résultat);
+  } catch (e) {
+    console.error("Erreur stats compteurs:", e);
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
+// Détail par joueur — parties jouées et points
+// ============================================================
+app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
+  try {
+    const noÉquipe = parseInt(req.params.noEquipe);
+    const noJoueur = parseInt(req.params.noJoueur);
+    console.log(`Stats joueur — équipe: ${noÉquipe}, joueur: ${noJoueur}`);
+
+    const parties = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+    );
+    const équipes = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+    );
+
+    let répondants = [];
+    try {
+      const contenu = fs
+        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
+    } catch (e) {
+      répondants = [];
+    }
+
+    // Répondants de ce joueur seulement
+    const répJoueur = répondants.filter(
+      (r) => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur,
+    );
+    console.log(`Répondants filtrés: ${répJoueur.length}`);
+
+    // Grouper par partie avec calcul des points
+    const partiesMap = {};
+    répJoueur.forEach((r) => {
+      if (!partiesMap[r.noPartie]) partiesMap[r.noPartie] = 0;
+      const série = séries.find((s) => s.noSérie === r.noSérie);
+      const question = série
+        ? série.questions.find((q) => q.noQuestion === r.noQuestion)
+        : null;
+      const points = r.pointsSecondaires
+        ? question
+          ? question.pointsSecondaires
+          : 5
+        : question
+          ? question.points
+          : 10;
+      partiesMap[r.noPartie] += points;
+    });
+
+    // Calculer les scores totaux par partie
+    const scoresParPartie = {};
+    répondants.forEach((r) => {
+      if (!scoresParPartie[r.noPartie]) scoresParPartie[r.noPartie] = {};
+      if (!scoresParPartie[r.noPartie][r.noÉquipe])
+        scoresParPartie[r.noPartie][r.noÉquipe] = 0;
+      const série = séries.find((s) => s.noSérie === r.noSérie);
+      const question = série
+        ? série.questions.find((q) => q.noQuestion === r.noQuestion)
+        : null;
+      const points = r.pointsSecondaires
+        ? question
+          ? question.pointsSecondaires
+          : 5
+        : question
+          ? question.points
+          : 10;
+      scoresParPartie[r.noPartie][r.noÉquipe] += points;
+    });
+
+    // Enrichir avec infos de partie
+    const résultat = Object.entries(partiesMap)
+      .map(([noPartie, ptsJoueur]) => {
+        const p = parties.find((p) => p.noPartie === parseInt(noPartie));
+        const équipeA = équipes.find((e) => e.noÉquipe === p?.noÉquipeA);
+        const équipeB = équipes.find((e) => e.noÉquipe === p?.noÉquipeB);
+        const scores = scoresParPartie[parseInt(noPartie)] || {};
+        const scoreA = scores[p?.noÉquipeA] || 0;
+        const scoreB = scores[p?.noÉquipeB] || 0;
+        const ptsTotal = scoreA + scoreB;
+
+        return {
+          noPartie: parseInt(noPartie),
+          date: p?.date || "",
+          nomÉquipeA: équipeA?.nomÉquipe || "",
+          nomÉquipeB: équipeB?.nomÉquipe || "",
+          scoreA,
+          scoreB,
+          ptsJoueur,
+          ptsTotal,
+          pctJoueur:
+            ptsTotal > 0 ? Math.round((ptsJoueur / ptsTotal) * 10000) / 100 : 0,
+        };
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json(résultat);
+  } catch (e) {
+    console.error("Erreur stats joueur:", e);
+    res.status(500).json({ erreur: e.message });
+  }
 });
 
 // ============================================================
@@ -1209,6 +1393,7 @@ io.on("connection", (socket) => {
       `répondants-${noPartie}.json`,
     );
     const cheminCumulatif = path.join(dossierSaison, "répondants.json");
+    const cheminAlignements = path.join(dossierSaison, "alignements.json");
 
     try {
       const contenuPartie = fs.readFileSync(cheminPartie, "utf-8").trim();
@@ -1226,16 +1411,12 @@ io.on("connection", (socket) => {
         répondantsCumulatifs = [];
       }
 
-      // Fusionner en évitant les doublons — retirer d'abord les entrées
-      // existantes pour cette partie avant d'ajouter les nouvelles
+      // Fusionner en évitant les doublons
       const fusion = [
-        // Garder seulement les répondants des AUTRES parties
         ...répondantsCumulatifs.filter((r) => r.noPartie !== noPartie),
-        // Ajouter les répondants de la partie en cours
         ...répondantsPartie,
       ];
 
-      // Trier par noPartie, noSérie, noQuestion pour faciliter la lecture
       const fusionTriée = fusion.sort((a, b) => {
         if (a.noPartie !== b.noPartie) return a.noPartie - b.noPartie;
         if (a.noSérie !== b.noSérie) return a.noSérie - b.noSérie;
@@ -1248,18 +1429,129 @@ io.on("connection", (socket) => {
         "utf-8",
       );
 
-      console.log(
-        `✅ Partie ${noPartie} fusionnée — ${répondantsPartie.length} répondants`,
+      // ============================================================
+      // Sauvegarder les alignements
+      // ============================================================
+      const état = obtenirÉtat(noPartie);
+      let alignements = [];
+      try {
+        const contenuAlign = fs.readFileSync(cheminAlignements, "utf-8").trim();
+        alignements = contenuAlign ? JSON.parse(contenuAlign) : [];
+      } catch (e) {
+        alignements = [];
+      }
+
+      alignements = alignements.filter((a) => a.noPartie !== noPartie);
+
+      const joueursParÉquipe = {};
+      état.joueursConnectés.forEach((j) => {
+        if (!joueursParÉquipe[j.noÉquipe])
+          joueursParÉquipe[j.noÉquipe] = new Set();
+        joueursParÉquipe[j.noÉquipe].add(j.noJoueur);
+      });
+
+      répondantsPartie.forEach((r) => {
+        if (r.noJoueur === 99) return;
+        if (!joueursParÉquipe[r.noÉquipe])
+          joueursParÉquipe[r.noÉquipe] = new Set();
+        joueursParÉquipe[r.noÉquipe].add(r.noJoueur);
+      });
+
+      Object.entries(joueursParÉquipe).forEach(([noÉquipe, joueursSet]) => {
+        alignements.push({
+          noPartie,
+          noÉquipe: parseInt(noÉquipe),
+          joueurs: [...joueursSet].sort((a, b) => a - b),
+        });
+      });
+
+      alignements.sort((a, b) => a.noPartie - b.noPartie);
+      fs.writeFileSync(cheminAlignements, JSON.stringify(alignements, null, 2));
+      console.log(`📋 Alignements sauvegardés pour partie ${noPartie}`);
+
+      // ============================================================
+      // Construire le résumé avec noms d'équipes et joueurs
+      // ============================================================
+      const équipes = JSON.parse(
+        fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+      );
+      const tousJoueurs = JSON.parse(
+        fs.readFileSync(path.join(dossierSaison, "joueurs.json"), "utf-8"),
       );
 
-      const état = obtenirÉtat(noPartie);
+      const résumé = Object.entries(joueursParÉquipe).map(
+        ([noÉquipe, joueursSet]) => {
+          const noÉq = parseInt(noÉquipe);
+          const équipe = équipes.find((e) => e.noÉquipe === noÉq);
+          const joueursÉquipe = [...joueursSet]
+            .filter((nj) => nj !== 99)
+            .map((nj) => {
+              const j = tousJoueurs.find(
+                (j) => j.noÉquipe === noÉq && j.noJoueur === nj,
+              );
+              // Calculer les points de ce joueur dans cette partie
+              const ptsJoueur = répondantsPartie
+                .filter((r) => r.noÉquipe === noÉq && r.noJoueur === nj)
+                .reduce((sum, r) => {
+                  const série = séries.find((s) => s.noSérie === r.noSérie);
+                  const question = série
+                    ? série.questions.find((q) => q.noQuestion === r.noQuestion)
+                    : null;
+                  const pts = r.pointsSecondaires
+                    ? (question?.pointsSecondaires ?? 0)
+                    : (question?.points ?? 0);
+                  return sum + pts;
+                }, 0);
+              return {
+                alias: j ? j.alias : `Joueur ${nj}`,
+                points: ptsJoueur,
+              };
+            })
+            .sort((a, b) => b.points - a.points);
+
+          // Ajouter les points collectifs si > 0
+          const ptsCollectif = répondantsPartie
+            .filter((r) => r.noÉquipe === noÉq && r.noJoueur === 99)
+            .reduce((sum, r) => {
+              const série = séries.find((s) => s.noSérie === r.noSérie);
+              const question = série
+                ? série.questions.find((q) => q.noQuestion === r.noQuestion)
+                : null;
+              const pts = r.pointsSecondaires
+                ? (question?.pointsSecondaires ?? 0)
+                : (question?.points ?? 0);
+              return sum + pts;
+            }, 0);
+
+          if (ptsCollectif > 0) {
+            joueursÉquipe.push({
+              alias: équipe ? équipe.nomÉquipe : `Équipe ${noÉq}`,
+              points: ptsCollectif,
+              estCollectif: true,
+            });
+          }
+
+          return {
+            noÉquipe: noÉq,
+            nomÉquipe: équipe ? équipe.nomÉquipe : `Équipe ${noÉq}`,
+            score: état.scores[noÉq] || 0,
+            joueurs: joueursÉquipe,
+          };
+        },
+      );
+
       état.mode = "terminée";
       état.buzzVerrou = false;
       io.to(`partie-${noPartie}`).emit("état", état);
       io.to(`partie-${noPartie}`).emit("partieTerminée", {
         noPartie,
         scores: état.scores,
+        résumé,
       });
+
+      console.log(
+        `✅ Partie ${noPartie} fusionnée — ${répondantsPartie.length} répondants`,
+      );
     } catch (e) {
       console.error("Erreur lors de la fusion :", e);
     }

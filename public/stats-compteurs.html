@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Compteurs — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            font-size: 0.95em;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--gris);
+            background: var(--fond-carte);
+            border: 1px solid var(--fond-champ);
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--fond-champ);
+            color: var(--texte);
+        }
+
+        nav a.actif {
+            background: var(--accent);
+            color: var(--blanc);
+            border-color: var(--accent);
+        }
+
+        h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3em;
+            color: var(--texte);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .section {
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 32px;
+        }
+
+        .tableau-conteneur {
+            width: 100%;
+            background: var(--blanc);
+            border-radius: var(--rayon);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        thead th {
+            background: var(--fond-champ);
+            color: var(--texte);
+            font-weight: 600;
+            padding: 10px 14px;
+            text-align: center;
+            border-bottom: 1px solid var(--fond-champ);
+            font-size: 0.9em;
+        }
+
+        thead th.gauche {
+            text-align: left;
+        }
+
+        tbody tr.ligne-joueur {
+            border-bottom: 1px solid var(--fond-carte);
+            transition: background 0.15s;
+        }
+
+        tbody tr.ligne-joueur:hover {
+            background: var(--fond);
+        }
+
+        tbody tr.ligne-expand {
+            display: none;
+        }
+
+        tbody tr.ligne-expand.visible {
+            display: table-row;
+        }
+
+        td {
+            padding: 9px 14px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        td.gauche {
+            text-align: left;
+        }
+
+        td.rang {
+            color: var(--gris);
+            width: 40px;
+        }
+
+        td.pts {
+            font-weight: 700;
+        }
+
+        td.gris {
+            color: var(--gris);
+            font-size: 0.88em;
+        }
+
+        /* Bouton expand */
+        .btn-expand {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1.5px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+
+        .btn-expand:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-expand.ouvert {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Zone expand détail parties */
+        .zone-détail {
+            padding: 12px 16px 16px 52px;
+            background: var(--fond);
+            border-top: 1px solid var(--fond-champ);
+        }
+
+        .détail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+        }
+
+        .détail-table th {
+            background: var(--fond-champ);
+            padding: 6px 10px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--texte);
+            border-bottom: 1px solid var(--fond-carte);
+        }
+
+        .détail-table th.gauche {
+            text-align: left;
+        }
+
+        .détail-table th.droite {
+            text-align: right;
+        }
+
+        .détail-table td {
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--fond-carte);
+            text-align: center;
+        }
+
+        .détail-table td.gauche {
+            text-align: left;
+        }
+
+        .détail-table td.droite {
+            text-align: right;
+        }
+
+        .détail-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pts-joueur {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .note-bas {
+            margin-top: 8px;
+            font-size: 0.82em;
+            color: var(--gris);
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <nav>
+        <a href="stats-calendrier.html">📅 Calendrier</a>
+        <a href="stats-classement.html">🏆 Classement</a>
+        <a href="stats-compteurs.html" class="actif">📊 Compteurs</a>
+    </nav>
+
+    <h2>📊 Compteurs 2025-2026</h2>
+
+    <!-- Tableau équipes -->
+    <div class="section">
+        <h3>Les équipes</h3>
+        <div class="tableau-conteneur">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th class="gauche">Équipe</th>
+                        <th>PJ</th>
+                        <th>Pts</th>
+                        <th>Pts/PJ</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyÉquipes">
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:var(--gris); padding:30px;">
+                            Chargement...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tableau joueurs avec expand -->
+    <div class="section">
+        <h3>Les joueurs</h3>
+        <div class="tableau-conteneur">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:36px;"></th>
+                        <th>Pos</th>
+                        <th class="gauche">Joueur</th>
+                        <th class="gauche">Équipe</th>
+                        <th>PJ</th>
+                        <th>Pts</th>
+                        <th>Pts/PJ</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyJoueurs">
+                    <tr>
+                        <td colspan="7" style="text-align:center; color:var(--gris); padding:30px;">
+                            Chargement...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="note-bas">
+        Calculé automatiquement depuis les parties terminées
+    </div>
+
+    <script>
+        let donnéesCompteurs = [];
+
+        async function chargerCompteurs() {
+            donnéesCompteurs = await fetch('/api/stats/compteurs').then(r => r.json());
+
+            afficherÉquipes();
+            afficherJoueurs();
+        }
+
+        function afficherÉquipes() {
+            const tbody = document.getElementById('tbodyÉquipes');
+
+            // Trier par total points
+            const équipes = donnéesCompteurs
+                .filter(é => é.totalÉquipe > 0)
+                .sort((a, b) => b.totalÉquipe - a.totalÉquipe);
+
+            if (équipes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5"
+                    style="text-align:center; color:var(--gris); padding:30px;">
+                    Aucune donnée pour l'instant
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = équipes.map((é, i) => {
+                // Calculer PJ équipe — nombre de parties distinctes
+                const pj = new Set(
+                    donnéesCompteurs
+                        .find(e => e.noÉquipe === é.noÉquipe)
+                        ?.joueurs.flatMap(j => []) || []
+                ).size || '—';
+
+                const ptsPJ = é.totalÉquipe > 0 ? '—' : '—';
+
+                return `<tr>
+                    <td class="rang">${i + 1}</td>
+                    <td class="gauche">${é.nomÉquipe}</td>
+                    <td>—</td>
+                    <td class="pts">${é.totalÉquipe}</td>
+                    <td>—</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function afficherJoueurs() {
+            const tbody = document.getElementById('tbodyJoueurs');
+
+            // Aplatir tous les joueurs avec points > 0
+            const tousJoueurs = donnéesCompteurs
+                .flatMap(é => é.joueurs
+                    .filter(j => j.noJoueur !== 99 && j.points > 0)
+                    .map(j => ({
+                        ...j,
+                        nomÉquipe: é.nomÉquipe
+                    }))
+                )
+                .sort((a, b) => b.points - a.points);
+
+            if (tousJoueurs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7"
+                    style="text-align:center; color:var(--gris); padding:30px;">
+                    Aucune donnée pour l'instant
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = tousJoueurs.map((j, i) => {
+                const ptsPJ = j.pj > 0
+                    ? (j.points / j.pj).toFixed(2)
+                    : '—';
+
+                const idLigne = `joueur-${j.noÉquipe}-${j.noJoueur}`;
+
+                return `
+                    <tr class="ligne-joueur" id="ligne-${idLigne}">
+                        <td style="padding:6px 8px;">
+                            <button class="btn-expand" id="btn-${idLigne}"
+                                onclick="toggleDétail('${idLigne}', ${j.noÉquipe}, ${j.noJoueur})"
+                                title="Voir les parties">+</button>
+                        </td>
+                        <td class="rang">${i + 1}</td>
+                        <td class="gauche">${j.alias}</td>
+                        <td class="gauche gris">${j.nomÉquipe}</td>
+                        <td>${j.pj || '—'}</td>
+                        <td class="pts">${j.points}</td>
+                        <td>${ptsPJ}</td>
+                    </tr>
+                    <tr class="ligne-expand" id="expand-${idLigne}">
+                        <td colspan="7" style="padding:0;">
+                            <div class="zone-détail" id="détail-${idLigne}">
+                                Chargement...
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        async function toggleDétail(idLigne, noÉquipe, noJoueur) {
+            const ligneExpand = document.getElementById(`expand-${idLigne}`);
+            const btn = document.getElementById(`btn-${idLigne}`);
+            const estOuvert = ligneExpand.classList.contains('visible');
+
+            console.log('toggleDétail appelé:', idLigne, noÉquipe, noJoueur);
+
+            if (estOuvert) {
+                ligneExpand.classList.remove('visible');
+                btn.classList.remove('ouvert');
+                btn.textContent = '+';
+            } else {
+                ligneExpand.classList.add('visible');
+                btn.classList.add('ouvert');
+                btn.textContent = '−';
+
+                // Charger le détail
+                const div = document.getElementById(`détail-${idLigne}`);
+                div.innerHTML = 'Chargement...';
+
+                const parties = await fetch(
+                    `/api/stats/joueur/${noÉquipe}/${noJoueur}`
+                ).then(r => r.json());
+
+                if (parties.length === 0) {
+                    div.innerHTML = '<em style="color:var(--gris)">Aucune partie</em>';
+                    return;
+                }
+
+                div.innerHTML = `
+                    <table class="détail-table">
+                        <thead>
+                            <tr>
+                                <th class="gauche">Date</th>
+                                <th class="droite">Équipe A</th>
+                                <th>Pts</th>
+                                <th>Pts</th>
+                                <th class="gauche">Équipe B</th>
+                                <th>Pts joueur</th>
+                                <th>Pts A+B</th>
+                                <th>joueur/A+B</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${parties.map(p => `
+                                <tr>
+                                    <td class="gauche">${formaterDate(p.date)}</td>
+                                    <td class="droite">${p.nomÉquipeA}</td>
+                                    <td>${p.scoreA}</td>
+                                    <td>${p.scoreB}</td>
+                                    <td class="gauche">${p.nomÉquipeB}</td>
+                                    <td class="pts-joueur">${p.ptsJoueur}</td>
+                                    <td>${p.ptsTotal}</td>
+                                    <td>${p.pctJoueur}%</td>
+                                </tr>`).join('')}
+                        </tbody>
+                    </table>`;
+            }
+        }
+
+        function formaterDate(dateStr) {
+            const d = new Date(dateStr + 'T12:00:00');
+            return d.toLocaleDateString('fr-CA', {
+                month: 'short', day: 'numeric', year: 'numeric'
+            });
+        }
+
+        chargerCompteurs();
+    </script>
+
+</body>
+
+</html>

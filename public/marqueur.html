@@ -631,8 +631,16 @@
 
             // Afficher les boutons de points
             const { série, question } = obtenirQuestionCourante();
-            document.getElementById('btnBonne').textContent =
-                `✅ ${question ? question.points : 10} pts`;
+
+            const pts = question ? question.points : 10;
+            document.getElementById('btnBonne').textContent = `✅ ${pts} pts`;
+            document.getElementById('btnBonne').onclick = () => bonneRéponse(pts);
+
+            const ptsSecondaires = question ? question.pointsSecondaires : 5;
+            document.getElementById('btnSecondaire').textContent = `✅ ${ptsSecondaires} pts`;
+            document.getElementById('btnSecondaire').onclick = () => bonneRéponse(ptsSecondaires);
+
+            
             document.getElementById('btnSecondaire').style.display =
                 (question && question.pointsSecondaires > 0) ? 'inline-block' : 'none';
             document.getElementById('boutonsPoints').style.display = 'block';
@@ -844,7 +852,7 @@
             if (question && question.estÉquipe === null) {
                 divToggle.innerHTML = `
             <button onclick="toggleModeÉquipe()" style="
-            margin-top: 8px;  ← ajouter
+            margin-top: 8px; 
                 background: ${estÉquipe ? '#2ecc71' : '#666'};
                 color: white; border: none; padding: 6px 16px;
                 border-radius:6px; cursor:pointer; font-size:0.9em;">

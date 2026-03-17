@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Classement — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            font-size: 0.95em;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--gris);
+            background: var(--fond-carte);
+            border: 1px solid var(--fond-champ);
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--fond-champ);
+            color: var(--texte);
+        }
+
+        nav a.actif {
+            background: var(--accent);
+            color: var(--blanc);
+            border-color: var(--accent);
+        }
+
+        h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .légende {
+            font-size: 0.82em;
+            color: var(--gris);
+            margin-bottom: 20px;
+            text-align: left;
+            /* ← aligné à gauche comme l'ancien */
+            max-width: 800px;
+            line-height: 2;
+        }
+
+        .tableau-conteneur {
+            width: 100%;
+            max-width: 800px;
+            background: var(--blanc);
+            border-radius: var(--rayon);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        thead th {
+            background: var(--fond-champ);
+            color: var(--texte);
+            font-weight: 600;
+            padding: 10px 14px;
+            text-align: center;
+            border-bottom: 1px solid var(--fond-champ);
+            font-size: 0.9em;
+        }
+
+        thead th.gauche {
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--fond-carte);
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: var(--fond);
+        }
+
+        td {
+            padding: 10px 14px;
+            text-align: center;
+        }
+
+        td.équipe {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td.pts {
+            font-weight: 700;
+            font-size: 1.05em;
+            color: var(--texte);
+            /* ← noir au lieu de bleu */
+        }
+
+        td.gris {
+            color: var(--gris);
+        }
+
+        .note-bas {
+            margin-top: 12px;
+            font-size: 0.82em;
+            color: var(--gris);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <nav>
+        <a href="stats-calendrier.html">📅 Calendrier</a>
+        <a href="stats-classement.html" class="actif">🏆 Classement</a>
+        <a href="stats-compteurs.html">📊 Compteurs</a>
+    </nav>
+
+    <h2>🏆 Classement 2025-2026</h2>
+
+    <div class="tableau-conteneur">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px;">Pos</th>
+                    <th class="gauche">Équipe</th>
+                    <th>MJ</th>
+                    <th>G</th>
+                    <th>GP</th>
+                    <th>PN</th>
+                    <th>PP</th>
+                    <th>P</th>
+                    <th>Pts</th>
+                    <th>%</th>
+                    <th>Pour</th>
+                    <th>Contre</th>
+                    <th>Diff</th>
+                </tr>
+            </thead>
+            <tbody id="corpsTableau">
+                <tr>
+                    <td colspan="13" style="text-align:center; color:var(--gris); padding:40px;">
+                        Chargement...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="légende">
+        G : Victoire +40 pts (4 pts) &nbsp;|&nbsp;
+        GP : Victoire ≤40 pts (3 pts) &nbsp;|&nbsp;
+        PN : Nulle (2 pts) &nbsp;|&nbsp;
+        PP : Défaite ≤40 pts (1 pt) &nbsp;|&nbsp;
+        P : Défaite +40 pts (0 pt) &nbsp;|&nbsp;
+        % : pts acquis / pts possibles
+    </div>
+    
+    <div class="note-bas">
+        Calculé automatiquement depuis les parties terminées
+    </div>
+
+    <script>
+        async function chargerClassement() {
+            const classement = await fetch('/api/stats/classement').then(r => r.json());
+            const tbody = document.getElementById('corpsTableau');
+
+            if (classement.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13"
+                    style="text-align:center; color:var(--gris); padding:40px;">
+                    Aucune partie terminée pour l'instant
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = classement.map((é, i) => {
+                const diff = é.ptsMarqués - é.ptsSubis;
+                const diffTexte = diff > 0 ? `+${diff}` : `${diff}`;
+                const diffCouleur = diff > 0 ? 'color:var(--vert)'
+                    : diff < 0 ? 'color:#c0392b' : '';
+
+                return `<tr>
+                    <td class="gris">${i + 1}</td>
+                    <td class="équipe">${é.nomÉquipe}</td>
+                    <td>${é.MJ}</td>
+                    <td>${é.G}</td>
+                    <td>${é.GP}</td>
+                    <td>${é.PN}</td>
+                    <td>${é.PP}</td>
+                    <td>${é.P}</td>
+                    <td class="pts">${é.pts}</td>
+                    <td>${é.pct}%</td>
+                    <td class="gris">${é.ptsMarqués}</td>
+                    <td class="gris">${é.ptsSubis}</td>
+                    <td style="${diffCouleur}">${diffTexte}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        chargerClassement();
+    </script>
+
+</body>
+
+</html>

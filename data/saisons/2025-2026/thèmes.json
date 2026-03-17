@@ -14,72 +14,67 @@
       },
       {
         "noSérie": 3,
-        "thème": "Arts, cinéma et télévision",
+        "thème": "Cinéma et télévision",
         "sousThème": ""
       },
       {
         "noSérie": 4,
-        "thème": "Société",
+        "thème": "Histoire et société",
         "sousThème": ""
       },
       {
         "noSérie": 5,
-        "thème": "20ième siècle",
-        "sousThème": "l'année est la réponse à la Q1"
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1988"
       },
       {
         "noSérie": 6,
-        "thème": "Langue",
-        "sousThème": "Se termine en \"ologie\""
+        "thème": "Arts et littérature",
+        "sousThème": ""
       },
       {
         "noSérie": 7,
-        "thème": "Histoire",
+        "thème": "Arts et littérature",
         "sousThème": ""
       },
       {
         "noSérie": 8,
-        "thème": "Sports et Loisirs",
+        "thème": "Sports et loisirs",
         "sousThème": ""
       },
       {
         "noSérie": 9,
-        "thème": "Géographie",
+        "thème": "Littérature",
         "sousThème": ""
       },
       {
         "noSérie": 10,
-        "thème": "Géographie",
-        "sousThème": "Un fleuve et son île"
+        "thème": "Sciences",
+        "sousThème": "Nommez l'organe affecté par les maladies suivantes."
       },
       {
         "noSérie": 11,
-        "thème": "Depuis 2010",
+        "thème": "Musique",
         "sousThème": ""
       },
       {
         "noSérie": 12,
-        "thème": "Littérature et musique",
-        "sousThème": ""
-      },
-      {
-        "noSérie": 13,
         "thème": "Sciences",
         "sousThème": ""
       },
       {
-        "noSérie": 14,
+        "noSérie": 13,
         "thème": "Libre",
-        "sousThème": "Rouge et or"
+        "sousThème": "Associez le satellite à sa planète. / Associez le film ayant remporté l'Oscar du meilleur film à son réalisateur."
       },
       {
-        "noSérie": 15,
+        "noSérie": 14,
         "thème": "Divers",
         "sousThème": ""
       },
       {
-        "noSérie": 16,
-        "thème": "Depuis 2010",
+        "noSérie": 15,
+        "thème": "Actualité",
         "sousThème": ""
       }
     ]

@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Joueur - Génie en Herbe</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <style>
         /* ============================================================
            Variables de couleurs — thème sombre accessible WCAG AA
@@ -386,6 +387,7 @@
         // ============================================================
         socket.on("état", (état) => {
             modeActuel = état.mode;
+            console.log('État reçu:', état.mode, état.noPartie);
             if (état.mode === "jeu" && joueurActuel) {
                 // Partie en cours et joueur enregistré
                 passerEnModeJeu();
@@ -398,34 +400,16 @@
                 // 🏁 Partie terminée — afficher message final avec scores
                 document.getElementById('zoneJeu').style.display = 'none';
                 document.getElementById('zoneInscription').style.display = 'none';
+                document.getElementById('statut').innerHTML = `
+                    <div>🏁 Partie terminée !</div>`;
+                // Le détail sera affiché via socket.on('partieTerminée')
 
-                // Construire le message avec les scores finaux
-                let message = '🏁 La partie est terminée. Merci d\'avoir joué !\n\n';
-
-                if (état.scores && Object.keys(état.scores).length > 0) {
-                    // Afficher le score de chaque équipe
-                    message = '🏁 La partie est terminée !';
-                    const statut = document.getElementById('statut');
-                    statut.innerHTML = `
-            <div>🏁 Partie terminée !</div>
-            <div style="margin-top:12px; font-size:0.8em;">
-                ${Object.entries(état.scores).map(([noÉquipe, score]) => {
-                        // Mettre en évidence le score du joueur actuel
-                        const estMonÉquipe = joueurActuel && parseInt(noÉquipe) === joueurActuel.noÉquipe;
-                        return `<div style="margin: 6px 0; color: ${estMonÉquipe ? 'var(--buzz)' : 'var(--blanc)'}">
-                        ${estMonÉquipe ? '⭐ ' : ''}
-                        Équipe ${noÉquipe} : ${score} pts
-                    </div>`;
-                    }).join('')}
-            </div>`;
-                    return; // On a déjà mis à jour le statut
-                }
-
-                document.getElementById('statut').textContent = message;
             } else {
                 // Mode initialisation
                 passerEnModeInscription();
             }
+
+
         });
 
         // ============================================================
@@ -620,6 +604,71 @@
             }
         });
 
+        // ============================================================
+        // Partie terminée — afficher le résumé avec équipes et joueurs
+        // ============================================================
+        socket.on('partieTerminée', ({ scores, résumé }) => {
+            document.getElementById('zoneJeu').style.display = 'none';
+            document.getElementById('zoneInscription').style.display = 'none';
+
+            if (!résumé || résumé.length === 0) {
+                document.getElementById('statut').textContent =
+                    '🏁 La partie est terminée. Merci d\'avoir joué !';
+                return;
+            }
+
+            const scoreMax = Math.max(...résumé.map(e => e.score));
+
+            const statut = document.getElementById('statut');
+            statut.innerHTML = `
+        <div style="margin-bottom:16px; font-family:'Bebas Neue',sans-serif;
+             font-size:1.4em; letter-spacing:1px;">
+            🏁 Partie terminée !
+        </div>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            ${résumé.map(é => {
+                const estGagnant = é.score === scoreMax;
+                const joueursHTML = é.joueurs.map(j => `
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding: 4px 0;
+                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                    font-size:0.85em;
+                    ${j.estCollectif ? 'font-style:italic; opacity:0.8;' : ''}">
+                    <span>${j.estCollectif ? '👥 ' : ''}${j.alias}</span>
+                    <span style="font-weight:600; margin-left:12px;">
+                        ${j.points > 0 ? j.points + ' pts' : '—'}
+                    </span>
+                </div>`).join('');
+
+                return `
+                <div style="
+                    background: ${estGagnant ? 'var(--buzz)' : 'var(--fond-carte)'};
+                    color: ${estGagnant ? 'var(--buzz-texte)' : 'var(--blanc)'};
+                    padding: 14px 16px;
+                    border-radius: 14px;
+                    min-width: 180px;
+                    flex: 1;
+                    max-width: 260px;
+                    text-align: left;">
+                    <div style="font-weight:700; font-size:1em;
+                         margin-bottom:4px; text-align:center;">
+                        ${estGagnant ? '🏆 ' : ''}${é.nomÉquipe}
+                    </div>
+                    <div style="font-family:'Bebas Neue',sans-serif;
+                         font-size:2.5em; text-align:center;
+                         margin-bottom:10px; letter-spacing:2px;">
+                        ${é.score} pts
+                    </div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.2);
+                         padding-top:8px;">
+                        ${joueursHTML}
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>`;
+        });
         // ============================================================
         // Afficher les champs nouveau joueur si nécessaire
         // ============================================================
