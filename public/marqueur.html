@@ -524,7 +524,7 @@
         let toutesParties = [];
         let partiesFiltrees = [];
         let toutesLésSéries = [];
-        let tousQuestionnaires = [];
+        let tousthèmes = [];
         let partieActuelle = null;
         let joueurAyantBuzzé = null;
         let modeActuel = 'initialisation';
@@ -780,6 +780,8 @@
             if (!partieActuelle) return;
             fetch('/api/parties').then(r => r.json()).then(parties => {
                 const partie = parties.find(p => p.noPartie === partieActuelle);
+                console.log('Partie trouvée:', partie);
+                console.log('noQuestionnaire de la partie:', partie?.noQuestionnaire);
                 if (!partie) return;
                 const div = document.getElementById('scores');
 
@@ -896,12 +898,15 @@
                 fetch('/api/parties').then(r => r.json()).then(parties => {
                     const partie = parties.find(p => p.noPartie === partieActuelle);
                     if (!partie) return;
-                    fetch('/api/questionnaires').then(r => r.json()).then(questionnaires => {
-                        const q = questionnaires.find(
-                            q => q.noQuestionnaire === partie.noQuestionnaire
+                    fetch('/api/themes').then(r => r.json()).then(thèmes => {
+                        const thèmeQuestionnaire = thèmes.find(
+                            t => t.noQuestionnaire === partie.noQuestionnaire
                         );
-                        if (!q) return;
-                        const thèmeSérie = q.séries.find(s => s.noSérie === série.noSérie);
+                        if (!thèmeQuestionnaire) {
+                            console.log('Questionnaire non trouvé:', partie.noQuestionnaire, 'dans', thèmes);
+                            return;
+                        }
+                        const thèmeSérie = thèmeQuestionnaire.séries.find(s => s.noSérie === série.noSérie);
                         if (thèmeSérie) {
                             let thème = thèmeSérie.thème;
                             if (thèmeSérie.sousThème) thème += ` — ${thèmeSérie.sousThème}`;
@@ -910,6 +915,8 @@
                     });
                 });
             }
+            console.log('Parties filtrées:', partiesFiltrées);
+           
         }
 
         // ============================================================
@@ -981,12 +988,17 @@
             tousJoueurs = await fetch('/api/joueurs').then(r => r.json());
             toutesPartiesData = await fetch('/api/parties').then(r => r.json());
             toutesLésSéries = await fetch('/api/series').then(r => r.json());
-            tousQuestionnaires = await fetch('/api/questionnaires').then(r => r.json());
+            tousthèmes = await fetch('/api/themes').then(r => r.json());
 
             const aujourdhui = new Date();
-            aujourdhui.setDate(aujourdhui.getDate() - 6);
-            const dateMin = aujourdhui.toISOString().split('T')[0];
-            partiesFiltrées = toutesPartiesData.filter(p => p.date >= dateMin);
+            const dateAvant = new Date(aujourdhui);
+            const dateAprès = new Date(aujourdhui);
+            dateAvant.setDate(aujourdhui.getDate() - 5); // Il y a x jours
+            dateAprès.setDate(aujourdhui.getDate() + 7); // 7 jours dans le futur
+            partiesFiltrées = toutesPartiesData.filter(p =>
+                p.date >= dateAvant.toISOString().split('T')[0] &&
+                p.date <= dateAprès.toISOString().split('T')[0]
+            );
 
             remplirSélecteur(partiesFiltrées);
         }

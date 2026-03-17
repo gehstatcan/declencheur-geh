@@ -53,7 +53,7 @@ function initialiserVolume() {
     "joueurs.json",
     "parties.json",
     "séries.json",
-    "questionnaires.json",
+    "thèmes.json",
   ];
 
   fichiers.forEach((fichier) => {
@@ -89,15 +89,15 @@ const parties = JSON.parse(
 const séries = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "séries.json"), "utf-8"),
 );
-const questionnaires = JSON.parse(
-  fs.readFileSync(path.join(dossierSaison, "questionnaires.json"), "utf-8"),
+const thèmes = JSON.parse(
+  fs.readFileSync(path.join(dossierSaison, "thèmes.json"), "utf-8"),
 );
 
 console.log(`✅ ${équipes.length} équipes chargées`);
 console.log(`✅ ${joueurs.length} joueurs chargés`);
 console.log(`✅ ${parties.length} parties chargées`);
 console.log(`✅ ${séries.length} séries chargées`);
-console.log(`✅ ${questionnaires.length} questionnaires chargés`);
+console.log(`✅ ${thèmes.length} thèmes chargés`);
 
 // ============================================================
 // Routes API — données statiques de la saison
@@ -106,7 +106,7 @@ app.get("/api/equipes", (req, res) => res.json(équipes));
 app.get("/api/joueurs", (req, res) => res.json(joueurs));
 app.get("/api/parties", (req, res) => res.json(parties));
 app.get("/api/series", (req, res) => res.json(séries));
-app.get("/api/questionnaires", (req, res) => res.json(questionnaires));
+app.get("/api/themes", (req, res) => res.json(thèmes));
 // ============================================================
 // Téléchargement du fichier répondants.json
 // Utile pour récupérer les données depuis le Volume Railway
