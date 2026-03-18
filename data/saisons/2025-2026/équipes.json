@@ -2,36 +2,43 @@
   {
     "noÉquipe": 1,
     "nomÉquipe": "Les Génies de la traduction",
-    "prioritéÉgalité": null
+    "prioritéÉgalité": null,
+    "son": "ding_dong"
   },
   {
     "noÉquipe": 2,
     "nomÉquipe": "Les Bons Perdants",
-    "prioritéÉgalité": null
+    "prioritéÉgalité": null,
+    "son": "bip_grave"
   },
   {
     "noÉquipe": 3,
     "nomÉquipe": "Les érudits en gerbe",
-    "prioritéÉgalité": null
+    "prioritéÉgalité": null,
+    "son": "alarme_montante"
   },
   {
     "noÉquipe": 4,
     "nomÉquipe": "Les Herbizarres",
-    "prioritéÉgalité": null
+    "prioritéÉgalité": null,
+    "son": "gong"
   },
   {
     "noÉquipe": 5,
     "nomÉquipe": "Les Méthos précieux",
-    "prioritéÉgalité": null
+    "prioritéÉgalité": null,
+    "son": "cloche"
   },
   {
     "noÉquipe": 6,
     "nomÉquipe": "Les 12e meilleurs",
-    "prioritéÉgalité": null
+    "prioritéÉgalité": null,
+    "son": "descente_rapide"
   },
   {
     "noÉquipe": 7,
     "nomÉquipe": "Les Faciles à cuire",
-    "prioritéÉgalité": null
+    "prioritéÉgalité": null,
+    "son": "double_bip"
   }
 ]

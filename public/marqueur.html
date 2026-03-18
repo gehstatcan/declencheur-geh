@@ -536,22 +536,45 @@
         // Web Audio pour les sons
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        const fréquencesParÉquipe = {
-            1: 220, 2: 330, 3: 440, 4: 550, 5: 660, 6: 770, 7: 880
-        };
-
         function jouerSon(noÉquipe) {
-            const fréquence = fréquencesParÉquipe[noÉquipe] || 440;
-            const oscillateur = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillateur.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillateur.frequency.value = fréquence;
-            oscillateur.type = 'sine';
-            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-            oscillateur.start(audioCtx.currentTime);
-            oscillateur.stop(audioCtx.currentTime + 0.8);
+            const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
+            let idSon = équipe?.son;
+            if (!idSon) {
+                // Fallback selon position A ou B dans la partie
+                const partie = toutesPartiesData.find(p => p.noPartie === partieActuelle);
+                idSon = (partie?.noÉquipeA === noÉquipe) ? 'triple_bip' : 'montee_douce';
+            }
+            jouerSonParId(idSon);
+        }
+
+        function jouerSonParId(id) {
+            const t = audioCtx.currentTime;
+            function bip(type, freq, vol, début, durée, freqFin) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, début);
+                if (freqFin !== undefined) osc.frequency.linearRampToValueAtTime(freqFin, début + durée);
+                gain.gain.setValueAtTime(vol, début);
+                gain.gain.exponentialRampToValueAtTime(0.001, début + durée);
+                osc.start(début); osc.stop(début + durée);
+            }
+            switch (id) {
+                case 'buzzer_tv':      bip('sawtooth', 200, 0.4, t, 0.4, 80); break;
+                case 'ding_dong':      bip('sine', 880, 0.5, t, 0.25); bip('sine', 660, 0.5, t + 0.25, 0.25); break;
+                case 'bip_grave':      bip('square', 150, 0.3, t, 0.5); break;
+                case 'alarme_montante':bip('sawtooth', 300, 0.4, t, 0.4, 650); break;
+                case 'triple_bip':     bip('sine', 880, 0.5, t, 0.12); bip('sine', 880, 0.5, t + 0.16, 0.12); bip('sine', 880, 0.5, t + 0.32, 0.12); break;
+                case 'cloche':         bip('triangle', 1046, 0.6, t, 0.9); break;
+                case 'klaxon':         bip('sawtooth', 220, 0.2, t, 0.5); bip('sawtooth', 440, 0.2, t, 0.5); break;
+                case 'bip_aigu':       bip('sine', 1320, 0.4, t, 0.3); break;
+                case 'descente_rapide':bip('sine', 800, 0.5, t, 0.35, 200); break;
+                case 'double_bip':     bip('sine', 660, 0.5, t, 0.15); bip('sine', 660, 0.5, t + 0.2, 0.15); break;
+                case 'montee_douce':   bip('sine', 440, 0.45, t, 0.4, 880); break;
+                case 'gong':           bip('triangle', 220, 0.7, t, 1.2); break;
+                default:               bip('sine', 440, 0.5, t, 0.8);
+            }
         }
 
         // Réception état global

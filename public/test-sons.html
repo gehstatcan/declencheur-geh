@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test sons — Génie en Herbe</title>
+    <style>
+        body { font-family: sans-serif; background: #1a1a2e; color: #eee; padding: 30px; }
+        h1 { color: #f0c040; margin-bottom: 8px; }
+        p { color: #aaa; margin-bottom: 30px; }
+        .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+        .carte {
+            background: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .nom { font-size: 1.1em; font-weight: bold; margin-bottom: 4px; color: #f0c040; }
+        .desc { font-size: 0.85em; color: #aaa; margin-bottom: 14px; }
+        button {
+            background: #0f3460;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.15s;
+        }
+        button:hover { background: #1a5c9a; }
+        button:active { background: #f0c040; color: #1a1a2e; }
+    </style>
+</head>
+<body>
+    <h1>Test des sons de buzzer</h1>
+    <p>Cliquez pour écouter chaque son. Notez ceux que vous préférez pour chaque équipe.</p>
+    <div class="grille" id="grille"></div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function bip(type, freq, vol, début, durée, freqFin) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, début);
+            if (freqFin !== undefined) osc.frequency.linearRampToValueAtTime(freqFin, début + durée);
+            gain.gain.setValueAtTime(vol, début);
+            gain.gain.exponentialRampToValueAtTime(0.001, début + durée);
+            osc.start(début); osc.stop(début + durée);
+        }
+
+        const sons = [
+            {
+                id: 'buzzer_tv',
+                nom: '1 — Buzzer TV',
+                desc: 'Son grave descendant, style émission télé',
+                jouer: (t) => bip('sawtooth', 200, 0.4, t, 0.4, 80)
+            },
+            {
+                id: 'ding_dong',
+                nom: '2 — Ding-dong',
+                desc: 'Deux notes descendantes, clochette de porte',
+                jouer: (t) => { bip('sine', 880, 0.5, t, 0.25); bip('sine', 660, 0.5, t + 0.25, 0.25); }
+            },
+            {
+                id: 'bip_grave',
+                nom: '3 — Bip grave',
+                desc: 'Onde carrée basse fréquence, robuste',
+                jouer: (t) => bip('square', 150, 0.3, t, 0.5)
+            },
+            {
+                id: 'alarme_montante',
+                nom: '4 — Alarme montante',
+                desc: 'Fréquence qui monte, style urgence',
+                jouer: (t) => bip('sawtooth', 300, 0.4, t, 0.4, 650)
+            },
+            {
+                id: 'triple_bip',
+                nom: '5 — Triple bip',
+                desc: 'Trois bips rapides aigus',
+                jouer: (t) => {
+                    bip('sine', 880, 0.5, t, 0.12);
+                    bip('sine', 880, 0.5, t + 0.16, 0.12);
+                    bip('sine', 880, 0.5, t + 0.32, 0.12);
+                }
+            },
+            {
+                id: 'cloche',
+                nom: '6 — Cloche',
+                desc: 'Triangle aigu avec longue décroissance',
+                jouer: (t) => bip('triangle', 1046, 0.6, t, 0.9)
+            },
+            {
+                id: 'klaxon',
+                nom: '7 — Klaxon',
+                desc: 'Deux fréquences superposées, klaxon de voiture',
+                jouer: (t) => { bip('sawtooth', 220, 0.2, t, 0.5); bip('sawtooth', 440, 0.2, t, 0.5); }
+            },
+            {
+                id: 'bip_aigu',
+                nom: '8 — Bip aigu',
+                desc: 'Bip simple aigu et court',
+                jouer: (t) => bip('sine', 1320, 0.4, t, 0.3)
+            },
+            {
+                id: 'descente_rapide',
+                nom: '9 — Descente rapide',
+                desc: 'Note qui chute vite, style cartoon',
+                jouer: (t) => bip('sine', 800, 0.5, t, 0.35, 200)
+            },
+            {
+                id: 'double_bip',
+                nom: '10 — Double bip',
+                desc: 'Deux bips moyens rapprochés',
+                jouer: (t) => {
+                    bip('sine', 660, 0.5, t, 0.15);
+                    bip('sine', 660, 0.5, t + 0.2, 0.15);
+                }
+            },
+            {
+                id: 'montee_douce',
+                nom: '11 — Montée douce',
+                desc: 'Sine qui monte doucement, style notification',
+                jouer: (t) => bip('sine', 440, 0.45, t, 0.4, 880)
+            },
+            {
+                id: 'gong',
+                nom: '12 — Gong',
+                desc: 'Triangle grave avec résonance',
+                jouer: (t) => bip('triangle', 220, 0.7, t, 1.2)
+            },
+        ];
+
+        const grille = document.getElementById('grille');
+        sons.forEach(s => {
+            const carte = document.createElement('div');
+            carte.className = 'carte';
+            carte.innerHTML = `
+                <div class="nom">${s.nom}</div>
+                <div class="desc">${s.desc}</div>
+                <button onclick="audioCtx.resume().then(() => ${s.id}())">▶ Écouter</button>
+            `;
+            grille.appendChild(carte);
+            window[s.id] = () => s.jouer(audioCtx.currentTime);
+        });
+    </script>
+</body>
+</html>
