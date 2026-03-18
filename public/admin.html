@@ -216,6 +216,31 @@
 
     <h2>🛠️ Administration</h2>
 
+    <!-- Upload parties -->
+    <div class="carte">
+        <h2>📅 Importer le calendrier</h2>
+
+        <div class="zone-upload" onclick="document.getElementById('fichierParties').click()">
+            <div class="icone">📋</div>
+            <label>Cliquez pour choisir le fichier CSV des parties</label>
+            <input type="file" id="fichierParties" accept=".csv,.xlsx,.xls" onchange="partiesChoisi(this)">
+            <div id="nomFichierParties"></div>
+        </div>
+
+        <button class="bouton bouton-upload" id="btnParties" onclick="uploadParties()" disabled>
+            📅 Importer le calendrier
+        </button>
+
+        <div id="résultatParties"></div>
+
+        <div class="info">
+            ℹ️ Le fichier doit contenir les colonnes : <strong>NoPartie, Date, Salle, NomAnimateur,
+            NoQuestionnaire, NoÉquipeA, NoÉquipeB, NoÉquipeQuestionnaire, LienReunion</strong>.<br>
+            Les colonnes LienConsole et LienBouton sont ignorées. Le fichier <strong>remplace</strong>
+            entièrement le calendrier existant.
+        </div>
+    </div>
+
     <!-- Upload questionnaire -->
     <div class="carte">
         <h2>📥 Importer un questionnaire</h2>
@@ -243,6 +268,73 @@
     </div>
 
     <script>
+        let fichierPartisSélectionné = null;
+
+        function partiesChoisi(input) {
+            if (input.files && input.files[0]) {
+                fichierPartisSélectionné = input.files[0];
+                document.getElementById('nomFichierParties').textContent =
+                    `📄 ${fichierPartisSélectionné.name}`;
+                document.getElementById('btnParties').disabled = false;
+                document.getElementById('résultatParties').style.display = 'none';
+            }
+        }
+
+        async function uploadParties() {
+            if (!fichierPartisSélectionné) return;
+
+            if (!confirm('Cette action remplacera entièrement le calendrier existant. Continuer ?')) return;
+
+            const btn = document.getElementById('btnParties');
+            btn.disabled = true;
+            btn.textContent = '⏳ Importation en cours...';
+
+            const formData = new FormData();
+            formData.append('fichier', fichierPartisSélectionné);
+
+            try {
+                const réponse = await fetch('/api/upload/parties', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const résultat = await réponse.json();
+                const div = document.getElementById('résultatParties');
+                div.style.display = 'block';
+
+                if (résultat.succès) {
+                    div.className = '';
+                    div.innerHTML = `
+                        <div class="résultat-titre">📅 Calendrier importé</div>
+                        <div class="résultat-ligne succès">✅ ${résultat.nbParties} parties importées avec succès</div>
+                    `;
+                } else if (résultat.erreurs) {
+                    div.className = '';
+                    const lignes = résultat.erreurs.map(e =>
+                        `<tr><td>${e.partie}</td><td>${e.message}</td></tr>`
+                    ).join('');
+                    div.innerHTML = `
+                        <div class="résultat-titre">📅 Import refusé — erreurs de validation</div>
+                        <div class="résultat-ligne avertissement">⚠️ ${résultat.erreurs.length} erreur(s) détectée(s). Corrigez le fichier et réimportez.</div>
+                        <table class="table-résultat">
+                            <thead><tr><th>Partie</th><th>Erreur</th></tr></thead>
+                            <tbody>${lignes}</tbody>
+                        </table>`;
+                } else {
+                    div.className = 'erreur';
+                    div.textContent = `❌ Erreur : ${résultat.erreur}`;
+                }
+            } catch (e) {
+                const div = document.getElementById('résultatParties');
+                div.style.display = 'block';
+                div.className = 'erreur';
+                div.textContent = `❌ Erreur de connexion : ${e.message}`;
+            }
+
+            btn.disabled = false;
+            btn.textContent = '📅 Importer le calendrier';
+        }
+
         let fichierSélectionné = null;
 
         function fichierChoisi(input) {
@@ -257,6 +349,20 @@
 
         async function uploadQuestionnaire() {
             if (!fichierSélectionné) return;
+
+            // Vérifier si le questionnaire existe déjà
+            const formVérif = new FormData();
+            formVérif.append('fichier', fichierSélectionné);
+            try {
+                const vérif = await fetch('/api/upload/questionnaire/vérifier', { method: 'POST', body: formVérif });
+                const info = await vérif.json();
+                if (info.erreur) { alert(`❌ ${info.erreur}`); return; }
+                if (info.existe) {
+                    if (!confirm(`Le questionnaire #${info.noQuestionnaire} existe déjà. Il sera entièrement remplacé. Continuer ?`)) return;
+                }
+            } catch (e) {
+                if (!confirm('Impossible de vérifier. Continuer quand même ?')) return;
+            }
 
             const btn = document.getElementById('btnUpload');
             btn.disabled = true;

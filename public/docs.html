@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>📚 Documentation — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --fond: #0f0f1a;
+            --fond-carte: #1a1a2e;
+            --fond-champ: #16213e;
+            --accent: #e94560;
+            --buzz: #FFD700;
+            --vert: #2ecc71;
+            --blanc: #ffffff;
+            --gris: #aaaaaa;
+            --rayon: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--blanc);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--blanc);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        header h1 span { color: var(--accent); }
+
+        .contenu {
+            width: 100%;
+            max-width: 720px;
+        }
+
+        h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .carte {
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .carte p {
+            color: var(--gris);
+            font-size: 0.95em;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .liste-gabarits {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .liste-gabarits li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--fond-champ);
+            border-radius: 10px;
+            padding: 12px 16px;
+            gap: 16px;
+        }
+
+        .gabarit-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .gabarit-nom {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .gabarit-desc {
+            font-size: 0.82em;
+            color: var(--gris);
+        }
+
+        .badge-désuet {
+            font-size: 0.75em;
+            background: #333;
+            color: var(--gris);
+            padding: 2px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .bouton-dl {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent);
+            color: var(--blanc);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .bouton-dl:hover { background: #c0392b; }
+
+        .bouton-dl.désactivé {
+            background: #333;
+            color: var(--gris);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .section-titre {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--gris);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; filter:invert(1);">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <div class="contenu">
+
+        <h2>📚 Documentation</h2>
+
+        <!-- Gabarits -->
+        <div class="carte">
+            <h2>📊 Gabarits de questionnaire</h2>
+            <p>
+                Chaque saison comprend 3 questionnaires. Téléchargez le gabarit correspondant,
+                remplissez-le selon le guide de rédaction, puis importez-le via la page
+                <a href="admin.html" style="color: var(--buzz)">Administration</a>.
+            </p>
+
+            <div class="section-titre">Saison 2025-2026</div>
+            <ul class="liste-gabarits">
+                <li>
+                    <div class="gabarit-info">
+                        <span class="gabarit-nom">Questionnaire 1</span>
+                        <span class="gabarit-desc">Saison 2025-2026</span>
+                    </div>
+                    <span class="badge-désuet">Désuet</span>
+                </li>
+                <li>
+                    <div class="gabarit-info">
+                        <span class="gabarit-nom">Questionnaire 2</span>
+                        <span class="gabarit-desc">Saison 2025-2026</span>
+                    </div>
+                    <span class="badge-désuet">Désuet</span>
+                </li>
+                <li>
+                    <div class="gabarit-info">
+                        <span class="gabarit-nom">Questionnaire 3</span>
+                        <span class="gabarit-desc">Saison 2025-2026</span>
+                    </div>
+                    <a class="bouton-dl" href="ressources/2025-2026/gabarit-q3.xlsx" download>
+                        ⬇ Télécharger
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Documents de référence -->
+        <div class="carte">
+            <h2>📄 Documents de référence</h2>
+            <p>Règlements, guide de rédaction et autres ressources utiles pour les auteurs et animateurs.</p>
+
+            <ul class="liste-gabarits">
+                <li>
+                    <div class="gabarit-info">
+                        <span class="gabarit-nom">Règlements de la ligue</span>
+                        <span class="gabarit-desc">Procédures de jeu, pointage, départage</span>
+                    </div>
+                    <a class="bouton-dl désactivé" href="#">⬇ Bientôt</a>
+                </li>
+                <li>
+                    <div class="gabarit-info">
+                        <span class="gabarit-nom">Guide de rédaction</span>
+                        <span class="gabarit-desc">Comment rédiger de bonnes questions</span>
+                    </div>
+                    <a class="bouton-dl désactivé" href="#">⬇ Bientôt</a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -91,7 +91,7 @@ const équipes = JSON.parse(
 const joueurs = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "joueurs.json"), "utf-8"),
 );
-const parties = JSON.parse(
+let parties = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
 );
 const séries = JSON.parse(
@@ -142,6 +142,29 @@ app.get("/api/telecharger/repondants-partie/:noPartie", (req, res) => {
     res.download(cheminPartie, `répondants-${noPartie}.json`);
   } else {
     res.status(404).json({ erreur: "Fichier introuvable" });
+  }
+});
+
+// ============================================================
+// Vérification préalable — lit le noQuestionnaire sans sauvegarder
+// ============================================================
+app.post("/api/upload/questionnaire/vérifier", upload.single("fichier"), (req, res) => {
+  try {
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const feuille = workbook.Sheets["Vers BD"];
+    const données = XLSX.utils.sheet_to_json(feuille, { header: 1 });
+    let noQuestionnaire = null;
+    for (const ligne of données) {
+      if (ligne[0] === "tblThèmes") continue;
+      if (ligne[0] === "NoQuestionnaire") continue;
+      const noQ = parseInt(ligne[0]);
+      if (!isNaN(noQ)) { noQuestionnaire = noQ; break; }
+    }
+    if (noQuestionnaire === null) return res.status(400).json({ erreur: "Numéro de questionnaire introuvable" });
+    const existe = questions.some(q => q.noQuestionnaire === noQuestionnaire);
+    res.json({ noQuestionnaire, existe });
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
   }
 });
 
@@ -286,6 +309,70 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     });
   } catch (e) {
     console.error("Erreur upload questionnaire:", e);
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
+// Upload parties CSV — remplace parties.json
+// ============================================================
+app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
+  try {
+    // Lire en UTF-8 avec raw:true pour éviter la conversion des dates en numéros Excel
+    const wb = XLSX.read(req.file.buffer.toString("utf-8"), { type: "string", raw: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const lignes = XLSX.utils.sheet_to_json(ws, { raw: true, defval: "" });
+
+    const nouvellesParties = lignes.map(l => ({
+      noPartie:               parseInt(l["NoPartie"]),
+      date:                   String(l["Date"] || ""),
+      salle:                  String(l["Salle"] || ""),
+      animateur:              String(l["NomAnimateur"] || ""),
+      noQuestionnaire:        parseInt(l["NoQuestionnaire"]),
+      noÉquipeA:              parseInt(l["NoÉquipeA"]),
+      noÉquipeB:              parseInt(l["NoÉquipeB"]),
+      noÉquipeQuestionnaire:  String(l["NoÉquipeQuestionnaire"]) === "NA" || !l["NoÉquipeQuestionnaire"]
+                                ? null : parseInt(l["NoÉquipeQuestionnaire"]),
+      lienRéunion:            String(l["LienReunion"] || ""),
+    })).filter(p => !isNaN(p.noPartie));
+
+    nouvellesParties.sort((a, b) => a.noPartie - b.noPartie);
+
+    // Validation
+    const noÉquipesValides = new Set(équipes.map(e => e.noÉquipe));
+    const erreurs = [];
+    const nosParties = new Set();
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+    nouvellesParties.forEach(p => {
+      const id = `Partie ${p.noPartie}`;
+      if (nosParties.has(p.noPartie)) erreurs.push({ partie: id, message: `noPartie ${p.noPartie} en double` });
+      nosParties.add(p.noPartie);
+      if (!p.date || !dateRegex.test(p.date)) erreurs.push({ partie: id, message: `Date invalide : "${p.date}"` });
+      if (isNaN(p.noQuestionnaire) || p.noQuestionnaire <= 0) erreurs.push({ partie: id, message: `noQuestionnaire invalide` });
+      if (!noÉquipesValides.has(p.noÉquipeA)) erreurs.push({ partie: id, message: `noÉquipeA (${p.noÉquipeA}) introuvable` });
+      if (!noÉquipesValides.has(p.noÉquipeB)) erreurs.push({ partie: id, message: `noÉquipeB (${p.noÉquipeB}) introuvable` });
+      if (p.noÉquipeA === p.noÉquipeB) erreurs.push({ partie: id, message: `noÉquipeA et noÉquipeB identiques` });
+      if (p.noÉquipeQuestionnaire !== null) {
+        if (!noÉquipesValides.has(p.noÉquipeQuestionnaire)) erreurs.push({ partie: id, message: `noÉquipeQuestionnaire (${p.noÉquipeQuestionnaire}) introuvable` });
+        if (p.noÉquipeQuestionnaire === p.noÉquipeA || p.noÉquipeQuestionnaire === p.noÉquipeB)
+          erreurs.push({ partie: id, message: `noÉquipeQuestionnaire ne peut pas être équipe A ou B` });
+      }
+    });
+
+    if (erreurs.length > 0) return res.json({ succès: false, erreurs });
+
+    const cheminParties = path.join(dossierSaison, "parties.json");
+    const contenuParties = '[\n' + nouvellesParties.map(p => '  ' + JSON.stringify(p)).join(',\n') + '\n]';
+    fs.writeFileSync(cheminParties, contenuParties, "utf-8");
+
+    // Recharger en mémoire
+    parties = nouvellesParties;
+
+    console.log(`📥 parties.json mis à jour — ${nouvellesParties.length} parties`);
+    res.json({ succès: true, nbParties: nouvellesParties.length });
+  } catch (e) {
+    console.error("Erreur upload parties:", e);
     res.status(500).json({ erreur: e.message });
   }
 });
