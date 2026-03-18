@@ -53,19 +53,21 @@ function initialiserVolume() {
     console.log("📁 Dossier parties créé sur le Volume");
   }
 
-  // Copier les fichiers JSON statiques s'ils n'existent pas encore
-  const fichiers = [
-    "équipes.json",
-    "joueurs.json",
-    "parties.json",
-    "séries.json",
-    "thèmes.json",
-  ];
-
-  fichiers.forEach((fichier) => {
+  // Toujours écraser — fichiers gérés via git uniquement
+  // À déplacer dans fichiersAdmin quand un import admin sera ajouté
+  const fichiersGit = ["équipes.json", "séries.json"];
+  fichiersGit.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
     const source = path.join(__dirname, "data", "saisons", saison, fichier);
+    fs.copyFileSync(source, destination);
+    console.log(`📄 ${fichier} mis à jour sur le Volume`);
+  });
 
+  // Copier seulement si absent — fichiers pouvant être modifiés via admin
+  const fichiersAdmin = ["joueurs.json", "parties.json", "thèmes.json"];
+  fichiersAdmin.forEach((fichier) => {
+    const destination = path.join(dossierSaison, fichier);
+    const source = path.join(__dirname, "data", "saisons", saison, fichier);
     if (!fs.existsSync(destination)) {
       fs.copyFileSync(source, destination);
       console.log(`📄 ${fichier} copié sur le Volume`);
