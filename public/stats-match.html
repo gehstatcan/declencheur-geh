@@ -157,26 +157,33 @@
         .col-question { width: 35%; }
         .col-réponse { width: 25%; font-style: italic; color: #555; }
         .col-joueur { width: 16%; }
-        .col-équipe { width: 16%; font-size: 0.82em; color: var(--gris); }
+        .col-équipe { width: 16%; font-size: 0.85em; }
         .col-pts { width: 52px; text-align: right; font-weight: 600; }
 
-        .pts-principal { color: var(--vert); }
-        .pts-secondaire { color: var(--orange); font-size: 0.85em; }
         .non-répondu { color: #ccc; }
 
-        .badge-équipe-a { color: #2980b9; font-size: 0.78em; }
-        .badge-équipe-b { color: #8e44ad; font-size: 0.78em; }
+        .badge-équipe-a { color: #1a6fa8; font-weight: 600; }
+        .badge-équipe-b { color: #7b35a8; font-weight: 600; }
+        .pts-équipe-a { color: #1a6fa8; }
+        .pts-équipe-b { color: #7b35a8; }
 
         #msg { text-align: center; color: var(--gris); padding: 40px; font-size: 1.1em; }
 
         .total-série {
-            padding: 6px 16px;
+            padding: 5px 16px;
             font-size: 0.82em; color: var(--gris);
             border-top: 1px solid var(--fond-champ);
             background: var(--fond);
             display: flex; gap: 16px; justify-content: flex-end;
         }
         .total-série span { font-weight: 600; color: var(--texte); }
+        .cumulatif-série {
+            padding: 5px 16px;
+            font-size: 0.82em; color: var(--accent);
+            background: var(--fond-champ);
+            display: flex; gap: 16px; justify-content: flex-end;
+        }
+        .cumulatif-série span { font-weight: 700; }
     </style>
 </head>
 <body>
@@ -280,6 +287,7 @@
                 return html;
             }
 
+            let cumA = 0, cumB = 0;
             d.séries.forEach(s => {
                 const titreThème = s.sousThème ? `${s.thème} — <span class="sous-thème">${s.sousThème}</span>` : s.thème;
                 html += `
@@ -299,21 +307,27 @@
                     const qA = s.questions.slice(0, mi);
                     const qB = s.questions.slice(mi);
                     html += `<div class="équipe-entête badge-équipe-a">▶ Équipe A — ${d.nomÉquipeA}</div>`;
-                    html += tableauQuestions(qA, d.noÉquipeA);
+                    html += tableauQuestions(qA, d.noÉquipeA, d.noÉquipeB);
                     html += `<div class="équipe-entête badge-équipe-b">▶ Équipe B — ${d.nomÉquipeB}</div>`;
-                    html += tableauQuestions(qB, d.noÉquipeB);
+                    html += tableauQuestions(qB, d.noÉquipeA, d.noÉquipeB);
                 } else {
-                    html += tableauQuestions(s.questions, null);
+                    html += tableauQuestions(s.questions, d.noÉquipeA, d.noÉquipeB);
                 }
 
                 // Totaux par équipe pour cette série
                 const totA = totalÉquipe(s.questions, d.noÉquipeA);
                 const totB = totalÉquipe(s.questions, d.noÉquipeB);
+                cumA += totA; cumB += totB;
                 if (totA > 0 || totB > 0) {
                     html += `<div class="total-série">
-                        ${d.nomÉquipeA} : <span>${totA} pts</span>
+                        Série — ${d.nomÉquipeA} : <span>${totA}</span>
                         &nbsp;·&nbsp;
-                        ${d.nomÉquipeB} : <span>${totB} pts</span>
+                        ${d.nomÉquipeB} : <span>${totB}</span>
+                    </div>
+                    <div class="cumulatif-série">
+                        Cumulatif — ${d.nomÉquipeA} : <span>${cumA}</span>
+                        &nbsp;·&nbsp;
+                        ${d.nomÉquipeB} : <span>${cumB}</span>
                     </div>`;
                 }
 
@@ -323,7 +337,7 @@
             return html;
         }
 
-        function tableauQuestions(questions, noÉquipeCible) {
+        function tableauQuestions(questions, noÉquipeA, noÉquipeB) {
             let html = `<table>
                 <thead><tr>
                     <th class="col-no">#</th>
@@ -336,16 +350,17 @@
 
             questions.forEach(q => {
                 const r = q.répondant;
-                const joueur = r ? r.alias : '<span class="non-répondu">—</span>';
-                const équipe = r ? `<span class="${r.noÉquipe === noÉquipeCible || noÉquipeCible === null ? '' : 'badge-équipe-b'}">${r.nomÉquipe}</span>` : '';
-                let pts = '';
-                if (r) {
-                    pts = r.estSecondaire
-                        ? `<span class="pts-secondaire">${r.points}✦</span>`
-                        : `<span class="pts-principal">${r.points}</span>`;
-                } else {
-                    pts = `<span class="non-répondu">—</span>`;
-                }
+                const classeÉquipe = r
+                    ? (r.noÉquipe === noÉquipeA ? 'badge-équipe-a' : 'badge-équipe-b')
+                    : '';
+                const classePts = r
+                    ? (r.noÉquipe === noÉquipeA ? 'pts-équipe-a' : 'pts-équipe-b')
+                    : '';
+                const joueur = r ? `<span class="${classeÉquipe}">${r.alias}</span>` : '<span class="non-répondu">—</span>';
+                const équipe = r ? `<span class="${classeÉquipe}">${r.nomÉquipe}</span>` : '';
+                const pts = r
+                    ? `<span class="${classePts}">${r.points}</span>`
+                    : `<span class="non-répondu">—</span>`;
                 html += `<tr>
                     <td class="col-no">${q.noQuestion}</td>
                     <td class="col-question">${escHtml(q.texte || '')}</td>

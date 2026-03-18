@@ -736,13 +736,19 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
     const partie = parties.find(p => p.noPartie === noPartie);
     if (!partie) return res.status(404).json({ erreur: 'Partie introuvable' });
 
-    // Répondants de la partie
-    const cheminPartie = path.join(dossierSaison, 'parties', `répondants-${noPartie}.json`);
+    // Répondants de la partie — depuis répondants.json, sinon fallback sur répondants-{N}.json
     let répondants = [];
     try {
-      const contenu = fs.readFileSync(cheminPartie, 'utf-8').trim();
-      répondants = contenu ? JSON.parse(contenu) : [];
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      const tous = contenu ? JSON.parse(contenu) : [];
+      répondants = tous.filter(r => r.noPartie === noPartie);
     } catch (e) { répondants = []; }
+    if (répondants.length === 0) {
+      try {
+        const contenu = fs.readFileSync(path.join(dossierSaison, 'parties', `répondants-${noPartie}.json`), 'utf-8').trim();
+        répondants = contenu ? JSON.parse(contenu) : [];
+      } catch (e) { répondants = []; }
+    }
 
     // Questions
     const cheminQuestions = path.join(dossierSaison, 'questions.json');
