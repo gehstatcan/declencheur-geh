@@ -189,9 +189,11 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
         const noQ = parseInt(ligne[0]);
         const noS = parseInt(ligne[1]);
         const noQuestion = parseInt(ligne[2]);
-        const texte = ligne[3] ? String(ligne[3]) : "";
-        const réponse = ligne[4] ? String(ligne[4]) : "";
-        if (!isNaN(noQ) && !isNaN(noS) && !isNaN(noQuestion) && texte) {
+        const texteRaw = ligne[3] ? String(ligne[3]) : "";
+        const texte = texteRaw === "0" ? "" : texteRaw;
+        const réponseRaw = ligne[4] ? String(ligne[4]) : "";
+        const réponse = réponseRaw === "0" ? "" : réponseRaw;
+        if (!isNaN(noQ) && !isNaN(noS) && !isNaN(noQuestion) && texte !== undefined) {
           questionsExtraites.push({ noSérie: noS, noQuestion, texte, réponse });
         }
       }
@@ -251,6 +253,25 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     questions.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
     fs.writeFileSync(cheminQuestions, JSON.stringify(questions, null, 2));
 
+    // Analyse des thèmes — thème vide ou "-- Choisir un thème --" considéré manquant
+    const thèmesSansValeur = thèmesExtraits.filter(t =>
+      !t.thème || t.thème === "-- Choisir un thème --"
+    ).map(t => t.noSérie);
+    const nbAvecSousThème = thèmesExtraits.filter(t => t.sousThème).length;
+
+    // Analyse des questions — séries avec texte ou réponse vides
+    const sériesMap2 = {};
+    questionsExtraites.forEach(q => {
+      if (!sériesMap2[q.noSérie]) sériesMap2[q.noSérie] = { total: 0, textesVides: 0, réponsesVides: 0 };
+      sériesMap2[q.noSérie].total++;
+      if (!q.texte) sériesMap2[q.noSérie].textesVides++;
+      if (!q.réponse) sériesMap2[q.noSérie].réponsesVides++;
+    });
+    const sériesIncomplètes = Object.entries(sériesMap2)
+      .filter(([, v]) => v.textesVides > 0 || v.réponsesVides > 0)
+      .map(([noSérie, v]) => ({ noSérie: parseInt(noSérie), total: v.total, textesVides: v.textesVides, réponsesVides: v.réponsesVides }))
+      .sort((a, b) => a.noSérie - b.noSérie);
+
     console.log(
       `📥 Questionnaire ${noQuestionnaire} importé — ${thèmesExtraits.length} séries, ${questionsExtraites.length} questions`,
     );
@@ -259,6 +280,9 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
       noQuestionnaire,
       nbSéries: thèmesExtraits.length,
       nbQuestions: questionsExtraites.length,
+      thèmesSansValeur,
+      nbAvecSousThème,
+      sériesIncomplètes,
     });
   } catch (e) {
     console.error("Erreur upload questionnaire:", e);

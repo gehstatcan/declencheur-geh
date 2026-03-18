@@ -145,20 +145,57 @@
         #résultat {
             display: none;
             margin-top: 16px;
-            padding: 16px;
             border-radius: var(--rayon);
-            text-align: center;
             font-size: 1em;
-        }
-
-        #résultat.succès {
-            background: var(--vert);
-            color: var(--buzz-texte);
+            overflow: hidden;
         }
 
         #résultat.erreur {
+            padding: 16px;
             background: var(--accent);
             color: var(--blanc);
+            text-align: center;
+        }
+
+        .résultat-titre {
+            padding: 12px 16px;
+            background: var(--fond-champ);
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .résultat-ligne {
+            padding: 10px 16px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .résultat-ligne.succès {
+            background: #1a3a2a;
+            color: #2ecc71;
+        }
+
+        .résultat-ligne.avertissement {
+            background: #3a2a10;
+            color: var(--orange);
+        }
+
+        .table-résultat {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .table-résultat th {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 16px;
+            text-align: left;
+            color: var(--gris);
+            font-weight: 600;
+        }
+
+        .table-résultat td {
+            padding: 7px 16px;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         .info {
@@ -239,10 +276,38 @@
                 div.style.display = 'block';
 
                 if (résultat.succès) {
-                    div.className = 'succès';
+                    div.className = '';
+
+                    // Thèmes
+                    let htmlThèmes;
+                    const sousThèmeMsg = résultat.nbAvecSousThème > 0 ? ` — ${résultat.nbAvecSousThème} série(s) avec sous-thème` : '';
+                    if (résultat.thèmesSansValeur.length === 0) {
+                        htmlThèmes = `<div class="résultat-ligne succès">✅ ${résultat.nbSéries} thèmes importés avec succès${sousThèmeMsg}</div>`;
+                    } else {
+                        htmlThèmes = `<div class="résultat-ligne avertissement">⚠️ ${résultat.nbSéries - résultat.thèmesSansValeur.length}/${résultat.nbSéries} thèmes valides — séries sans thème : S${résultat.thèmesSansValeur.join(', S')}${sousThèmeMsg}</div>`;
+                    }
+
+                    // Questions
+                    let htmlQuestions;
+                    if (résultat.sériesIncomplètes.length === 0) {
+                        htmlQuestions = `<div class="résultat-ligne succès">✅ Toutes les questions importées avec succès (${résultat.nbQuestions}/${résultat.nbQuestions})</div>`;
+                    } else {
+                        const nbComplètes = résultat.nbSéries - résultat.sériesIncomplètes.length;
+                        const lignes = résultat.sériesIncomplètes.map(s =>
+                            `<tr><td>Série ${s.noSérie}</td><td style="text-align:center">${s.textesVides}/${s.total}</td><td style="text-align:center">${s.réponsesVides}/${s.total}</td></tr>`
+                        ).join('');
+                        htmlQuestions = `
+                            <div class="résultat-ligne avertissement">⚠️ Certaines questions ou réponses semblent manquantes. ${nbComplètes} série(s) sont complètes. Problèmes avec les séries suivantes :</div>
+                            <table class="table-résultat">
+                                <thead><tr><th>Série</th><th style="text-align:center">Textes vides</th><th style="text-align:center">Réponses vides</th></tr></thead>
+                                <tbody>${lignes}</tbody>
+                            </table>`;
+                    }
+
                     div.innerHTML = `
-                        ✅ Questionnaire #${résultat.noQuestionnaire} importé !<br>
-                        ${résultat.nbSéries} séries — ${résultat.nbQuestions} questions
+                        <div class="résultat-titre">📥 Questionnaire #${résultat.noQuestionnaire} importé</div>
+                        ${htmlThèmes}
+                        ${htmlQuestions}
                     `;
                 } else {
                     div.className = 'erreur';

@@ -170,7 +170,7 @@
       {
         "noSérie": 1,
         "thème": "Langue",
-        "sousThème": "Trouvez l'animal"
+        "sousThème": ""
       },
       {
         "noSérie": 2,
@@ -179,73 +179,68 @@
       },
       {
         "noSérie": 3,
-        "thème": "Arts, cinéma et télévision",
+        "thème": "Cinéma et télévision",
         "sousThème": ""
       },
       {
         "noSérie": 4,
-        "thème": "Société",
-        "sousThème": ""
+        "thème": "Histoire et société",
+        "sousThème": "st4"
       },
       {
         "noSérie": 5,
-        "thème": "20ième siècle",
-        "sousThème": ""
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1988"
       },
       {
         "noSérie": 6,
-        "thème": "Arts, cinéma et télévision",
-        "sousThème": ""
+        "thème": "Arts et littérature",
+        "sousThème": "st6"
       },
       {
         "noSérie": 7,
-        "thème": "Histoire",
-        "sousThème": ""
+        "thème": "Arts et littérature",
+        "sousThème": "st7"
       },
       {
         "noSérie": 8,
-        "thème": "Sports et Loisirs",
-        "sousThème": ""
+        "thème": "Sports et loisirs",
+        "sousThème": "st8"
       },
       {
         "noSérie": 9,
-        "thème": "Arts, cinéma et télévision",
+        "thème": "Actualité",
         "sousThème": ""
       },
       {
         "noSérie": 10,
-        "thème": "Géographie",
-        "sousThème": ""
+        "thème": "Langue",
+        "sousThème": "st10"
       },
       {
         "noSérie": 11,
-        "thème": "Histoire",
-        "sousThème": "Grands belligérants de l'Histoire"
+        "thème": "Musique",
+        "sousThème": "st11"
       },
       {
         "noSérie": 12,
-        "thème": "Littérature et musique",
-        "sousThème": ""
+        "thème": "Sciences",
+        "sousThème": "st12"
       },
       {
         "noSérie": 13,
         "thème": "Sciences",
-        "sousThème": ""
+        "sousThème": "st13.a / st13.b"
       },
       {
         "noSérie": 14,
-        "thème": "Libre",
-        "sousThème": ""
+        "thème": "Divers",
+        "sousThème": "St 14"
       },
       {
         "noSérie": 15,
-        "thème": "Divers",
-        "sousThème": ""
-      },
-      {
-        "noSérie": 16,
-        "thème": "Depuis 2010",
-        "sousThème": ""
+        "thème": "Actualité",
+        "sousThème": "st15"
       }
     ]
   },
@@ -264,72 +259,67 @@
       },
       {
         "noSérie": 3,
-        "thème": "Arts, cinéma et télévision",
+        "thème": "Cinéma et télévision",
         "sousThème": ""
       },
       {
         "noSérie": 4,
-        "thème": "Société",
+        "thème": "Histoire et société",
         "sousThème": ""
       },
       {
         "noSérie": 5,
-        "thème": "20ième siècle",
-        "sousThème": "1909"
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1978"
       },
       {
         "noSérie": 6,
-        "thème": "Littérature et musique",
-        "sousThème": "Littérature"
+        "thème": "Arts et littérature",
+        "sousThème": "Variété - Alphabet radiotéléphonique international"
       },
       {
         "noSérie": 7,
-        "thème": "Histoire",
+        "thème": "Arts et littérature",
         "sousThème": ""
       },
       {
         "noSérie": 8,
-        "thème": "Sports et Loisirs",
+        "thème": "Sports et loisirs",
         "sousThème": ""
       },
       {
         "noSérie": 9,
-        "thème": "(Choisir un thème)",
-        "sousThème": "Littérature, société, sciences, etc."
+        "thème": "Sciences",
+        "sousThème": ""
       },
       {
         "noSérie": 10,
-        "thème": "Sciences",
-        "sousThème": "Des pieds et des mains"
+        "thème": "Actualité",
+        "sousThème": "Variété - Homophones de chiffres"
       },
       {
         "noSérie": 11,
-        "thème": "Histoire",
-        "sousThème": "Citations célèbres"
+        "thème": "Musique",
+        "sousThème": ""
       },
       {
         "noSérie": 12,
-        "thème": "Littérature et musique",
+        "thème": "Sciences",
         "sousThème": ""
       },
       {
         "noSérie": 13,
-        "thème": "Sciences",
-        "sousThème": ""
+        "thème": "Actualité",
+        "sousThème": "Équipes de la National Lacrosse League / Slogans de plaques d’immatriculation américaines"
       },
       {
         "noSérie": 14,
-        "thème": "Libre",
-        "sousThème": ""
-      },
-      {
-        "noSérie": 15,
         "thème": "Divers",
         "sousThème": ""
       },
       {
-        "noSérie": 16,
-        "thème": "Depuis 2010",
+        "noSérie": 15,
+        "thème": "Actualité",
         "sousThème": ""
       }
     ]
@@ -507,21 +497,81 @@
   {
     "noQuestionnaire": 7,
     "séries": [
-      { "noSérie": 1, "thème": "Langue", "sousThème": "" },
-      { "noSérie": 2, "thème": "Géographie", "sousThème": "" },
-      { "noSérie": 3, "thème": "Cinéma et télévision", "sousThème": "" },
-      { "noSérie": 4, "thème": "Histoire et société", "sousThème": "" },
-      { "noSérie": 5, "thème": "Une année, décennie ou siècle", "sousThème": "1988" },
-      { "noSérie": 6, "thème": "Actualité", "sousThème": "" },
-      { "noSérie": 7, "thème": "Arts et littérature", "sousThème": "" },
-      { "noSérie": 8, "thème": "Sports et loisirs", "sousThème": "" },
-      { "noSérie": 9, "thème": "Littérature", "sousThème": "Bernard Werber" },
-      { "noSérie": 10, "thème": "Sciences", "sousThème": "Nommez l'organe affecté par les maladies suivantes." },
-      { "noSérie": 11, "thème": "Musique", "sousThème": "" },
-      { "noSérie": 12, "thème": "Sciences", "sousThème": "" },
-      { "noSérie": 13, "thème": "Libre", "sousThème": "Associez le satellite à sa planète. / Associez le film à son réalisateur (Oscar du meilleur film)." },
-      { "noSérie": 14, "thème": "Divers", "sousThème": "" },
-      { "noSérie": 15, "thème": "Actualité", "sousThème": "" }
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1988"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Actualité",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Littérature",
+        "sousThème": "Bernard Werber"
+      },
+      {
+        "noSérie": 10,
+        "thème": "Sciences",
+        "sousThème": "Nommez l'organe affecté par les maladies suivantes."
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": "Associez le satellite à sa planète. / Associez le film à son réalisateur (Oscar du meilleur film)."
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
     ]
   }
 ]
