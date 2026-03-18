@@ -728,6 +728,104 @@ app.get('/api/stats/partie/:noPartie', (req, res) => {
 });
 
 // ============================================================
+// Feuille de match — questions + répondants d'une partie
+// ============================================================
+app.get('/api/stats/match/:noPartie', (req, res) => {
+  try {
+    const noPartie = parseInt(req.params.noPartie);
+    const partie = parties.find(p => p.noPartie === noPartie);
+    if (!partie) return res.status(404).json({ erreur: 'Partie introuvable' });
+
+    // Répondants de la partie
+    const cheminPartie = path.join(dossierSaison, 'parties', `répondants-${noPartie}.json`);
+    let répondants = [];
+    try {
+      const contenu = fs.readFileSync(cheminPartie, 'utf-8').trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { répondants = []; }
+
+    // Questions
+    const cheminQuestions = path.join(dossierSaison, 'questions.json');
+    let questionsData = [];
+    try {
+      const contenu = fs.readFileSync(cheminQuestions, 'utf-8').trim();
+      questionsData = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { questionsData = []; }
+
+    const questionnaireQ = questionsData.find(q => q.noQuestionnaire === partie.noQuestionnaire);
+    const questionnaireT = thèmes.find(t => t.noQuestionnaire === partie.noQuestionnaire);
+
+    const équipeA = équipes.find(e => e.noÉquipe === partie.noÉquipeA);
+    const équipeB = équipes.find(e => e.noÉquipe === partie.noÉquipeB);
+
+    // Scores
+    const scores = {};
+    répondants.forEach(r => {
+      if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
+      const sérieInfo = séries.find(s => s.noSérie === r.noSérie);
+      const qInfo = sérieInfo?.questions.find(q => q.noQuestion === r.noQuestion);
+      const pts = r.pointsSecondaires ? (qInfo?.pointsSecondaires ?? 0) : (qInfo?.points ?? 0);
+      scores[r.noÉquipe] += pts;
+    });
+
+    // Séries avec questions et répondants
+    const sériesMatch = (questionnaireQ?.séries || []).map(sérieQ => {
+      const sérieInfo = séries.find(s => s.noSérie === sérieQ.noSérie);
+      const thèmeSérie = questionnaireT?.séries.find(t => t.noSérie === sérieQ.noSérie);
+
+      const questions = sérieQ.questions.map(q => {
+        const répondant = répondants.find(r => r.noSérie === sérieQ.noSérie && r.noQuestion === q.noQuestion);
+        const qInfo = sérieInfo?.questions.find(sq => sq.noQuestion === q.noQuestion);
+
+        let répondantInfo = null;
+        if (répondant) {
+          const nomÉq = équipes.find(e => e.noÉquipe === répondant.noÉquipe)?.nomÉquipe || `Équipe ${répondant.noÉquipe}`;
+          const alias = répondant.noJoueur === 99
+            ? '👥 ' + nomÉq
+            : joueurs.find(j => j.noÉquipe === répondant.noÉquipe && j.noJoueur === répondant.noJoueur)?.alias || `Joueur ${répondant.noJoueur}`;
+          const pts = répondant.pointsSecondaires ? (qInfo?.pointsSecondaires ?? 0) : (qInfo?.points ?? 0);
+          répondantInfo = { noÉquipe: répondant.noÉquipe, alias, nomÉquipe: nomÉq, points: pts, estSecondaire: répondant.pointsSecondaires };
+        }
+
+        return {
+          noQuestion: q.noQuestion,
+          texte: q.texte,
+          réponse: q.réponse,
+          points: qInfo?.points ?? 10,
+          pointsSecondaires: qInfo?.pointsSecondaires ?? 0,
+          répondant: répondantInfo
+        };
+      });
+
+      return {
+        noSérie: sérieQ.noSérie,
+        typeSérie: sérieInfo?.typeSérie || '',
+        estÉquipe: sérieInfo?.estÉquipe || false,
+        thème: thèmeSérie?.thème || '',
+        sousThème: thèmeSérie?.sousThème || '',
+        questions
+      };
+    });
+
+    res.json({
+      noPartie,
+      date: partie.date,
+      animateur: partie.animateur,
+      noQuestionnaire: partie.noQuestionnaire,
+      noÉquipeA: partie.noÉquipeA,
+      noÉquipeB: partie.noÉquipeB,
+      nomÉquipeA: équipeA?.nomÉquipe || '',
+      nomÉquipeB: équipeB?.nomÉquipe || '',
+      scoreA: scores[partie.noÉquipeA] || 0,
+      scoreB: scores[partie.noÉquipeB] || 0,
+      séries: sériesMatch
+    });
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
 // États des parties en cours — un état par noPartie
 // Chaque partie a sa propre room Socket.io : "partie-25", etc.
 // ============================================================

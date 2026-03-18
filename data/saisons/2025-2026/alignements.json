@@ -33,5 +33,25 @@
       2,
       4
     ]
+  },
+  {
+    "noPartie": 13,
+    "noÉquipe": 1,
+    "joueurs": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "noPartie": 13,
+    "noÉquipe": 2,
+    "joueurs": [
+      1,
+      2,
+      3,
+      4
+    ]
   }
 ]

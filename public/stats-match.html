@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Feuille de match — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --orange: #e67e22;
+            --rouge: #c0392b;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+        header { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+        header h1 span { color: var(--accent); }
+        nav {
+            display: flex; gap: 8px; margin-bottom: 24px;
+            flex-wrap: wrap; justify-content: center;
+        }
+        nav a {
+            font-size: 0.95em; padding: 8px 20px; border-radius: 20px;
+            text-decoration: none; color: var(--gris);
+            background: var(--fond-carte); border: 1px solid var(--fond-champ);
+            transition: all 0.2s;
+        }
+        nav a:hover { background: var(--fond-champ); color: var(--texte); }
+        nav a.actif { background: var(--accent); color: var(--blanc); border-color: var(--accent); }
+
+        .sélecteur {
+            display: flex; gap: 12px; align-items: center;
+            margin-bottom: 24px; flex-wrap: wrap; justify-content: center;
+        }
+        select {
+            font-family: 'Inter', sans-serif;
+            font-size: 1em; padding: 8px 14px;
+            border-radius: 8px; border: 1px solid var(--fond-champ);
+            background: var(--blanc); color: var(--texte);
+            cursor: pointer; min-width: 280px;
+        }
+
+        #feuille { width: 100%; max-width: 1000px; }
+
+        .en-tête-match {
+            background: var(--accent); color: var(--blanc);
+            border-radius: var(--rayon) var(--rayon) 0 0;
+            padding: 16px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 8px;
+        }
+        .en-tête-match .titre {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em; letter-spacing: 1px;
+        }
+        .en-tête-match .info { font-size: 0.85em; opacity: 0.8; }
+
+        .score-bloc {
+            display: flex; gap: 16px; align-items: center;
+            background: var(--blanc);
+            border-left: 1px solid var(--fond-champ);
+            border-right: 1px solid var(--fond-champ);
+            padding: 14px 20px;
+            justify-content: center; flex-wrap: wrap;
+        }
+        .score-équipe {
+            text-align: center; min-width: 160px;
+        }
+        .score-équipe .nom {
+            font-weight: 600; font-size: 0.95em;
+            color: var(--accent); margin-bottom: 4px;
+        }
+        .score-équipe .pts {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.8em; letter-spacing: 2px; line-height: 1;
+        }
+        .score-équipe.gagnant .pts { color: var(--vert); }
+        .score-équipe.perdant .pts { color: var(--gris); }
+        .score-vs { font-family: 'Bebas Neue', sans-serif; font-size: 1.8em; color: var(--gris); }
+
+        .série-bloc {
+            background: var(--blanc);
+            border-left: 1px solid var(--fond-champ);
+            border-right: 1px solid var(--fond-champ);
+            border-bottom: 1px solid var(--fond-champ);
+            margin-bottom: 2px;
+            overflow: hidden;
+        }
+        .série-bloc:last-child { border-radius: 0 0 var(--rayon) var(--rayon); }
+
+        .série-entête {
+            background: var(--fond-champ);
+            padding: 10px 16px;
+            display: flex; align-items: baseline; gap: 10px;
+            cursor: pointer; user-select: none;
+        }
+        .série-entête:hover { background: var(--fond-carte); }
+        .série-entête .no-série {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3em; color: var(--accent); letter-spacing: 1px;
+            min-width: 70px;
+        }
+        .série-entête .type-série { font-size: 0.8em; color: var(--gris); }
+        .série-entête .thème {
+            font-style: italic; font-size: 0.95em; color: var(--texte); flex: 1;
+        }
+        .série-entête .sous-thème { font-size: 0.8em; color: var(--orange); }
+        .série-entête .toggle { color: var(--gris); font-size: 0.8em; margin-left: auto; }
+
+        .équipe-entête {
+            background: var(--fond); padding: 6px 16px;
+            font-size: 0.8em; font-weight: 600; color: var(--accent);
+            letter-spacing: 0.5px; border-top: 1px solid var(--fond-champ);
+            text-transform: uppercase;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+        table th {
+            background: var(--fond-carte);
+            color: var(--accent); font-family: 'Bebas Neue', sans-serif;
+            font-size: 0.95em; letter-spacing: 0.8px;
+            padding: 7px 10px; text-align: left;
+            border-bottom: 1px solid var(--fond-champ);
+        }
+        table td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #f0ece4;
+            vertical-align: top;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #faf8f4; }
+
+        .col-no { width: 36px; text-align: center; color: var(--gris); font-size: 0.85em; }
+        .col-question { width: 35%; }
+        .col-réponse { width: 25%; font-style: italic; color: #555; }
+        .col-joueur { width: 16%; }
+        .col-équipe { width: 16%; font-size: 0.82em; color: var(--gris); }
+        .col-pts { width: 52px; text-align: right; font-weight: 600; }
+
+        .pts-principal { color: var(--vert); }
+        .pts-secondaire { color: var(--orange); font-size: 0.85em; }
+        .non-répondu { color: #ccc; }
+
+        .badge-équipe-a { color: #2980b9; font-size: 0.78em; }
+        .badge-équipe-b { color: #8e44ad; font-size: 0.78em; }
+
+        #msg { text-align: center; color: var(--gris); padding: 40px; font-size: 1.1em; }
+
+        .total-série {
+            padding: 6px 16px;
+            font-size: 0.82em; color: var(--gris);
+            border-top: 1px solid var(--fond-champ);
+            background: var(--fond);
+            display: flex; gap: 16px; justify-content: flex-end;
+        }
+        .total-série span { font-weight: 600; color: var(--texte); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>GEH <span>Statcan</span></h1>
+    </header>
+    <nav>
+        <a href="stats-calendrier.html">Calendrier</a>
+        <a href="stats-classement.html">Classement</a>
+        <a href="stats-compteurs.html">Compteurs</a>
+        <a href="stats-match.html" class="actif">Feuille de match</a>
+    </nav>
+
+    <div class="sélecteur">
+        <label for="selectPartie" style="font-weight:600; color:var(--accent)">Partie :</label>
+        <select id="selectPartie">
+            <option value="">— Choisir une partie —</option>
+        </select>
+    </div>
+
+    <div id="feuille">
+        <div id="msg">Sélectionne une partie pour afficher la feuille de match.</div>
+    </div>
+
+    <script>
+        async function charger() {
+            // Charger la liste des parties jouées
+            const [calendrier] = await Promise.all([
+                fetch('/api/stats/calendrier').then(r => r.json())
+            ]);
+            const jouées = calendrier.filter(p => p.terminée);
+            const sel = document.getElementById('selectPartie');
+            jouées.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.noPartie;
+                const date = new Date(p.date).toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+                opt.textContent = `Partie ${p.noPartie} — ${p.nomÉquipeA} c. ${p.nomÉquipeB} (${date})`;
+                sel.appendChild(opt);
+            });
+
+            // Pré-sélectionner via URL ?noPartie=X
+            const params = new URLSearchParams(location.search);
+            if (params.get('noPartie')) {
+                sel.value = params.get('noPartie');
+                afficherPartie(parseInt(params.get('noPartie')));
+            }
+        }
+
+        document.getElementById('selectPartie').addEventListener('change', e => {
+            const val = parseInt(e.target.value);
+            if (val) afficherPartie(val);
+        });
+
+        async function afficherPartie(noPartie) {
+            document.getElementById('feuille').innerHTML = '<div id="msg">Chargement...</div>';
+            try {
+                const data = await fetch(`/api/stats/match/${noPartie}`).then(r => r.json());
+                document.getElementById('feuille').innerHTML = construireFeuille(data);
+                // Expand/collapse séries
+                document.querySelectorAll('.série-entête').forEach(entête => {
+                    entête.addEventListener('click', () => {
+                        const corps = entête.nextElementSibling;
+                        const toggle = entête.querySelector('.toggle');
+                        const caché = corps.style.display === 'none';
+                        corps.style.display = caché ? '' : 'none';
+                        toggle.textContent = caché ? '▲' : '▼';
+                    });
+                });
+            } catch (e) {
+                document.getElementById('feuille').innerHTML = `<div id="msg">Erreur : ${e.message}</div>`;
+            }
+        }
+
+        function construireFeuille(d) {
+            const date = new Date(d.date).toLocaleDateString('fr-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const gagnantA = d.scoreA > d.scoreB;
+            const gagnantB = d.scoreB > d.scoreA;
+
+            let html = `
+            <div class="en-tête-match">
+                <div>
+                    <div class="titre">Partie ${d.noPartie} — ${d.nomÉquipeA} c. ${d.nomÉquipeB}</div>
+                    <div class="info">${date}${d.animateur ? ' · ' + d.animateur : ''}${d.noQuestionnaire ? ' · Questionnaire #' + d.noQuestionnaire : ''}</div>
+                </div>
+            </div>
+            <div class="score-bloc">
+                <div class="score-équipe ${gagnantA ? 'gagnant' : 'perdant'}">
+                    <div class="nom">${gagnantA ? '🏆 ' : ''}${d.nomÉquipeA}</div>
+                    <div class="pts">${d.scoreA}</div>
+                </div>
+                <div class="score-vs">c.</div>
+                <div class="score-équipe ${gagnantB ? 'gagnant' : 'perdant'}">
+                    <div class="nom">${gagnantB ? '🏆 ' : ''}${d.nomÉquipeB}</div>
+                    <div class="pts">${d.scoreB}</div>
+                </div>
+            </div>`;
+
+            if (d.séries.length === 0) {
+                html += `<div id="msg" style="background:white;padding:30px;border:1px solid var(--fond-champ)">
+                    Questions non disponibles pour le questionnaire #${d.noQuestionnaire}.</div>`;
+                return html;
+            }
+
+            d.séries.forEach(s => {
+                const titreThème = s.sousThème ? `${s.thème} — <span class="sous-thème">${s.sousThème}</span>` : s.thème;
+                html += `
+                <div class="série-bloc">
+                    <div class="série-entête">
+                        <span class="no-série">Série ${s.noSérie}</span>
+                        <span class="type-série">${s.typeSérie}</span>
+                        <span class="thème">${titreThème}</span>
+                        <span class="toggle">▲</span>
+                    </div>
+                    <div class="série-corps">`;
+
+                // Pour série 1 (Individuelle, 8 questions) : split A/B
+                const estIndividuelle = s.typeSérie === 'Individuelle' && s.questions.length >= 6;
+                if (estIndividuelle) {
+                    const mi = Math.ceil(s.questions.length / 2);
+                    const qA = s.questions.slice(0, mi);
+                    const qB = s.questions.slice(mi);
+                    html += `<div class="équipe-entête badge-équipe-a">▶ Équipe A — ${d.nomÉquipeA}</div>`;
+                    html += tableauQuestions(qA, d.noÉquipeA);
+                    html += `<div class="équipe-entête badge-équipe-b">▶ Équipe B — ${d.nomÉquipeB}</div>`;
+                    html += tableauQuestions(qB, d.noÉquipeB);
+                } else {
+                    html += tableauQuestions(s.questions, null);
+                }
+
+                // Totaux par équipe pour cette série
+                const totA = totalÉquipe(s.questions, d.noÉquipeA);
+                const totB = totalÉquipe(s.questions, d.noÉquipeB);
+                if (totA > 0 || totB > 0) {
+                    html += `<div class="total-série">
+                        ${d.nomÉquipeA} : <span>${totA} pts</span>
+                        &nbsp;·&nbsp;
+                        ${d.nomÉquipeB} : <span>${totB} pts</span>
+                    </div>`;
+                }
+
+                html += `</div></div>`;
+            });
+
+            return html;
+        }
+
+        function tableauQuestions(questions, noÉquipeCible) {
+            let html = `<table>
+                <thead><tr>
+                    <th class="col-no">#</th>
+                    <th class="col-question">Question</th>
+                    <th class="col-réponse">Réponse</th>
+                    <th class="col-joueur">Joueur</th>
+                    <th class="col-équipe">Équipe</th>
+                    <th class="col-pts">Pts</th>
+                </tr></thead><tbody>`;
+
+            questions.forEach(q => {
+                const r = q.répondant;
+                const joueur = r ? r.alias : '<span class="non-répondu">—</span>';
+                const équipe = r ? `<span class="${r.noÉquipe === noÉquipeCible || noÉquipeCible === null ? '' : 'badge-équipe-b'}">${r.nomÉquipe}</span>` : '';
+                let pts = '';
+                if (r) {
+                    pts = r.estSecondaire
+                        ? `<span class="pts-secondaire">${r.points}✦</span>`
+                        : `<span class="pts-principal">${r.points}</span>`;
+                } else {
+                    pts = `<span class="non-répondu">—</span>`;
+                }
+                html += `<tr>
+                    <td class="col-no">${q.noQuestion}</td>
+                    <td class="col-question">${escHtml(q.texte || '')}</td>
+                    <td class="col-réponse">${escHtml(q.réponse || '')}</td>
+                    <td class="col-joueur">${joueur}</td>
+                    <td class="col-équipe">${équipe}</td>
+                    <td class="col-pts">${pts}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function totalÉquipe(questions, noÉquipe) {
+            return questions
+                .filter(q => q.répondant?.noÉquipe === noÉquipe)
+                .reduce((sum, q) => sum + (q.répondant?.points || 0), 0);
+        }
+
+        function escHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        charger();
+    </script>
+</body>
+</html>

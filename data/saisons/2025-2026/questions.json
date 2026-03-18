@@ -627,8 +627,8 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Au moins 2 questions dans chacun des thèmes.",
-            "réponse": ""
+            "texte": "En quelle année la Première Guerre mondiale a-t-elle officiellement pris fin?",
+            "réponse": "1918"
           },
           {
             "noQuestion": 2,
@@ -657,8 +657,8 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Choisir une année (décennie ou siècle pour les époques plus anciennes) et poser 5 questions relatives à cette période. Les questions doivent être diversifiées, sports, politiques, arts, etc. La première question vaut 5 points.",
-            "réponse": ""
+            "texte": "Quel Canadien a d'abord été déclaré champion du 100m aux Jeux olympiques de Séoul 1988, avant d'être disqualifié pour dopage?",
+            "réponse": "Ben Johnson"
           },
           {
             "noQuestion": 2,
@@ -685,6 +685,11 @@
       {
         "noSérie": 6,
         "questions": [
+          {
+            "noQuestion": 1,
+            "texte": "Quel premier ministre canadien a annoncé sa démission en janvier 2025?",
+            "réponse": "Justin Trudeau"
+          },
           {
             "noQuestion": 2,
             "texte": "Qui sont les candidats à la chefferie de la CAQ?",
@@ -727,13 +732,13 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Collective",
-            "réponse": ""
+            "texte": "Qui est l'auteur du roman À la recherche du temps perdu?",
+            "réponse": "Marcel Proust"
           },
           {
             "noQuestion": 2,
-            "texte": "Au moins 2 questions dans chacun des thèmes.",
-            "réponse": ""
+            "texte": "Quel peintre québécois a cofondé le groupe des Automatistes et signé le Refus global?",
+            "réponse": "Paul-Émile Borduas"
           },
           {
             "noQuestion": 3,
@@ -757,13 +762,13 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Collective",
-            "réponse": ""
+            "texte": "Dans quelle ville auront lieu les Jeux olympiques d'été de 2028?",
+            "réponse": "Los Angeles"
           },
           {
             "noQuestion": 2,
-            "texte": "Au moins 2 questions dans chacun des thèmes.",
-            "réponse": ""
+            "texte": "Quel sport pratique le joueur québécois Félix Auger-Aliassime?",
+            "réponse": "Tennis"
           },
           {
             "noQuestion": 3,
@@ -787,18 +792,18 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Question à indice",
+            "texte": "Né à Toulouse, cet écrivain se lance dans l'écriture à un jeune âge par la rédaction de nouvelles, notamment Le château magique en 1969 et Les enquêtes de Taupin en 1970.",
             "réponse": ""
           },
           {
             "noQuestion": 2,
-            "texte": "Dès le 1er indice, il ne doit pas y avoir plusieurs réponses possibles. Le premier indice devrait être très difficile!",
+            "texte": "Mes personnages comme Edmond Wells ou Michael Pinson explorent des thèmes comme la science, le paranormal et la spiritualité.",
             "réponse": ""
           },
           {
             "noQuestion": 3,
-            "texte": "Né à Toulouse, cet écrivain se lance dans l'écriture à un jeune âge par la rédaction de nouvelles, notammnent Le château magique en 1969 et Les enquêtes de Taupin en 1970.",
-            "réponse": ""
+            "texte": "Mes publications comprennent L'Encyclopédie du savoir relatif et absolu, Demain les chats, Les Thanatonautes et la trilogie des Fourmis.",
+            "réponse": "Bernard Werber"
           }
         ]
       },
@@ -807,13 +812,13 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Vis-à-vis",
-            "réponse": "Nommez l'organe affecté par les maladies suivantes."
+            "texte": "Myocardite",
+            "réponse": "Cœur"
           },
           {
             "noQuestion": 2,
-            "texte": "Il est normal que ces 4 questions soient parmi les plus faciles du questionnaire",
-            "réponse": ""
+            "texte": "Néphrite",
+            "réponse": "Rein"
           },
           {
             "noQuestion": 3,
@@ -832,13 +837,13 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Collective",
-            "réponse": ""
+            "texte": "Quel producteur influent est connu pour le « Wall of Sound »?",
+            "réponse": "Phil Spector"
           },
           {
             "noQuestion": 2,
-            "texte": "Les 5 questions doivent couvrir l'ensemble du thème. Varier les sujets, formulations, longueurs, difficultés, etc.",
-            "réponse": ""
+            "texte": "En plus d'être humoriste, cet artiste a fait paraître l'album Plexus lunaire en novembre 2025.",
+            "réponse": "Adib Alkhalidey"
           },
           {
             "noQuestion": 3,
@@ -862,22 +867,22 @@
         "questions": [
           {
             "noQuestion": 1,
-            "texte": "Série 12",
-            "réponse": "Sciences"
+            "texte": "Quelle planète du système solaire possède la plus grande tempête connue, appelée la Grande Tache rouge?",
+            "réponse": "Jupiter"
           },
           {
             "noQuestion": 2,
-            "texte": "Collective",
-            "réponse": ""
+            "texte": "Quel gaz constitue environ 78 % de l'atmosphère terrestre?",
+            "réponse": "Azote"
           },
           {
             "noQuestion": 3,
-            "texte": "Les 5 questions doivent couvrir l'ensemble du thème. Varier les sujets, formulations, longueurs, difficultés, etc.",
-            "réponse": ""
+            "texte": "Comment se nomme le phénomène par lequel les plantes fabriquent leur propre nourriture à partir de la lumière du soleil?",
+            "réponse": "Photosynthèse"
           },
           {
             "noQuestion": 4,
-            "texte": "Quelle planète du système solaire possède la plus grande tempête connue, appelée la Grande Tache rouge?",
+            "texte": "Comment s'appelle l'unité de mesure de l'énergie dans le système international?",
             "réponse": "Jupiter"
           },
           {
@@ -890,126 +895,42 @@
       {
         "noSérie": 13,
         "questions": [
-          {
-            "noQuestion": 1,
-            "texte": "Deux séries d'associations de 4 éléments. L'inconnue correctement identifiée et bien associée vaut 20 points, les autres bonnes associations valent 10 points chacune.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 2,
-            "texte": "Sous-thème 1 (doit être précis et non relié au sous-thème 2)",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 4,
-            "texte": "Triton",
-            "réponse": "A"
-          },
-          {
-            "noQuestion": 5,
-            "texte": "Phobos",
-            "réponse": "B"
-          },
-          {
-            "noQuestion": 6,
-            "texte": "Titan",
-            "réponse": "D (Saturne)"
-          }
+          { "noQuestion": 1, "texte": "Callisto", "réponse": "C (Jupiter)" },
+          { "noQuestion": 2, "texte": "Triton", "réponse": "A (Neptune)" },
+          { "noQuestion": 3, "texte": "Phobos", "réponse": "B (Mars)" },
+          { "noQuestion": 4, "texte": "Titan", "réponse": "D (Saturne)" },
+          { "noQuestion": 5, "texte": "Slumdog Millionaire", "réponse": "C (Danny Boyle)" },
+          { "noQuestion": 6, "texte": "The Artist", "réponse": "A (Michel Hazanavicius)" },
+          { "noQuestion": 7, "texte": "American Beauty", "réponse": "B (Sam Mendes)" },
+          { "noQuestion": 8, "texte": "Argo", "réponse": "D (Ben Affleck)" }
         ]
       },
       {
         "noSérie": 14,
         "questions": [
-          {
-            "noQuestion": 1,
-            "texte": "Sous-thème 2 (doit être précis et non relié au sous-thème 1)",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 3,
-            "texte": "Associez le film ayant remporté l'Oscar du meilleur film à son réalisateur.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 4,
-            "texte": "Slumdog Millionaire",
-            "réponse": "C"
-          },
-          {
-            "noQuestion": 5,
-            "texte": "The Artist",
-            "réponse": "A"
-          },
-          {
-            "noQuestion": 6,
-            "texte": "American Beauty",
-            "réponse": "B"
-          },
-          {
-            "noQuestion": 7,
-            "texte": "Argo",
-            "réponse": "D (Ben Affleck)"
-          },
-          {
-            "noQuestion": 8,
-            "texte": "Michel Hazanavicius",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 9,
-            "texte": "Sam Mendes",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 10,
-            "texte": "Danny Boyle",
-            "réponse": ""
-          }
+          { "noQuestion": 1, "texte": "Qui a écrit la série Avant le crash avec sa conjointe Kim Lévesque-Lizotte?", "réponse": "Éric Bruneau" },
+          { "noQuestion": 2, "texte": "Au hockey, quel duo de frères a été le plus productif de l'histoire de la LNH en ce qui concerne le nombre de points?", "réponse": "Gretzky - Wayne et Brent - 2861 points" },
+          { "noQuestion": 3, "texte": "Quelle est la capitale de l'Idaho?", "réponse": "Boise" },
+          { "noQuestion": 4, "texte": "Comment s'appelle le passage de la phase solide à la phase liquide?", "réponse": "Fusion" },
+          { "noQuestion": 5, "texte": "Quel type de jazz allie l'harmonie et l'improvisation du jazz avec le rock, le funk et le r'n'b?", "réponse": "Fusion" },
+          { "noQuestion": 6, "texte": "Comment appelle-t-on la scission d'un noyau atomique lourd en deux noyaux plus légers sous l'impact d'un neutron?", "réponse": "Fission" },
+          { "noQuestion": 7, "texte": "Quel peintre québécois est reconnu pour sa série Bleu-blanc-rouge?", "réponse": "Serge Lemoyne" },
+          { "noQuestion": 8, "texte": "Quel homme d'affaires souhaite réduire la taille du conseil d'administration d'Air Transat?", "réponse": "Pierre Karl Péladeau" },
+          { "noQuestion": 9, "texte": "Originaire de Russie, quelle race de chat de grande taille est qualifiée comme étant la plus hypoallergénique?", "réponse": "Sibérien" },
+          { "noQuestion": 10, "texte": "Combien font la racine carrée de 4 multipliée par la racine carrée de 36?", "réponse": "12" }
         ]
       },
       {
         "noSérie": 15,
         "questions": [
-          {
-            "noQuestion": 1,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 2,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 3,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 4,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 5,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 6,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 7,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          },
-          {
-            "noQuestion": 8,
-            "texte": "Viser des questions courtes couvrant un maximum de thèmes différents.",
-            "réponse": ""
-          }
+          { "noQuestion": 1, "texte": "Quel premier ministre canadien a remporté les élections fédérales de mars 2025?", "réponse": "Mark Carney" },
+          { "noQuestion": 2, "texte": "Quel pays d'Europe a rejoint l'OTAN comme 32e membre en mars 2024?", "réponse": "La Suède" },
+          { "noQuestion": 3, "texte": "Quel acteur a remporté l'Oscar du meilleur acteur pour son rôle dans Oppenheimer (cérémonie de mars 2024)?", "réponse": "Cillian Murphy" },
+          { "noQuestion": 4, "texte": "Quel nageur français a remporté 4 médailles d'or individuelles aux Jeux olympiques de Paris 2024?", "réponse": "Léon Marchand" },
+          { "noQuestion": 5, "texte": "Quel film a remporté l'Oscar du meilleur film lors de la cérémonie de mars 2024?", "réponse": "Oppenheimer" },
+          { "noQuestion": 6, "texte": "Quel pays a accueilli la COP29 en novembre 2024?", "réponse": "L'Azerbaïdjan (Bakou)" },
+          { "noQuestion": 7, "texte": "Quel hockeyeur de la LNH a battu le record de buts en carrière de Wayne Gretzky en 2025?", "réponse": "Alex Ovechkin" },
+          { "noQuestion": 8, "texte": "Comment s'appelle l'auteur-compositeur-interprète décédé le 5 mars 2026, auteur de la chanson \"Un nouveau jour va se lever\"?", "réponse": "Jacques Michel" }
         ]
       }
     ]
