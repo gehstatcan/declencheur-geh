@@ -661,7 +661,7 @@
 
             const ptsSecondaires = question ? question.pointsSecondaires : 5;
             document.getElementById('btnSecondaire').textContent = `✅ ${ptsSecondaires} pts`;
-            document.getElementById('btnSecondaire').onclick = () => bonneRéponse(ptsSecondaires);
+            document.getElementById('btnSecondaire').onclick = () => bonneRéponse(ptsSecondaires, true);
 
             
             document.getElementById('btnSecondaire').style.display =
@@ -673,7 +673,7 @@
         // Demande de confirmation à l'animateur quand une question
         // a déjà une réponse enregistrée — évite les doublons
         // ============================================================
-        socket.on('confirmerÉcrasement', ({ noÉquipe, noJoueur, points, ancienRépondant }) => {
+        socket.on('confirmerÉcrasement', ({ noÉquipe, noJoueur, points, estSecondaire, ancienRépondant }) => {
             const équipe = toutesÉquipes.find(e => e.noÉquipe === ancienRépondant.noÉquipe);
             const nomÉquipe = équipe ? équipe.nomÉquipe : `Équipe ${ancienRépondant.noÉquipe}`;
 
@@ -696,7 +696,7 @@
             );
 
             if (confirmer) {
-                socket.emit('confirmerÉcrasement', { noPartie: partieActuelle, noÉquipe, noJoueur, points });
+                socket.emit('confirmerÉcrasement', { noPartie: partieActuelle, noÉquipe, noJoueur, points, estSecondaire });
             }
         });
 
@@ -743,13 +743,14 @@
             socket.emit('réinitialiser', partieActuelle);
         }
 
-        function bonneRéponse(points) {
+        function bonneRéponse(points, estSecondaire = false) {
             if (!joueurAyantBuzzé) return;
             socket.emit('attribuerPoints', {
                 noPartie: partieActuelle,
                 noÉquipe: joueurAyantBuzzé.noÉquipe,
                 noJoueur: joueurAyantBuzzé.noJoueur,
-                points
+                points,
+                estSecondaire
             });
         }
 

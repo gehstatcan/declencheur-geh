@@ -886,7 +886,7 @@ function enregistrerRépondant(
   état,
   répondants,
   cheminPartie,
-  { noÉquipe, noJoueur, points },
+  { noÉquipe, noJoueur, points, estSecondaire },
 ) {
   if (!état.scores[noÉquipe]) état.scores[noÉquipe] = 0;
   état.scores[noÉquipe] += points;
@@ -897,9 +897,14 @@ function enregistrerRépondant(
     noQuestion: état.noQuestionActuelle,
     noJoueur,
     noÉquipe,
-    pointsSecondaires: points < 10,
+    pointsSecondaires: estSecondaire,
   });
 
+  répondants.sort((a, b) => {
+    if (a.noPartie !== b.noPartie) return a.noPartie - b.noPartie;
+    if (a.noSérie !== b.noSérie) return a.noSérie - b.noSérie;
+    return a.noQuestion - b.noQuestion;
+  });
   fs.writeFileSync(cheminPartie, JSON.stringify(répondants, null, 2), "utf-8");
 
   avancerQuestion(état);
@@ -1187,7 +1192,7 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   // Bonne réponse — attribuer les points
   // --------------------------------------------------------
-  socket.on("attribuerPoints", ({ noPartie, noÉquipe, noJoueur, points }) => {
+  socket.on("attribuerPoints", ({ noPartie, noÉquipe, noJoueur, points, estSecondaire }) => {
     const état = obtenirÉtat(noPartie);
 
     // Si mode équipe, les points vont à noJoueur = 99
@@ -1228,8 +1233,9 @@ io.on("connection", (socket) => {
 
     enregistrerRépondant(état, répondants, cheminPartie, {
       noÉquipe,
-      noJoueur: noJoueurFinal, // ← utiliser noJoueurFinal
+      noJoueur: noJoueurFinal,
       points,
+      estSecondaire: estSecondaire || false,
     });
   });
 
@@ -1240,7 +1246,7 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on(
     "confirmerÉcrasement",
-    ({ noPartie, noÉquipe, noJoueur, points }) => {
+    ({ noPartie, noÉquipe, noJoueur, points, estSecondaire }) => {
       const état = obtenirÉtat(noPartie);
       const cheminPartie = path.join(
         dossierSaison,
@@ -1300,6 +1306,7 @@ io.on("connection", (socket) => {
         noÉquipe,
         noJoueur,
         points,
+        estSecondaire: estSecondaire || false,
       });
     },
   );
