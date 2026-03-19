@@ -346,13 +346,9 @@
 
     <script>
         let donnéesParties = [];
-        let donnéesCompteurs = [];
 
         async function chargerCalendrier() {
-            [donnéesParties, donnéesCompteurs] = await Promise.all([
-                fetch('/api/stats/calendrier').then(r => r.json()),
-                fetch('/api/stats/compteurs').then(r => r.json())
-            ]);
+            donnéesParties = await fetch('/api/stats/calendrier').then(r => r.json());
 
             const tbody = document.getElementById('corpsTableau');
             const aujourdhui = new Date().toISOString().split('T')[0];
@@ -429,43 +425,39 @@
             }
         }
 
-        function afficherJoueurs(noPartie) {
+        async function afficherJoueurs(noPartie) {
             const partie = donnéesParties.find(p => p.noPartie === noPartie);
             if (!partie) return;
 
             const div = document.getElementById(`joueurs-${noPartie}`);
 
-            // Trouver les données des deux équipes
-            const équipeA = donnéesCompteurs.find(e =>
-                e.nomÉquipe === partie.nomÉquipeA);
-            const équipeB = donnéesCompteurs.find(e =>
-                e.nomÉquipe === partie.nomÉquipeB);
+            const data = await fetch(`/api/stats/partie/${noPartie}/joueurs`).then(r => r.json());
 
-            // Pour une partie terminée, calculer les points par joueur
-            // depuis répondants — pour l'instant on affiche les stats saison
-            const rendreListe = (équipe) => {
-                if (!équipe) return '<em style="color:var(--gris)">Aucune donnée</em>';
-                // Filtrer joueur 99 et joueurs à 0 pts si partie pas terminée
-                const joueurs = équipe.joueurs
-                    .filter(j => j.noJoueur !== 99 && (partie.terminée ? true : true))
-                    .map(j => `
-                        <div class="joueur-ligne">
-                            <span>${j.alias}</span>
-                            <span class="pts ${j.points === 0 ? 'pts-zero' : ''}">
-                                ${j.points} pts
-                            </span>
-                        </div>`).join('');
-                return joueurs || '<em style="color:var(--gris)">Aucun joueur</em>';
+            const rendreListe = (équipeData, nomÉquipe) => {
+                if (!équipeData || équipeData.joueurs.length === 0)
+                    return '<em style="color:var(--gris)">Aucun joueur</em>';
+                return équipeData.joueurs.map(j => `
+                    <div class="joueur-ligne">
+                        <span>${j.alias}</span>
+                        <span class="pts ${j.points === 0 ? 'pts-zero' : ''}">${j.points} pts</span>
+                    </div>`).join('');
             };
 
+            const [équipeA, équipeB] = data;
+            const titreÉquipe = (nom, éq) => {
+                const col = éq?.pointsCollectifs > 0
+                    ? `<span class="pts" style="float:right">${éq.pointsCollectifs} pts</span>`
+                    : '';
+                return `${nom}${col}`;
+            };
             div.innerHTML = `
                 <div class="grille-joueurs">
                     <div class="colonne-équipe">
-                        <h4>${partie.nomÉquipeA}</h4>
+                        <h4>${titreÉquipe(partie.nomÉquipeA, équipeA)}</h4>
                         ${rendreListe(équipeA)}
                     </div>
                     <div class="colonne-équipe">
-                        <h4>${partie.nomÉquipeB}</h4>
+                        <h4>${titreÉquipe(partie.nomÉquipeB, équipeB)}</h4>
                         ${rendreListe(équipeB)}
                     </div>
                 </div>`;

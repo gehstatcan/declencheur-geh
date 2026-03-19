@@ -490,6 +490,50 @@ app.get("/api/stats/calendrier", (req, res) => {
 });
 
 // ============================================================
+// Joueurs d'une partie — alignement + points de la partie
+// ============================================================
+app.get("/api/stats/partie/:noPartie/joueurs", (req, res) => {
+  try {
+    const noPartie = parseInt(req.params.noPartie);
+    const partie = parties.find(p => p.noPartie === noPartie);
+    if (!partie) return res.status(404).json({ erreur: 'Partie introuvable' });
+
+    const alignements = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'alignements.json'), 'utf-8'));
+    const joueurs = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'joueurs.json'), 'utf-8'));
+
+    let répondants = [];
+    try {
+      const tous = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim() || '[]');
+      répondants = tous.filter(r => r.noPartie === noPartie);
+    } catch (e) {}
+
+    const pointsJoueur = (noÉquipe, noJoueur) => {
+      return répondants
+        .filter(r => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur)
+        .reduce((sum, r) => {
+          const sérieInfo = séries.find(s => s.noSérie === r.noSérie);
+          const qInfo = sérieInfo?.questions.find(q => q.noQuestion === r.noQuestion);
+          return sum + (r.pointsSecondaires ? (qInfo?.pointsSecondaires ?? 0) : (qInfo?.points ?? 0));
+        }, 0);
+    };
+
+    const résultat = [partie.noÉquipeA, partie.noÉquipeB].map(noÉquipe => {
+      const align = alignements.find(a => a.noPartie === noPartie && a.noÉquipe === noÉquipe);
+      const noJoueurs = align ? align.joueurs : [];
+      const joueursPartie = noJoueurs.map(noJ => {
+        const j = joueurs.find(j => j.noÉquipe === noÉquipe && j.noJoueur === noJ);
+        return { noJoueur: noJ, alias: j?.alias || `Joueur ${noJ}`, points: pointsJoueur(noÉquipe, noJ) };
+      });
+      return { noÉquipe, pointsCollectifs: pointsJoueur(noÉquipe, 99), joueurs: joueursPartie };
+    });
+
+    res.json(résultat);
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
 // Classement — G/GP/PN/PP/P
 // ============================================================
 app.get("/api/stats/classement", (req, res) => {
@@ -846,6 +890,29 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
     const noPartie = parseInt(req.params.noPartie);
     const partie = parties.find(p => p.noPartie === noPartie);
     if (!partie) return res.status(404).json({ erreur: 'Partie introuvable' });
+
+    // Protection : bloquer si une autre partie avec le même questionnaire n'a pas encore de répondants
+    const autresPartiesMêmeQ = parties.filter(p =>
+      p.noPartie !== noPartie && p.noQuestionnaire === partie.noQuestionnaire
+    );
+    const aDesRépondants = (noP) => {
+      try {
+        const tous = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim() || '[]');
+        return tous.some(r => r.noPartie === noP);
+      } catch (e) { return false; }
+    };
+    const partieNonJouée = autresPartiesMêmeQ.find(p => !aDesRépondants(p.noPartie));
+    if (partieNonJouée) {
+      const équipeQ = équipes.find(e => e.noÉquipe === partieNonJouée.noÉquipeQuestionnaire);
+      const nomÉquipeQ = équipeQ ? équipeQ.nomÉquipe : partieNonJouée.noÉquipeQuestionnaire ? `Équipe ${partieNonJouée.noÉquipeQuestionnaire}` : null;
+      return res.status(403).json({
+        erreur: 'protégé',
+        noPartieBloquante: partieNonJouée.noPartie,
+        datePartieBloquante: partieNonJouée.date,
+        noQuestionnaire: partie.noQuestionnaire,
+        équipeQuestionnaire: nomÉquipeQ
+      });
+    }
 
     // Répondants de la partie — depuis répondants.json, sinon fallback sur répondants-{N}.json
     let répondants = [];
@@ -1718,11 +1785,8 @@ io.on("connection", (socket) => {
         return a.noQuestion - b.noQuestion;
       });
 
-      fs.writeFileSync(
-        cheminCumulatif,
-        JSON.stringify(fusionTriée, null, 2),
-        "utf-8",
-      );
+      const contenuFusion = '[\n' + fusionTriée.map(r => '  ' + JSON.stringify(r)).join(',\n') + '\n]';
+      fs.writeFileSync(cheminCumulatif, contenuFusion, "utf-8");
 
       // ============================================================
       // Sauvegarder les alignements
@@ -1760,8 +1824,9 @@ io.on("connection", (socket) => {
         });
       });
 
-      alignements.sort((a, b) => a.noPartie - b.noPartie);
-      fs.writeFileSync(cheminAlignements, JSON.stringify(alignements, null, 2));
+      alignements.sort((a, b) => a.noPartie !== b.noPartie ? a.noPartie - b.noPartie : a.noÉquipe - b.noÉquipe);
+      const contenuAlign = '[\n' + alignements.map(a => '  ' + JSON.stringify(a)).join(',\n') + '\n]';
+      fs.writeFileSync(cheminAlignements, contenuAlign, 'utf-8');
       console.log(`📋 Alignements sauvegardés pour partie ${noPartie}`);
 
       // ============================================================

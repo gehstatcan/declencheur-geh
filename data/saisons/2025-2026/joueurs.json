@@ -1,527 +1,78 @@
 [
-  {
-    "noÉquipe": 1,
-    "noJoueur": 1,
-    "alias": "Stéphanie",
-    "nom": "Audet-Brazeau",
-    "prénom": "Stéphanie"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 2,
-    "alias": "Julia",
-    "nom": "Colpron",
-    "prénom": "Julia"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 3,
-    "alias": "Isabelle",
-    "nom": "Gamache",
-    "prénom": "Isabelle"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 4,
-    "alias": "Catherine",
-    "nom": "Lachance",
-    "prénom": "Catherine"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 5,
-    "alias": "Francis",
-    "nom": "Vilandré",
-    "prénom": "Francis"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 6,
-    "alias": "Julie",
-    "nom": "Sarrazin",
-    "prénom": "Julie"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 8,
-    "alias": "Émilie",
-    "nom": "Fougères",
-    "prénom": "Émilie"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 9,
-    "alias": "Marc-Olivier",
-    "nom": "Loiselle",
-    "prénom": "Marc-Olivier"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 10,
-    "alias": "Christian Frédéric",
-    "nom": "Sarrette",
-    "prénom": "Christian Frédéric"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 99,
-    "alias": "Les Génies de la traduction",
-    "estÉquipe": true
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 1,
-    "alias": "Steeve",
-    "nom": "Boisvert",
-    "prénom": "Steeve"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 2,
-    "alias": "Samuel",
-    "nom": "Perreault",
-    "prénom": "Samuel"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 3,
-    "alias": "Jonathan",
-    "nom": "Baillargeon",
-    "prénom": "Jonathan"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 4,
-    "alias": "Vincent",
-    "nom": "Hardy",
-    "prénom": "Vincent"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 5,
-    "alias": "Nicole",
-    "nom": "Paquin",
-    "prénom": "Nicole"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 6,
-    "alias": "Franklin",
-    "nom": "Assoumou",
-    "prénom": "Franklin"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 7,
-    "alias": "Marie-Hélène",
-    "nom": "Sarrasin",
-    "prénom": "Marie-Hélène"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 9,
-    "alias": "Vincent",
-    "nom": "Parenteau",
-    "prénom": "Vincent"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 10,
-    "alias": "Cindy",
-    "nom": "Lecavalier",
-    "prénom": "Cindy"
-  },
-  {
-    "noÉquipe": 2,
-    "noJoueur": 99,
-    "alias": "Les Bons Perdants",
-    "estÉquipe": true
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 1,
-    "alias": "Mark",
-    "nom": "Switzer",
-    "prénom": "Mark"
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 2,
-    "alias": "Pierre",
-    "nom": "Parent",
-    "prénom": "Pierre"
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 3,
-    "alias": "François",
-    "nom": "Rivest",
-    "prénom": "François"
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 4,
-    "alias": "André",
-    "nom": "Delage",
-    "prénom": "André"
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 5,
-    "alias": "Louise",
-    "nom": "Maheux",
-    "prénom": "Louise"
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 6,
-    "alias": "Yanick",
-    "nom": "Aubé",
-    "prénom": "Yanick"
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 7,
-    "alias": "Jean-Michel",
-    "nom": "M.",
-    "prénom": "Jean-Michel"
-  },
-  {
-    "noÉquipe": 3,
-    "noJoueur": 99,
-    "alias": "Les érudits en gerbe",
-    "estÉquipe": true
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 1,
-    "alias": "Sébastien",
-    "nom": "Landry",
-    "prénom": "Sébastien"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 2,
-    "alias": "Frédéric",
-    "nom": "Bédard",
-    "prénom": "Frédéric"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 3,
-    "alias": "Geneviève",
-    "nom": "Ouellet",
-    "prénom": "Geneviève"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 4,
-    "alias": "Samuel",
-    "nom": "Vézina",
-    "prénom": "Samuel"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 5,
-    "alias": "Jean-Dominique",
-    "nom": "Morency",
-    "prénom": "Jean-Dominique"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 6,
-    "alias": "Stéphane",
-    "nom": "Martineau",
-    "prénom": "Stéphane"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 7,
-    "alias": "Michel",
-    "nom": "Parenteau",
-    "prénom": "Michel"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 8,
-    "alias": "Caroline",
-    "nom": "Pelletier",
-    "prénom": "Caroline"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 10,
-    "alias": "Sylvain",
-    "nom": "Coulombe",
-    "prénom": "Sylvain"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 11,
-    "alias": "Francis",
-    "nom": "Demers",
-    "prénom": "Francis"
-  },
-  {
-    "noÉquipe": 4,
-    "noJoueur": 99,
-    "alias": "Les Herbizarres",
-    "estÉquipe": true
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 1,
-    "alias": "Bruno",
-    "nom": "Lapierre",
-    "prénom": "Bruno"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 2,
-    "alias": "Julie",
-    "nom": "Bernier",
-    "prénom": "Julie"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 3,
-    "alias": "Sylvain",
-    "nom": "Perron",
-    "prénom": "Sylvain"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 4,
-    "alias": "Martin",
-    "nom": "Sirois",
-    "prénom": "Martin"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 5,
-    "alias": "Didier",
-    "nom": "Garriguet",
-    "prénom": "Didier"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 6,
-    "alias": "Jean-Sébastien",
-    "nom": "Provencal",
-    "prénom": "Jean-Sébastien"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 8,
-    "alias": "Marlène",
-    "nom": "Savard",
-    "prénom": "Marlène"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 9,
-    "alias": "François",
-    "nom": "Lavoie",
-    "prénom": "François"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 99,
-    "alias": "Les Méthos précieux",
-    "estÉquipe": true
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 1,
-    "alias": "Stéphane",
-    "nom": "Mongeau",
-    "prénom": "Stéphane"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 2,
-    "alias": "Pierre-Olivier",
-    "nom": "Julien",
-    "prénom": "Pierre-Olivier"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 3,
-    "alias": "Julien",
-    "nom": "Bérard-Chagnon",
-    "prénom": "Julien"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 4,
-    "alias": "Patrick",
-    "nom": "Charbonneau",
-    "prénom": "Patrick"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 5,
-    "alias": "Keven",
-    "nom": "Bosa",
-    "prénom": "Keven"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 6,
-    "alias": "Étienne",
-    "nom": "Lemyre",
-    "prénom": "Étienne"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 7,
-    "alias": "Daphné",
-    "nom": "Allard Gervais",
-    "prénom": "Daphné"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 8,
-    "alias": "Emy",
-    "nom": "Bourdages",
-    "prénom": "Emy"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 9,
-    "alias": "David",
-    "nom": "Binet",
-    "prénom": "David"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 11,
-    "alias": "François",
-    "nom": "Sergerie",
-    "prénom": "François"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 12,
-    "alias": "Arnaud",
-    "nom": "Bouchard-Santerre",
-    "prénom": "Arnaud"
-  },
-  {
-    "noÉquipe": 6,
-    "noJoueur": 99,
-    "alias": "Les 12e meilleurs",
-    "estÉquipe": true
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 1,
-    "alias": "Philippe",
-    "nom": "Bérubé",
-    "prénom": "Philippe"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 2,
-    "alias": "Tony",
-    "nom": "Labillois",
-    "prénom": "Tony"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 3,
-    "alias": "Éric",
-    "nom": "Caron-Malenfant",
-    "prénom": "Éric"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 4,
-    "alias": "Pierre",
-    "nom": "Galarneau",
-    "prénom": "Pierre"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 5,
-    "alias": "Félix",
-    "nom": "Labrecque-Synnott",
-    "prénom": "Félix"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 6,
-    "alias": "Yves",
-    "nom": "Gilbert",
-    "prénom": "Yves"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 9,
-    "alias": "Catherine",
-    "nom": "NA",
-    "prénom": "Catherine"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 10,
-    "alias": "Louis",
-    "nom": "NA",
-    "prénom": "Louis"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 11,
-    "alias": "Étienne",
-    "nom": "Lemyre (Faciles)",
-    "prénom": "Étienne"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 12,
-    "alias": "Élizabeth",
-    "nom": "LeBlanc",
-    "prénom": "Élizabeth"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 13,
-    "alias": "Bertrand",
-    "nom": "Ouellet-Léveillé",
-    "prénom": "Bertrand"
-  },
-  {
-    "noÉquipe": 7,
-    "noJoueur": 99,
-    "alias": "Les Faciles à cuire",
-    "estÉquipe": true
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 11,
-    "alias": "Martin",
-    "nom": "Sirois",
-    "prénom": "Martin"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 12,
-    "alias": "Marlène",
-    "nom": "Savard",
-    "prénom": "Marlène"
-  },
-  {
-    "noÉquipe": 1,
-    "noJoueur": 13,
-    "alias": "Alias Test",
-    "nom": "Nom Test",
-    "prénom": "Prénom Test"
-  },
-  {
-    "noÉquipe": 5,
-    "noJoueur": 10,
-    "alias": "Orion",
-    "nom": "Sirois",
-    "prénom": "Orion"
-  }
+  { "noÉquipe": 1, "noJoueur": 1, "alias": "Stéphanie", "nom": "Audet-Brazeau", "prénom": "Stéphanie" },
+  { "noÉquipe": 1, "noJoueur": 2, "alias": "Julia", "nom": "Colpron", "prénom": "Julia" },
+  { "noÉquipe": 1, "noJoueur": 3, "alias": "Isabelle", "nom": "Gamache", "prénom": "Isabelle" },
+  { "noÉquipe": 1, "noJoueur": 4, "alias": "Catherine", "nom": "Lachance", "prénom": "Catherine" },
+  { "noÉquipe": 1, "noJoueur": 5, "alias": "Francis", "nom": "Vilandré", "prénom": "Francis" },
+  { "noÉquipe": 1, "noJoueur": 6, "alias": "Julie", "nom": "Sarrazin", "prénom": "Julie" },
+  { "noÉquipe": 1, "noJoueur": 8, "alias": "Émilie", "nom": "Fougères", "prénom": "Émilie" },
+  { "noÉquipe": 1, "noJoueur": 9, "alias": "Marc-Olivier", "nom": "Loiselle", "prénom": "Marc-Olivier" },
+  { "noÉquipe": 1, "noJoueur": 10, "alias": "Christian Frédéric", "nom": "Sarrette", "prénom": "Christian Frédéric" },
+  { "noÉquipe": 1, "noJoueur": 11, "alias": "Martin", "nom": "Sirois", "prénom": "Martin" },
+  { "noÉquipe": 1, "noJoueur": 12, "alias": "Marlène", "nom": "Savard", "prénom": "Marlène" },
+  { "noÉquipe": 1, "noJoueur": 13, "alias": "Alias Test", "nom": "Nom Test", "prénom": "Prénom Test" },
+  { "noÉquipe": 1, "noJoueur": 99, "alias": "Les Génies de la traduction", "estÉquipe": true },
+  { "noÉquipe": 2, "noJoueur": 1, "alias": "Steeve", "nom": "Boisvert", "prénom": "Steeve" },
+  { "noÉquipe": 2, "noJoueur": 2, "alias": "Samuel", "nom": "Perreault", "prénom": "Samuel" },
+  { "noÉquipe": 2, "noJoueur": 3, "alias": "Jonathan", "nom": "Baillargeon", "prénom": "Jonathan" },
+  { "noÉquipe": 2, "noJoueur": 4, "alias": "Vincent", "nom": "Hardy", "prénom": "Vincent" },
+  { "noÉquipe": 2, "noJoueur": 5, "alias": "Nicole", "nom": "Paquin", "prénom": "Nicole" },
+  { "noÉquipe": 2, "noJoueur": 6, "alias": "Franklin", "nom": "Assoumou", "prénom": "Franklin" },
+  { "noÉquipe": 2, "noJoueur": 7, "alias": "Marie-Hélène", "nom": "Sarrasin", "prénom": "Marie-Hélène" },
+  { "noÉquipe": 2, "noJoueur": 9, "alias": "Vincent", "nom": "Parenteau", "prénom": "Vincent" },
+  { "noÉquipe": 2, "noJoueur": 10, "alias": "Cindy", "nom": "Lecavalier", "prénom": "Cindy" },
+  { "noÉquipe": 2, "noJoueur": 99, "alias": "Les Bons Perdants", "estÉquipe": true },
+  { "noÉquipe": 3, "noJoueur": 1, "alias": "Mark", "nom": "Switzer", "prénom": "Mark" },
+  { "noÉquipe": 3, "noJoueur": 2, "alias": "Pierre", "nom": "Parent", "prénom": "Pierre" },
+  { "noÉquipe": 3, "noJoueur": 3, "alias": "François", "nom": "Rivest", "prénom": "François" },
+  { "noÉquipe": 3, "noJoueur": 4, "alias": "André", "nom": "Delage", "prénom": "André" },
+  { "noÉquipe": 3, "noJoueur": 5, "alias": "Louise", "nom": "Maheux", "prénom": "Louise" },
+  { "noÉquipe": 3, "noJoueur": 6, "alias": "Yanick", "nom": "Aubé", "prénom": "Yanick" },
+  { "noÉquipe": 3, "noJoueur": 7, "alias": "Jean-Michel", "nom": "M.", "prénom": "Jean-Michel" },
+  { "noÉquipe": 3, "noJoueur": 99, "alias": "Les érudits en gerbe", "estÉquipe": true },
+  { "noÉquipe": 4, "noJoueur": 1, "alias": "Sébastien", "nom": "Landry", "prénom": "Sébastien" },
+  { "noÉquipe": 4, "noJoueur": 2, "alias": "Frédéric", "nom": "Bédard", "prénom": "Frédéric" },
+  { "noÉquipe": 4, "noJoueur": 3, "alias": "Geneviève", "nom": "Ouellet", "prénom": "Geneviève" },
+  { "noÉquipe": 4, "noJoueur": 4, "alias": "Samuel", "nom": "Vézina", "prénom": "Samuel" },
+  { "noÉquipe": 4, "noJoueur": 5, "alias": "Jean-Dominique", "nom": "Morency", "prénom": "Jean-Dominique" },
+  { "noÉquipe": 4, "noJoueur": 6, "alias": "Stéphane", "nom": "Martineau", "prénom": "Stéphane" },
+  { "noÉquipe": 4, "noJoueur": 7, "alias": "Michel", "nom": "Parenteau", "prénom": "Michel" },
+  { "noÉquipe": 4, "noJoueur": 8, "alias": "Caroline", "nom": "Pelletier", "prénom": "Caroline" },
+  { "noÉquipe": 4, "noJoueur": 10, "alias": "Sylvain", "nom": "Coulombe", "prénom": "Sylvain" },
+  { "noÉquipe": 4, "noJoueur": 11, "alias": "Francis", "nom": "Demers", "prénom": "Francis" },
+  { "noÉquipe": 4, "noJoueur": 99, "alias": "Les Herbizarres", "estÉquipe": true },
+  { "noÉquipe": 5, "noJoueur": 1, "alias": "Bruno", "nom": "Lapierre", "prénom": "Bruno" },
+  { "noÉquipe": 5, "noJoueur": 2, "alias": "Julie", "nom": "Bernier", "prénom": "Julie" },
+  { "noÉquipe": 5, "noJoueur": 3, "alias": "Sylvain", "nom": "Perron", "prénom": "Sylvain" },
+  { "noÉquipe": 5, "noJoueur": 4, "alias": "Martin", "nom": "Sirois", "prénom": "Martin" },
+  { "noÉquipe": 5, "noJoueur": 5, "alias": "Didier", "nom": "Garriguet", "prénom": "Didier" },
+  { "noÉquipe": 5, "noJoueur": 6, "alias": "Jean-Sébastien", "nom": "Provencal", "prénom": "Jean-Sébastien" },
+  { "noÉquipe": 5, "noJoueur": 8, "alias": "Marlène", "nom": "Savard", "prénom": "Marlène" },
+  { "noÉquipe": 5, "noJoueur": 9, "alias": "François", "nom": "Lavoie", "prénom": "François" },
+  { "noÉquipe": 5, "noJoueur": 10, "alias": "Orion", "nom": "Sirois", "prénom": "Orion" },
+  { "noÉquipe": 5, "noJoueur": 99, "alias": "Les Méthos précieux", "estÉquipe": true },
+  { "noÉquipe": 6, "noJoueur": 1, "alias": "Stéphane", "nom": "Mongeau", "prénom": "Stéphane" },
+  { "noÉquipe": 6, "noJoueur": 2, "alias": "Pierre-Olivier", "nom": "Julien", "prénom": "Pierre-Olivier" },
+  { "noÉquipe": 6, "noJoueur": 3, "alias": "Julien", "nom": "Bérard-Chagnon", "prénom": "Julien" },
+  { "noÉquipe": 6, "noJoueur": 4, "alias": "Patrick", "nom": "Charbonneau", "prénom": "Patrick" },
+  { "noÉquipe": 6, "noJoueur": 5, "alias": "Keven", "nom": "Bosa", "prénom": "Keven" },
+  { "noÉquipe": 6, "noJoueur": 6, "alias": "Étienne", "nom": "Lemyre", "prénom": "Étienne" },
+  { "noÉquipe": 6, "noJoueur": 7, "alias": "Daphné", "nom": "Allard Gervais", "prénom": "Daphné" },
+  { "noÉquipe": 6, "noJoueur": 8, "alias": "Emy", "nom": "Bourdages", "prénom": "Emy" },
+  { "noÉquipe": 6, "noJoueur": 9, "alias": "David", "nom": "Binet", "prénom": "David" },
+  { "noÉquipe": 6, "noJoueur": 11, "alias": "François", "nom": "Sergerie", "prénom": "François" },
+  { "noÉquipe": 6, "noJoueur": 12, "alias": "Arnaud", "nom": "Bouchard-Santerre", "prénom": "Arnaud" },
+  { "noÉquipe": 6, "noJoueur": 99, "alias": "Les 12e meilleurs", "estÉquipe": true },
+  { "noÉquipe": 7, "noJoueur": 1, "alias": "Philippe", "nom": "Bérubé", "prénom": "Philippe" },
+  { "noÉquipe": 7, "noJoueur": 2, "alias": "Tony", "nom": "Labillois", "prénom": "Tony" },
+  { "noÉquipe": 7, "noJoueur": 3, "alias": "Éric", "nom": "Caron-Malenfant", "prénom": "Éric" },
+  { "noÉquipe": 7, "noJoueur": 4, "alias": "Pierre", "nom": "Galarneau", "prénom": "Pierre" },
+  { "noÉquipe": 7, "noJoueur": 5, "alias": "Félix", "nom": "Labrecque-Synnott", "prénom": "Félix" },
+  { "noÉquipe": 7, "noJoueur": 6, "alias": "Yves", "nom": "Gilbert", "prénom": "Yves" },
+  { "noÉquipe": 7, "noJoueur": 9, "alias": "Catherine", "nom": "NA", "prénom": "Catherine" },
+  { "noÉquipe": 7, "noJoueur": 10, "alias": "Louis", "nom": "NA", "prénom": "Louis" },
+  { "noÉquipe": 7, "noJoueur": 11, "alias": "Étienne", "nom": "Lemyre (Faciles)", "prénom": "Étienne" },
+  { "noÉquipe": 7, "noJoueur": 12, "alias": "Élizabeth", "nom": "LeBlanc", "prénom": "Élizabeth" },
+  { "noÉquipe": 7, "noJoueur": 13, "alias": "Bertrand", "nom": "Ouellet-Léveillé", "prénom": "Bertrand" },
+  { "noÉquipe": 7, "noJoueur": 99, "alias": "Les Faciles à cuire", "estÉquipe": true }
 ]

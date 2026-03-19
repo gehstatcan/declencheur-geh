@@ -240,7 +240,20 @@
         async function afficherPartie(noPartie) {
             document.getElementById('feuille').innerHTML = '<div id="msg">Chargement...</div>';
             try {
-                const data = await fetch(`/api/stats/match/${noPartie}`).then(r => r.json());
+                const resp = await fetch(`/api/stats/match/${noPartie}`);
+                const data = await resp.json();
+                if (resp.status === 403) {
+                    const infoQ = data.équipeQuestionnaire ? `#${data.noQuestionnaire} — ${data.équipeQuestionnaire}` : `#${data.noQuestionnaire}`;
+                    document.getElementById('feuille').innerHTML = `<div id="msg" style="color:#b94a00;background:#fff3e0;border:1px solid #f5c04a;padding:1.2em 1.5em;border-radius:8px;max-width:600px;margin:2em auto;">
+                        🔒 <strong>Feuille de match protégée</strong><br><br>
+                        La partie <strong>#${data.noPartieBloquante}</strong> utilise le même questionnaire que celle-ci (${infoQ}) et n'a pas encore été jouée. Elle sera jouée le ${data.datePartieBloquante}.
+                    </div>`;
+                    return;
+                }
+                if (!resp.ok) {
+                    document.getElementById('feuille').innerHTML = `<div id="msg">Erreur : ${data.erreur || resp.status}</div>`;
+                    return;
+                }
                 document.getElementById('feuille').innerHTML = construireFeuille(data);
                 // Expand/collapse séries
                 document.querySelectorAll('.série-entête').forEach(entête => {

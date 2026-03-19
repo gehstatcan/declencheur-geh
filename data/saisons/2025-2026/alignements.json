@@ -1,57 +1,14 @@
 [
-  {
-    "noPartie": 1,
-    "noÉquipe": 1,
-    "joueurs": [
-      1,
-      2,
-      3,
-      4,
-      5
-    ]
-  },
-  {
-    "noPartie": 1,
-    "noÉquipe": 2,
-    "joueurs": [
-      1,
-      7,
-      10
-    ]
-  },
-  {
-    "noPartie": 2,
-    "noÉquipe": 4,
-    "joueurs": [
-      1
-    ]
-  },
-  {
-    "noPartie": 2,
-    "noÉquipe": 7,
-    "joueurs": [
-      2,
-      4
-    ]
-  },
-  {
-    "noPartie": 13,
-    "noÉquipe": 1,
-    "joueurs": [
-      1,
-      2,
-      3,
-      4
-    ]
-  },
-  {
-    "noPartie": 13,
-    "noÉquipe": 2,
-    "joueurs": [
-      1,
-      2,
-      3,
-      4
-    ]
-  }
+  {"noPartie":1,"noÉquipe":1,"joueurs":[1,2,3,4,5]},
+  {"noPartie":1,"noÉquipe":2,"joueurs":[1,7,10]},
+  {"noPartie":2,"noÉquipe":4,"joueurs":[1]},
+  {"noPartie":2,"noÉquipe":7,"joueurs":[2,4]},
+  {"noPartie":13,"noÉquipe":1,"joueurs":[1,2,3,4,5,6,8,9]},
+  {"noPartie":13,"noÉquipe":2,"joueurs":[1,2,3,4,5,6,7]},
+  {"noPartie":25,"noÉquipe":1,"joueurs":[1,11]},
+  {"noPartie":25,"noÉquipe":5,"joueurs":[10]},
+  {"noPartie":26,"noÉquipe":4,"joueurs":[11]},
+  {"noPartie":26,"noÉquipe":6,"joueurs":[1,7]},
+  {"noPartie":29,"noÉquipe":3,"joueurs":[1,5]},
+  {"noPartie":29,"noÉquipe":7,"joueurs":[1,2,4,9]}
 ]
