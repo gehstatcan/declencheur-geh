@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Équipe — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --rouge: #c0392b;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--fond); color: var(--texte); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
+        header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+        header img { mix-blend-mode: multiply; }
+        header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2em; letter-spacing: 2px; color: var(--accent); }
+        header h1 span { color: #888; }
+        nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+        nav a { padding: 6px 14px; border-radius: 20px; background: var(--fond-carte); color: var(--texte); text-decoration: none; font-size: 0.9em; font-weight: 600; }
+        nav a:hover { background: var(--fond-champ); }
+        nav a.actif { background: var(--accent); color: white; }
+        h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8em; letter-spacing: 1px; color: var(--accent); margin-bottom: 16px; text-align: center; }
+        h3 { font-size: 1em; font-weight: 600; color: var(--accent); margin-bottom: 12px; border-bottom: 2px solid var(--fond-champ); padding-bottom: 6px; }
+        .section { width: 100%; max-width: 860px; background: var(--fond-carte); border-radius: var(--rayon); padding: 20px; margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+        thead th { background: var(--fond-champ); color: var(--texte); padding: 8px 12px; font-weight: 600; text-align: center; }
+        thead th.gauche { text-align: left; }
+        tbody tr { border-bottom: 1px solid var(--fond-champ); }
+        tbody tr:last-child { border-bottom: none; }
+        tbody td { padding: 8px 12px; text-align: center; }
+        tbody td.gauche { text-align: left; }
+        .pts { font-weight: 700; color: var(--accent); }
+        .gris { color: var(--gris); }
+        .rang { color: var(--gris); font-size: 0.85em; width: 32px; }
+        .résultat-V { color: var(--vert); font-weight: 700; }
+        .résultat-D { color: var(--rouge); font-weight: 700; }
+        .résultat-N { color: var(--gris); font-weight: 600; }
+        .score { font-weight: 700; }
+        .score-gagnant { color: var(--vert); }
+        .score-perdant { color: var(--rouge); }
+        .btn-expand { background: var(--fond-champ); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: 700; font-size: 0.85em; line-height: 22px; color: var(--accent); }
+        .btn-expand.ouvert { background: var(--accent); color: white; }
+        .ligne-expand { display: none; }
+        .ligne-expand.visible { display: table-row; }
+        .zone-détail { padding: 10px 16px; background: var(--fond); border-top: 1px solid var(--fond-champ); }
+        .détail-joueurs { display: flex; flex-wrap: wrap; gap: 8px; }
+        .badge-joueur { background: var(--fond-carte); border-radius: 8px; padding: 4px 10px; font-size: 0.88em; }
+        .badge-joueur .pts-badge { font-weight: 700; color: var(--accent); margin-left: 6px; }
+        #msg { text-align: center; color: var(--gris); padding: 40px; }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <h1>GEH <span>Statcan</span></h1>
+    </header>
+    <nav>
+        <a href="stats-calendrier.html">📅 Calendrier</a>
+        <a href="stats-classement.html">🏆 Classement</a>
+        <a href="stats-compteurs.html">📊 Compteurs</a>
+        <a href="stats-match.html">📋 Feuille de match</a>
+    </nav>
+
+    <h2 id="titreÉquipe">Chargement...</h2>
+
+    <div class="section">
+        <h3>Parties</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:32px;"></th>
+                    <th class="gauche">Date</th>
+                    <th class="gauche">Adversaire</th>
+                    <th>Résultat</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyParties">
+                <tr><td colspan="5" id="msg">Chargement...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Joueurs</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="rang">Pos</th>
+                    <th class="gauche">Joueur</th>
+                    <th>PJ</th>
+                    <th>Pts</th>
+                    <th>Pts/PJ</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyJoueurs">
+                <tr><td colspan="5" id="msgJoueurs">Chargement...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const noÉquipe = parseInt(params.get('noEquipe'));
+
+        async function charger() {
+            if (!noÉquipe) {
+                document.getElementById('titreÉquipe').textContent = 'Équipe introuvable';
+                return;
+            }
+
+            const data = await fetch(`/api/stats/equipe/${noÉquipe}`).then(r => r.json());
+            if (data.erreur) {
+                document.getElementById('titreÉquipe').textContent = data.erreur;
+                return;
+            }
+
+            document.title = `${data.équipe.nomÉquipe} — GEH Statcan`;
+            document.getElementById('titreÉquipe').textContent = data.équipe.nomÉquipe;
+
+            afficherParties(data.parties);
+            afficherJoueurs(data.joueurs);
+        }
+
+        function afficherParties(parties) {
+            const tbody = document.getElementById('tbodyParties');
+            if (parties.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gris);padding:30px;">Aucune partie jouée</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = parties.map((p, i) => {
+                const date = new Date(p.date + 'T00:00:00').toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+                const classeR = `résultat-${p.résultat}`;
+                const classeScore = p.résultat === 'V' ? 'score-gagnant' : p.résultat === 'D' ? 'score-perdant' : '';
+                const idLigne = `partie-${p.noPartie}`;
+
+                const joueursSorted = [...p.joueurs].sort((a, b) => b.pts - a.pts);
+                const joueursHtml = joueursSorted.length > 0
+                    ? `<table style="width:100%;border-collapse:collapse;font-size:0.9em;">
+                        ${joueursSorted.map(j => `
+                        <tr style="border-bottom:1px solid var(--fond-champ);">
+                            <td style="padding:5px 12px;text-align:left;${j.estCollectif ? 'color:var(--gris);font-style:italic;' : ''}">${j.alias}</td>
+                            <td style="padding:5px 12px;text-align:right;font-weight:700;color:var(--accent);">${j.pts}</td>
+                        </tr>`).join('')}
+                      </table>`
+                    : '<span style="color:var(--gris);padding:8px 12px;display:block;">Aucune donnée</span>';
+
+                const lienAdv = `<a href="stats-equipe.html?noEquipe=${p.noAdversaire}" style="color:inherit;text-decoration:none;font-weight:600;">${p.nomAdversaire}</a>`;
+
+                return `
+                    <tr>
+                        <td><button class="btn-expand" id="btn-${idLigne}" onclick="toggleExpand('${idLigne}')">+</button></td>
+                        <td class="gauche">${date}</td>
+                        <td class="gauche">${lienAdv}</td>
+                        <td class="${classeR}">${p.résultat}</td>
+                        <td class="score ${classeScore}">${p.scoreÉquipe} — ${p.scoreAdv}</td>
+                    </tr>
+                    <tr class="ligne-expand" id="expand-${idLigne}">
+                        <td colspan="5" style="padding:0;">
+                            <div class="zone-détail">${joueursHtml}</div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function afficherJoueurs(joueurs) {
+            const tbody = document.getElementById('tbodyJoueurs');
+            tbody.innerHTML = joueurs.map((j, i) => {
+                const ptsPJ = j.ptsPJ > 0 ? j.ptsPJ.toFixed(2) : '—';
+                return `<tr>
+                    <td class="rang">${i + 1}</td>
+                    <td class="gauche">${j.alias}${j.nom ? ` <span class="gris" style="font-weight:400;">${j.nom}</span>` : ''}</td>
+                    <td>${j.pj || '—'}</td>
+                    <td class="pts">${j.pts || '—'}</td>
+                    <td>${ptsPJ}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function toggleExpand(id) {
+            const ligne = document.getElementById(`expand-${id}`);
+            const btn = document.getElementById(`btn-${id}`);
+            const ouvert = ligne.classList.contains('visible');
+            ligne.classList.toggle('visible', !ouvert);
+            btn.classList.toggle('ouvert', !ouvert);
+            btn.textContent = ouvert ? '+' : '−';
+        }
+
+        charger();
+    </script>
+</body>
+</html>

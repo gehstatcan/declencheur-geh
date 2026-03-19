@@ -135,6 +135,9 @@
             text-align: left;
         }
 
+        .th-tri:hover { background: var(--fond-carte); }
+        .th-tri.actif { color: var(--accent); font-weight: 700; }
+
         tbody tr.ligne-joueur {
             border-bottom: 1px solid var(--fond-carte);
             transition: background 0.15s;
@@ -271,7 +274,7 @@
 <body>
 
     <header>
-        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
 
@@ -292,10 +295,10 @@
                 <thead>
                     <tr>
                         <th>Pos</th>
-                        <th class="gauche">Équipe</th>
-                        <th>PJ</th>
-                        <th>Pts</th>
-                        <th>Pts/PJ</th>
+                        <th class="gauche th-tri" data-table="équipes" data-col="nomÉquipe">Équipe</th>
+                        <th class="th-tri" data-table="équipes" data-col="pjÉquipe">PJ</th>
+                        <th class="th-tri actif" data-table="équipes" data-col="totalÉquipe">Pts ▼</th>
+                        <th class="th-tri" data-table="équipes" data-col="ptsPJÉquipe">Pts/PJ</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyÉquipes">
@@ -318,11 +321,11 @@
                     <tr>
                         <th style="width:36px;"></th>
                         <th>Pos</th>
-                        <th class="gauche">Joueur</th>
-                        <th class="gauche">Équipe</th>
-                        <th>PJ</th>
-                        <th>Pts</th>
-                        <th>Pts/PJ</th>
+                        <th class="gauche th-tri" data-table="joueurs" data-col="alias">Joueur</th>
+                        <th class="gauche th-tri" data-table="joueurs" data-col="nomÉquipe">Équipe</th>
+                        <th class="th-tri" data-table="joueurs" data-col="pj">PJ</th>
+                        <th class="th-tri actif" data-table="joueurs" data-col="points">Pts ▼</th>
+                        <th class="th-tri" data-table="joueurs" data-col="ptsPJ">Pts/PJ</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyJoueurs">
@@ -342,21 +345,55 @@
 
     <script>
         let donnéesCompteurs = [];
+        const triÉtat = {
+            équipes: { col: 'totalÉquipe', dir: -1 },
+            joueurs: { col: 'points', dir: -1 }
+        };
 
         async function chargerCompteurs() {
             donnéesCompteurs = await fetch('/api/stats/compteurs').then(r => r.json());
-
             afficherÉquipes();
             afficherJoueurs();
         }
 
+        document.querySelectorAll('.th-tri').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const table = th.dataset.table;
+                const col = th.dataset.col;
+                if (triÉtat[table].col === col) {
+                    triÉtat[table].dir *= -1;
+                } else {
+                    triÉtat[table].col = col;
+                    triÉtat[table].dir = col === 'alias' || col === 'nomÉquipe' ? 1 : -1;
+                }
+                // Mettre à jour indicateurs
+                th.closest('thead').querySelectorAll('.th-tri').forEach(t => {
+                    t.classList.remove('actif');
+                    t.textContent = t.textContent.replace(/ [▲▼]$/, '');
+                });
+                th.classList.add('actif');
+                th.textContent += triÉtat[table].dir === 1 ? ' ▲' : ' ▼';
+                table === 'équipes' ? afficherÉquipes() : afficherJoueurs();
+            });
+        });
+
+        function trierPar(arr, col, dir) {
+            return [...arr].sort((a, b) => {
+                const va = a[col] ?? '';
+                const vb = b[col] ?? '';
+                if (typeof va === 'string') return dir * va.localeCompare(vb, 'fr');
+                return dir * (va - vb);
+            });
+        }
+
         function afficherÉquipes() {
             const tbody = document.getElementById('tbodyÉquipes');
-
-            // Trier par total points
-            const équipes = donnéesCompteurs
-                .filter(é => é.totalÉquipe > 0)
-                .sort((a, b) => b.totalÉquipe - a.totalÉquipe);
+            const { col, dir } = triÉtat.équipes;
+            const équipes = trierPar(
+                donnéesCompteurs.filter(é => é.totalÉquipe > 0),
+                col, dir
+            );
 
             if (équipes.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5"
@@ -367,38 +404,29 @@
             }
 
             tbody.innerHTML = équipes.map((é, i) => {
-                // Calculer PJ équipe — nombre de parties distinctes
-                const pj = new Set(
-                    donnéesCompteurs
-                        .find(e => e.noÉquipe === é.noÉquipe)
-                        ?.joueurs.flatMap(j => []) || []
-                ).size || '—';
-
-                const ptsPJ = é.totalÉquipe > 0 ? '—' : '—';
+                const pj = é.pjÉquipe || '—';
+                const ptsPJ = é.ptsPJÉquipe > 0 ? é.ptsPJÉquipe.toFixed(2) : '—';
 
                 return `<tr>
                     <td class="rang">${i + 1}</td>
-                    <td class="gauche">${é.nomÉquipe}</td>
-                    <td>—</td>
+                    <td class="gauche"><a href="stats-equipe.html?noEquipe=${é.noÉquipe}" style="color:inherit;text-decoration:none;font-weight:600;">${é.nomÉquipe}</a></td>
+                    <td>${pj}</td>
                     <td class="pts">${é.totalÉquipe}</td>
-                    <td>—</td>
+                    <td>${ptsPJ}</td>
                 </tr>`;
             }).join('');
         }
 
         function afficherJoueurs() {
             const tbody = document.getElementById('tbodyJoueurs');
-
-            // Aplatir tous les joueurs avec points > 0
-            const tousJoueurs = donnéesCompteurs
-                .flatMap(é => é.joueurs
+            const { col, dir } = triÉtat.joueurs;
+            const tousJoueurs = trierPar(
+                donnéesCompteurs.flatMap(é => é.joueurs
                     .filter(j => j.noJoueur !== 99 && j.points > 0)
-                    .map(j => ({
-                        ...j,
-                        nomÉquipe: é.nomÉquipe
-                    }))
-                )
-                .sort((a, b) => b.points - a.points);
+                    .map(j => ({ ...j, nomÉquipe: é.nomÉquipe, ptsPJ: j.pj > 0 ? j.points / j.pj : 0 }))
+                ),
+                col, dir
+            );
 
             if (tousJoueurs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7"
@@ -423,8 +451,8 @@
                                 title="Voir les parties">+</button>
                         </td>
                         <td class="rang">${i + 1}</td>
-                        <td class="gauche">${j.alias}</td>
-                        <td class="gauche gris">${j.nomÉquipe}</td>
+                        <td class="gauche">${j.alias}${j.nom ? ` <span class="gris" style="font-weight:400;">${j.nom}</span>` : ''}</td>
+                        <td class="gauche"><a href="stats-equipe.html?noEquipe=${j.noÉquipe}" style="color:var(--accent);text-decoration:none;font-weight:600;">${j.nomÉquipe}</a></td>
                         <td>${j.pj || '—'}</td>
                         <td class="pts">${j.points}</td>
                         <td>${ptsPJ}</td>

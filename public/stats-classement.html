@@ -174,7 +174,7 @@
 <body>
 
     <header>
-        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
 
@@ -250,7 +250,7 @@
 
                 return `<tr>
                     <td class="gris">${i + 1}</td>
-                    <td class="équipe">${é.nomÉquipe}</td>
+                    <td class="équipe"><a href="stats-equipe.html?noEquipe=${é.noÉquipe}" style="color:inherit;text-decoration:none;font-weight:600;">${é.nomÉquipe}</a></td>
                     <td>${é.MJ}</td>
                     <td>${é.G}</td>
                     <td>${é.GP}</td>

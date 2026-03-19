@@ -303,7 +303,7 @@
 <body>
 
     <header>
-        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
 
@@ -378,7 +378,7 @@
                         class="lien-bouton lien-teams">📹 Teams</a>`;
                 }
                 if (estTerminée) {
-                    liensHtml += `<a href="stats-match.html?partie=${p.noPartie}"
+                    liensHtml += `<a href="stats-match.html?noPartie=${p.noPartie}"
                         class="lien-bouton lien-match">📋 Feuille</a>`;
                 }
 
@@ -393,9 +393,9 @@
                         </td>
                         <td style="color:var(--gris); font-size:0.85em;">${p.noPartie}</td>
                         <td class="date">${formaterDate(p.date)}</td>
-                        <td class="équipe" style="text-align:right;">${p.nomÉquipeA}</td>
+                        <td class="équipe" style="text-align:right;"><a href="stats-equipe.html?noEquipe=${p.noÉquipeA}" style="color:inherit;text-decoration:none;font-weight:600;">${p.nomÉquipeA}</a></td>
                         <td class="score">${scoreHtml}</td>
-                        <td class="équipe">${p.nomÉquipeB}</td>
+                        <td class="équipe"><a href="stats-equipe.html?noEquipe=${p.noÉquipeB}" style="color:inherit;text-decoration:none;font-weight:600;">${p.nomÉquipeB}</a></td>
                         <td class="liens">${liensHtml}</td>
                     </tr>
                     <tr class="ligne-expand" id="expand-${p.noPartie}">

@@ -470,6 +470,8 @@ app.get("/api/stats/calendrier", (req, res) => {
       return {
         noPartie: partie.noPartie,
         date: partie.date,
+        noÉquipeA: partie.noÉquipeA,
+        noÉquipeB: partie.noÉquipeB,
         nomÉquipeA: équipeA ? équipeA.nomÉquipe : "",
         nomÉquipeB: équipeB ? équipeB.nomÉquipe : "",
         scoreA,
@@ -704,8 +706,15 @@ app.get("/api/stats/compteurs", (req, res) => {
       partiesJoueur[clé].add(r.noPartie);
     });
 
+    let alignements = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, "alignements.json"), "utf-8").trim();
+      alignements = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { alignements = []; }
+
     const résultat = équipes
       .map((é) => {
+        const pjÉquipe = new Set(alignements.filter(a => a.noÉquipe === é.noÉquipe).map(a => a.noPartie)).size;
         const membresÉquipe = joueurs.filter((j) => j.noÉquipe === é.noÉquipe);
         const joueursStats = membresÉquipe
           .map((j) => {
@@ -733,6 +742,8 @@ app.get("/api/stats/compteurs", (req, res) => {
           noÉquipe: é.noÉquipe,
           nomÉquipe: é.nomÉquipe,
           totalÉquipe,
+          pjÉquipe,
+          ptsPJÉquipe: pjÉquipe > 0 ? Math.round((totalÉquipe / pjÉquipe) * 100) / 100 : 0,
           ptsÉquipeCollectif: ptsÉquipe,
           joueurs: joueursStats,
         };
@@ -849,6 +860,111 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
   }
 });
 
+app.get('/api/stats/equipe/:noEquipe', (req, res) => {
+  try {
+    const noÉquipe = parseInt(req.params.noEquipe);
+    const équipe = équipes.find(e => e.noÉquipe === noÉquipe);
+    if (!équipe) return res.status(404).json({ erreur: 'Équipe introuvable' });
+
+    let répondants = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { répondants = []; }
+
+    let alignements = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'alignements.json'), 'utf-8').trim();
+      alignements = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { alignements = []; }
+
+    const membresÉquipe = joueurs.filter(j => j.noÉquipe === noÉquipe);
+
+    // Calcul des points par partie et par joueur
+    const calcPts = (r) => {
+      const série = séries.find(s => s.noSérie === r.noSérie);
+      const q = série?.questions.find(q => q.noQuestion === r.noQuestion);
+      return r.pointsSecondaires ? (q?.pointsSecondaires ?? 5) : (q?.points ?? 10);
+    };
+
+    // Scores totaux par partie (toutes équipes)
+    const scoresParPartie = {};
+    répondants.forEach(r => {
+      if (!scoresParPartie[r.noPartie]) scoresParPartie[r.noPartie] = {};
+      if (!scoresParPartie[r.noPartie][r.noÉquipe]) scoresParPartie[r.noPartie][r.noÉquipe] = 0;
+      scoresParPartie[r.noPartie][r.noÉquipe] += calcPts(r);
+    });
+
+    // Parties jouées par cette équipe (via alignements)
+    const noPartiesÉquipe = [...new Set(alignements.filter(a => a.noÉquipe === noÉquipe).map(a => a.noPartie))];
+
+    const partiesÉquipe = noPartiesÉquipe.map(noPartie => {
+      const p = parties.find(p => p.noPartie === noPartie);
+      if (!p) return null;
+      const noAdv = p.noÉquipeA === noÉquipe ? p.noÉquipeB : p.noÉquipeA;
+      const adversaire = équipes.find(e => e.noÉquipe === noAdv);
+      const scores = scoresParPartie[noPartie] || {};
+      const scoreÉquipe = scores[noÉquipe] || 0;
+      const scoreAdv = scores[noAdv] || 0;
+      const résultat = scoreÉquipe > scoreAdv ? 'V' : scoreÉquipe < scoreAdv ? 'D' : 'N';
+
+      // Contribution par joueur dans cette partie
+      const répPartie = répondants.filter(r => r.noPartie === noPartie && r.noÉquipe === noÉquipe);
+      const ptsParJoueur = {};
+      répPartie.forEach(r => {
+        const clé = r.noJoueur;
+        if (!ptsParJoueur[clé]) ptsParJoueur[clé] = 0;
+        ptsParJoueur[clé] += calcPts(r);
+      });
+
+      // Tous les joueurs alignés, même ceux à 0 pts
+      const alignPartie = alignements.find(a => a.noPartie === noPartie && a.noÉquipe === noÉquipe);
+      const tousNoJoueurs = [...new Set([
+        ...Object.keys(ptsParJoueur).map(Number),
+        ...(alignPartie?.joueurs || [])
+      ])];
+
+      const joueursPartie = tousNoJoueurs.map(nJ => {
+        if (nJ === 99) return { alias: 'Collectif', pts: ptsParJoueur[99] || 0, estCollectif: true };
+        const j = membresÉquipe.find(j => j.noJoueur === nJ);
+        return { alias: j?.alias || `Joueur ${nJ}`, pts: ptsParJoueur[nJ] || 0, estCollectif: false };
+      }).sort((a, b) => b.pts - a.pts);
+
+      return { noPartie, date: p.date, noAdversaire: noAdv, nomAdversaire: adversaire?.nomÉquipe || `Équipe ${noAdv}`, scoreÉquipe, scoreAdv, résultat, joueurs: joueursPartie };
+    }).filter(Boolean).sort((a, b) => a.date.localeCompare(b.date));
+
+    // Compteurs joueurs (tous les membres, même 0 pts)
+    const ptsParJoueurTotal = {};
+    const partiesParJoueur = {};
+    répondants.filter(r => r.noÉquipe === noÉquipe).forEach(r => {
+      if (!ptsParJoueurTotal[r.noJoueur]) ptsParJoueurTotal[r.noJoueur] = 0;
+      if (!partiesParJoueur[r.noJoueur]) partiesParJoueur[r.noJoueur] = new Set();
+      ptsParJoueurTotal[r.noJoueur] += calcPts(r);
+      partiesParJoueur[r.noJoueur].add(r.noPartie);
+    });
+
+    // PJ par joueur depuis alignements (inclut les joueurs à 0 pts)
+    const pjParJoueur = {};
+    alignements.filter(a => a.noÉquipe === noÉquipe).forEach(a => {
+      a.joueurs.forEach(noJ => {
+        if (!pjParJoueur[noJ]) pjParJoueur[noJ] = new Set();
+        pjParJoueur[noJ].add(a.noPartie);
+      });
+    });
+
+    const joueursStats = membresÉquipe.map(j => {
+      const pts = ptsParJoueurTotal[j.noJoueur] || 0;
+      const pj = pjParJoueur[j.noJoueur]?.size || 0;
+      return { noJoueur: j.noJoueur, alias: j.alias, prénom: j.prénom, nom: j.nom, pts, pj, ptsPJ: pj > 0 ? Math.round(pts / pj * 100) / 100 : 0 };
+    }).sort((a, b) => b.pts - a.pts);
+
+    res.json({ équipe, parties: partiesÉquipe, joueurs: joueursStats });
+  } catch (e) {
+    console.error('Erreur stats équipe:', e);
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
 app.get('/api/stats/partie/:noPartie', (req, res) => {
     try {
         const noPartie = parseInt(req.params.noPartie);
@@ -941,6 +1057,7 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
 
     const équipeA = équipes.find(e => e.noÉquipe === partie.noÉquipeA);
     const équipeB = équipes.find(e => e.noÉquipe === partie.noÉquipeB);
+    const équipeQ = équipes.find(e => e.noÉquipe === partie.noÉquipeQuestionnaire);
 
     // Scores
     const scores = {};
@@ -1000,6 +1117,7 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
       noÉquipeB: partie.noÉquipeB,
       nomÉquipeA: équipeA?.nomÉquipe || '',
       nomÉquipeB: équipeB?.nomÉquipe || '',
+      nomÉquipeQuestionnaire: équipeQ?.nomÉquipe || null,
       scoreA: scores[partie.noÉquipeA] || 0,
       scoreB: scores[partie.noÉquipeB] || 0,
       séries: sériesMatch

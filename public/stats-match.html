@@ -188,6 +188,7 @@
 </head>
 <body>
     <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH <span>Statcan</span></h1>
     </header>
     <nav>
@@ -219,8 +220,8 @@
             jouées.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.noPartie;
-                const date = new Date(p.date).toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
-                opt.textContent = `Partie ${p.noPartie} — ${p.nomÉquipeA} c. ${p.nomÉquipeB} (${date})`;
+                const date = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+                opt.textContent = `Partie ${p.noPartie} — ${p.nomÉquipeA} vs${p.nomÉquipeB} (${date})`;
                 sel.appendChild(opt);
             });
 
@@ -271,25 +272,25 @@
         }
 
         function construireFeuille(d) {
-            const date = new Date(d.date).toLocaleDateString('fr-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const date = new Date(d.date + 'T12:00:00').toLocaleDateString('fr-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const gagnantA = d.scoreA > d.scoreB;
             const gagnantB = d.scoreB > d.scoreA;
 
             let html = `
             <div class="en-tête-match">
                 <div>
-                    <div class="titre">Partie ${d.noPartie} — ${d.nomÉquipeA} c. ${d.nomÉquipeB}</div>
-                    <div class="info">${date}${d.animateur ? ' · ' + d.animateur : ''}${d.noQuestionnaire ? ' · Questionnaire #' + d.noQuestionnaire : ''}</div>
+                    <div class="titre">Partie ${d.noPartie} — <a href="stats-equipe.html?noEquipe=${d.noÉquipeA}" style="color:inherit;text-decoration:none;">${d.nomÉquipeA}</a> vs <a href="stats-equipe.html?noEquipe=${d.noÉquipeB}" style="color:inherit;text-decoration:none;">${d.nomÉquipeB}</a></div>
+                    <div class="info">${date}${d.animateur ? ' · ' + d.animateur : ''}${d.noQuestionnaire ? ' · Questionnaire #' + d.noQuestionnaire + (d.nomÉquipeQuestionnaire ? ' (' + d.nomÉquipeQuestionnaire + ')' : '') : ''}</div>
                 </div>
             </div>
             <div class="score-bloc">
                 <div class="score-équipe ${gagnantA ? 'gagnant' : 'perdant'}">
-                    <div class="nom">${gagnantA ? '🏆 ' : ''}${d.nomÉquipeA}</div>
+                    <div class="nom">${gagnantA ? '🏆 ' : ''}<a href="stats-equipe.html?noEquipe=${d.noÉquipeA}" style="color:inherit;text-decoration:none;">${d.nomÉquipeA}</a></div>
                     <div class="pts">${d.scoreA}</div>
                 </div>
-                <div class="score-vs">c.</div>
+
                 <div class="score-équipe ${gagnantB ? 'gagnant' : 'perdant'}">
-                    <div class="nom">${gagnantB ? '🏆 ' : ''}${d.nomÉquipeB}</div>
+                    <div class="nom">${gagnantB ? '🏆 ' : ''}<a href="stats-equipe.html?noEquipe=${d.noÉquipeB}" style="color:inherit;text-decoration:none;">${d.nomÉquipeB}</a></div>
                     <div class="pts">${d.scoreB}</div>
                 </div>
             </div>`;
