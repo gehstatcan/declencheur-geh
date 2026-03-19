@@ -178,7 +178,7 @@
                 const ptsPJ = j.ptsPJ > 0 ? j.ptsPJ.toFixed(2) : '—';
                 return `<tr>
                     <td class="rang">${i + 1}</td>
-                    <td class="gauche">${j.alias}${j.nom ? ` <span class="gris" style="font-weight:400;">${j.nom}</span>` : ''}</td>
+                    <td class="gauche"><a href="stats-joueur.html?noEquipe=${noÉquipe}&noJoueur=${j.noJoueur}" style="color:inherit;text-decoration:none;">${j.alias}${j.nom ? ` <span style="font-weight:400;color:var(--gris);">${j.nom}</span>` : ''}</a></td>
                     <td>${j.pj || '—'}</td>
                     <td class="pts">${j.pts || '—'}</td>
                     <td>${ptsPJ}</td>

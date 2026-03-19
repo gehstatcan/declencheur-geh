@@ -660,6 +660,59 @@ app.get("/api/stats/classement", (req, res) => {
 });
 
 // ============================================================
+// Stats par thème
+app.get('/api/stats/themes', (req, res) => {
+  try {
+    let répondants = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { répondants = []; }
+
+    // Lookup noPartie → noQuestionnaire
+    const questParPartie = {};
+    parties.forEach(p => { questParPartie[p.noPartie] = p.noQuestionnaire; });
+
+    // Lookup noQuestionnaire → noSérie → { thème, sousThème }
+    const thèmeLookup = {};
+    thèmes.forEach(t => {
+      thèmeLookup[t.noQuestionnaire] = {};
+      t.séries.forEach(s => { thèmeLookup[t.noQuestionnaire][s.noSérie] = { thème: s.thème, sousThème: s.sousThème }; });
+    });
+
+    // Accumuler pts par joueur par thème (excl. collectif)
+    const statsParThème = {};
+    répondants.forEach(r => {
+      if (r.noJoueur === 99) return;
+      const noQ = questParPartie[r.noPartie];
+      if (!noQ) return;
+      const thèmeInfo = thèmeLookup[noQ]?.[r.noSérie];
+      if (!thèmeInfo) return;
+      const clé = thèmeInfo.thème;
+      if (!statsParThème[clé]) statsParThème[clé] = {};
+      const joueurClé = `${r.noÉquipe}-${r.noJoueur}`;
+      if (!statsParThème[clé][joueurClé]) statsParThème[clé][joueurClé] = { noÉquipe: r.noÉquipe, noJoueur: r.noJoueur, pts: 0 };
+      const série = séries.find(s => s.noSérie === r.noSérie);
+      const q = série?.questions.find(q => q.noQuestion === r.noQuestion);
+      const pts = r.pointsSecondaires ? (q?.pointsSecondaires ?? 5) : (q?.points ?? 10);
+      statsParThème[clé][joueurClé].pts += pts;
+    });
+
+    const résultat = Object.entries(statsParThème).map(([thème, joueursMap]) => {
+      const joueursList = Object.values(joueursMap).map(j => {
+        const joueur = joueurs.find(jj => jj.noÉquipe === j.noÉquipe && jj.noJoueur === j.noJoueur);
+        const équipe = équipes.find(e => e.noÉquipe === j.noÉquipe);
+        return { noJoueur: j.noJoueur, alias: joueur?.alias || `J${j.noJoueur}`, nom: joueur?.nom || '', nomÉquipe: équipe?.nomÉquipe || '', noÉquipe: j.noÉquipe, pts: j.pts };
+      }).sort((a, b) => b.pts - a.pts);
+      return { thème, joueurs: joueursList };
+    }).sort((a, b) => a.thème.localeCompare(b.thème, 'fr'));
+
+    res.json(résultat);
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
 // Compteurs — points par équipe et par joueur
 // ============================================================
 app.get("/api/stats/compteurs", (req, res) => {
@@ -856,6 +909,176 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
     res.json(résultat);
   } catch (e) {
     console.error("Erreur stats joueur:", e);
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
+// Profil joueur — infos, parties, stats par thème
+// ============================================================
+app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
+  try {
+    const noÉquipe = parseInt(req.params.noEquipe);
+    const noJoueur = parseInt(req.params.noJoueur);
+
+    const joueur = joueurs.find(j => j.noÉquipe === noÉquipe && j.noJoueur === noJoueur);
+    if (!joueur) return res.status(404).json({ erreur: 'Joueur introuvable' });
+
+    const équipe = équipes.find(e => e.noÉquipe === noÉquipe);
+
+    let répondants = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { répondants = []; }
+
+    let alignements = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'alignements.json'), 'utf-8').trim();
+      alignements = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { alignements = []; }
+
+    const répJoueur = répondants.filter(r => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur);
+
+    // PJ depuis alignements
+    const pj = alignements.filter(a => a.noÉquipe === noÉquipe && (a.joueurs || []).includes(noJoueur)).length;
+
+    // Pts par partie
+    const ptsParPartie = {};
+    répJoueur.forEach(r => {
+      if (!ptsParPartie[r.noPartie]) ptsParPartie[r.noPartie] = 0;
+      const série = séries.find(s => s.noSérie === r.noSérie);
+      const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
+      const pts = r.pointsSecondaires ? (question ? question.pointsSecondaires : 5) : (question ? question.points : 10);
+      ptsParPartie[r.noPartie] += pts;
+    });
+
+    const totalPts = Object.values(ptsParPartie).reduce((s, v) => s + v, 0);
+
+    // Scores totaux par partie
+    const scoresParPartie = {};
+    répondants.forEach(r => {
+      if (!scoresParPartie[r.noPartie]) scoresParPartie[r.noPartie] = {};
+      if (!scoresParPartie[r.noPartie][r.noÉquipe]) scoresParPartie[r.noPartie][r.noÉquipe] = 0;
+      const série = séries.find(s => s.noSérie === r.noSérie);
+      const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
+      const pts = r.pointsSecondaires ? (question ? question.pointsSecondaires : 5) : (question ? question.points : 10);
+      scoresParPartie[r.noPartie][r.noÉquipe] += pts;
+    });
+
+    // Liste des parties
+    const partiesJoueur = Object.entries(ptsParPartie).map(([noPartieStr, ptsJoueur]) => {
+      const noPartie = parseInt(noPartieStr);
+      const p = parties.find(p => p.noPartie === noPartie);
+      const noAdv = p?.noÉquipeA === noÉquipe ? p?.noÉquipeB : p?.noÉquipeA;
+      const équipeAdv = équipes.find(e => e.noÉquipe === noAdv);
+      const scores = scoresParPartie[noPartie] || {};
+      const scoreÉquipe = scores[noÉquipe] || 0;
+      const scoreAdv = scores[noAdv] || 0;
+      const ptsTotal = scoreÉquipe + scoreAdv;
+      const résultat = scoreÉquipe > scoreAdv ? 'V' : scoreÉquipe < scoreAdv ? 'D' : 'N';
+      return {
+        noPartie,
+        date: p?.date || '',
+        noAdversaire: noAdv,
+        nomAdversaire: équipeAdv?.nomÉquipe || '',
+        résultat,
+        scoreÉquipe,
+        scoreAdv,
+        ptsJoueur,
+        ptsTotal,
+        pctJoueur: ptsTotal > 0 ? Math.round(ptsJoueur / ptsTotal * 10000) / 100 : 0,
+      };
+    }).sort((a, b) => a.date.localeCompare(b.date));
+
+    // Questionnaires protégés : au moins une partie non jouée avec ce questionnaire
+    const partiesJouées = new Set(répondants.map(r => r.noPartie));
+    const partiesParQuestionnaire = {};
+    parties.forEach(p => {
+      if (!partiesParQuestionnaire[p.noQuestionnaire]) partiesParQuestionnaire[p.noQuestionnaire] = [];
+      partiesParQuestionnaire[p.noQuestionnaire].push(p.noPartie);
+    });
+    const questionnairesProtégés = new Set();
+    Object.entries(partiesParQuestionnaire).forEach(([noQ, noParties]) => {
+      if (noParties.some(noP => !partiesJouées.has(noP))) questionnairesProtégés.add(parseInt(noQ));
+    });
+
+    // Lookup questions (texte + réponse)
+    let questionsData = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'questions.json'), 'utf-8').trim();
+      questionsData = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { questionsData = []; }
+    const questionsLookup = {};
+    questionsData.forEach(q => {
+      questionsLookup[q.noQuestionnaire] = {};
+      q.séries.forEach(s => {
+        questionsLookup[q.noQuestionnaire][s.noSérie] = {};
+        s.questions.forEach(qq => { questionsLookup[q.noQuestionnaire][s.noSérie][qq.noQuestion] = qq; });
+      });
+    });
+
+    // Stats par thème
+    const questParPartie = {};
+    parties.forEach(p => { questParPartie[p.noPartie] = p.noQuestionnaire; });
+    const thèmeLookup = {};
+    thèmes.forEach(t => {
+      thèmeLookup[t.noQuestionnaire] = {};
+      t.séries.forEach(s => { thèmeLookup[t.noQuestionnaire][s.noSérie] = s.thème; });
+    });
+    const ptsParThème = {};
+    répJoueur.forEach(r => {
+      const noQ = questParPartie[r.noPartie];
+      const thème = noQ && thèmeLookup[noQ] ? thèmeLookup[noQ][r.noSérie] : null;
+      if (!thème) return;
+      const série = séries.find(s => s.noSérie === r.noSérie);
+      const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
+      const pts = r.pointsSecondaires ? (question ? question.pointsSecondaires : 5) : (question ? question.points : 10);
+      ptsParThème[thème] = (ptsParThème[thème] || 0) + pts;
+    });
+    const themesResult = Object.entries(ptsParThème)
+      .map(([theme, pts]) => ({ theme, pts }))
+      .sort((a, b) => b.pts - a.pts);
+
+    res.json({
+      joueur: {
+        alias: joueur.alias,
+        nom: joueur.nom || '',
+        noÉquipe,
+        nomÉquipe: équipe?.nomÉquipe || '',
+        pj,
+        pts: totalPts,
+        ptsPJ: pj > 0 ? Math.round(totalPts / pj * 100) / 100 : 0,
+      },
+      parties: partiesJoueur,
+      themes: themesResult,
+      questions: répJoueur.map(r => {
+        const noQ = questParPartie[r.noPartie];
+        const thème = noQ && thèmeLookup[noQ] ? thèmeLookup[noQ][r.noSérie] : null;
+        const série = séries.find(s => s.noSérie === r.noSérie);
+        const qSérie = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
+        const pts = r.pointsSecondaires ? (qSérie ? qSérie.pointsSecondaires : 5) : (qSérie ? qSérie.points : 10);
+        const protégé = noQ ? questionnairesProtégés.has(noQ) : false;
+        const qTexte = !protégé && noQ ? questionsLookup[noQ]?.[r.noSérie]?.[r.noQuestion] : null;
+        const p = parties.find(p => p.noPartie === r.noPartie);
+        const noAdv = p?.noÉquipeA === noÉquipe ? p?.noÉquipeB : p?.noÉquipeA;
+        const équipeAdv = équipes.find(e => e.noÉquipe === noAdv);
+        return {
+          noPartie: r.noPartie,
+          date: p?.date || '',
+          noAdversaire: noAdv,
+          nomAdversaire: équipeAdv?.nomÉquipe || '',
+          noSérie: r.noSérie,
+          thème: thème || '',
+          texte: protégé ? '' : (qTexte?.texte || ''),
+          réponse: protégé ? '' : (qTexte?.réponse || ''),
+          pts,
+          estSecondaire: !!r.pointsSecondaires,
+        };
+      }).sort((a, b) => a.date.localeCompare(b.date) || a.noPartie - b.noPartie),
+    });
+  } catch (e) {
+    console.error('Erreur profil joueur:', e);
     res.status(500).json({ erreur: e.message });
   }
 });

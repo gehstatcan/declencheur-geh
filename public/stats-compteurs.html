@@ -268,6 +268,138 @@
             width: 100%;
             max-width: 900px;
         }
+
+        .onglets {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 24px;
+            background: var(--fond-carte);
+            padding: 6px;
+            border-radius: 24px;
+        }
+
+        .onglets button {
+            padding: 7px 20px;
+            border: none;
+            border-radius: 18px;
+            background: transparent;
+            color: var(--gris);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .onglets button:hover { color: var(--texte); }
+        .onglets button.actif { background: var(--accent); color: white; }
+
+        .panneau { display: none; width: 100%; max-width: 900px; }
+        .panneau.actif { display: block; }
+
+        .thème-bloc {
+            background: var(--blanc);
+            border-radius: var(--rayon);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .thème-titre {
+            background: var(--fond-champ);
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 0.95em;
+            color: var(--accent);
+        }
+
+        .thème-joueurs {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .thème-joueur {
+            display: flex;
+            align-items: center;
+            padding: 7px 16px;
+            border-bottom: 1px solid var(--fond-carte);
+            gap: 10px;
+        }
+
+        .thème-joueur:last-child { border-bottom: none; }
+        .thème-rang { color: var(--gris); font-size: 0.85em; width: 28px; text-align: center; flex-shrink: 0; }
+        .thème-alias { font-weight: 600; }
+        .thème-nom { font-weight: 400; color: var(--gris); font-size: 0.88em; margin-left: 4px; }
+        .thème-equipe { margin-left: auto; padding-left: 12px; }
+        .thème-equipe a { color: var(--accent); text-decoration: none; font-size: 0.85em; font-weight: 600; background: var(--fond-champ); padding: 2px 8px; border-radius: 10px; }
+        .thème-equipe a:hover { background: var(--fond-carte); }
+        .thème-pts { font-weight: 700; color: var(--accent); min-width: 36px; text-align: right; flex-shrink: 0; }
+        .thème-joueur.caché { display: none; }
+
+        .themes-layout { display: flex; gap: 20px; width: 100%; align-items: flex-start; }
+
+        .themes-sidebar {
+            width: 180px;
+            flex-shrink: 0;
+            background: var(--blanc);
+            border-radius: var(--rayon);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 8px;
+            position: sticky;
+            top: 16px;
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+        }
+
+        .themes-sidebar a {
+            display: block;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.84em;
+            font-weight: 600;
+            color: var(--texte);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .themes-sidebar a:hover { background: var(--fond-champ); }
+        .themes-sidebar a.actif { background: var(--accent); color: white; }
+
+        .themes-contenu { flex: 1; min-width: 0; }
+
+        .btn-voir-tout {
+            margin: 8px 16px 12px;
+            padding: 5px 14px;
+            border: 1.5px solid var(--fond-champ);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--gris);
+            font-size: 0.82em;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-voir-tout:hover { background: var(--fond-champ); color: var(--texte); }
+
+        .btn-tout-afficher {
+            margin-bottom: 16px;
+            padding: 7px 18px;
+            border: 1.5px solid var(--accent);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--accent);
+            font-size: 0.88em;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-tout-afficher:hover { background: var(--accent); color: white; }
+        .btn-tout-afficher:disabled { opacity: 0.45; cursor: default; }
+        .btn-tout-afficher:disabled:hover { background: transparent; color: var(--accent); }
     </style>
 </head>
 
@@ -287,9 +419,16 @@
 
     <h2>📊 Compteurs 2025-2026</h2>
 
-    <!-- Tableau équipes -->
+    <div class="onglets">
+        <button class="actif" onclick="afficherOnglet('joueurs', this)">Joueurs</button>
+        <button onclick="afficherOnglet('themes', this)">Par thème</button>
+        <button onclick="afficherOnglet('équipes', this)">Équipes</button>
+    </div>
+
+    <!-- Panneau équipes -->
+    <div id="panneau-équipes" class="panneau">
     <div class="section">
-        <h3>Les équipes</h3>
+        <h3>Points d'équipe</h3>
         <div class="tableau-conteneur">
             <table>
                 <thead>
@@ -297,8 +436,8 @@
                         <th>Pos</th>
                         <th class="gauche th-tri" data-table="équipes" data-col="nomÉquipe">Équipe</th>
                         <th class="th-tri" data-table="équipes" data-col="pjÉquipe">PJ</th>
-                        <th class="th-tri actif" data-table="équipes" data-col="totalÉquipe">Pts ▼</th>
-                        <th class="th-tri" data-table="équipes" data-col="ptsPJÉquipe">Pts/PJ</th>
+                        <th class="th-tri actif" data-table="équipes" data-col="ptsÉquipeCollectif">Pts ▼</th>
+                        <th class="th-tri" data-table="équipes" data-col="ptsPJCollectif">Pts/PJ</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyÉquipes">
@@ -312,14 +451,16 @@
         </div>
     </div>
 
-    <!-- Tableau joueurs avec expand -->
+    </div><!-- fin panneau équipes -->
+
+    <!-- Panneau joueurs -->
+    <div id="panneau-joueurs" class="panneau actif">
     <div class="section">
         <h3>Les joueurs</h3>
         <div class="tableau-conteneur">
             <table>
                 <thead>
                     <tr>
-                        <th style="width:36px;"></th>
                         <th>Pos</th>
                         <th class="gauche th-tri" data-table="joueurs" data-col="alias">Joueur</th>
                         <th class="gauche th-tri" data-table="joueurs" data-col="nomÉquipe">Équipe</th>
@@ -339,21 +480,105 @@
         </div>
     </div>
 
+    </div><!-- fin panneau joueurs -->
+
+    <!-- Panneau par thème -->
+    <div id="panneau-themes" class="panneau">
+        <div class="themes-layout">
+            <div id="sidebarThèmes" class="themes-sidebar">
+                <div style="text-align:center;color:var(--gris);padding:16px;font-size:0.85em;">Chargement...</div>
+            </div>
+            <div class="themes-contenu">
+                <div id="contenuThemes">
+                    <div style="text-align:center;color:var(--gris);padding:40px;">Chargement...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="note-bas">
         Calculé automatiquement depuis les parties terminées
     </div>
 
     <script>
         let donnéesCompteurs = [];
+        let donnéesThèmes = null;
         const triÉtat = {
-            équipes: { col: 'totalÉquipe', dir: -1 },
+            équipes: { col: 'ptsÉquipeCollectif', dir: -1 },
             joueurs: { col: 'points', dir: -1 }
         };
+
+        function afficherOnglet(id, btn) {
+            document.querySelectorAll('.panneau').forEach(p => p.classList.remove('actif'));
+            document.querySelectorAll('.onglets button').forEach(b => b.classList.remove('actif'));
+            document.getElementById('panneau-' + id).classList.add('actif');
+            btn.classList.add('actif');
+            if (id === 'themes' && donnéesThèmes === null) chargerThèmes();
+        }
 
         async function chargerCompteurs() {
             donnéesCompteurs = await fetch('/api/stats/compteurs').then(r => r.json());
             afficherÉquipes();
             afficherJoueurs();
+        }
+
+        async function chargerThèmes() {
+            donnéesThèmes = await fetch('/api/stats/themes').then(r => r.json());
+            const sidebar = document.getElementById('sidebarThèmes');
+            const div = document.getElementById('contenuThemes');
+
+            if (!donnéesThèmes.length) {
+                sidebar.innerHTML = '';
+                div.innerHTML = '<div style="text-align:center;color:var(--gris);padding:40px;">Aucune donnée</div>';
+                return;
+            }
+
+            sidebar.innerHTML = donnéesThèmes.map((t, i) =>
+                `<a id="nav-theme-${i}" onclick="navThème(${i})">${t.thème}</a>`
+            ).join('');
+
+            const toutBtn = `<button class="btn-tout-afficher" onclick="toutAfficher(this)">Tout afficher</button>`;
+
+            div.innerHTML = toutBtn + donnéesThèmes.map((t, i) => {
+                const joueursHtml = t.joueurs.map((j, idx) => `
+                    <div class="thème-joueur${idx >= 5 ? ' caché' : ''}" data-theme="${i}">
+                        <span class="thème-rang">${idx + 1}</span>
+                        <span class="thème-alias"><a href="stats-joueur.html?noEquipe=${j.noÉquipe}&noJoueur=${j.noJoueur}" style="color:inherit;text-decoration:none;">${j.alias}</a>${j.nom ? `<span class="thème-nom">${j.nom}</span>` : ''}</span>
+                        <span class="thème-equipe"><a href="stats-equipe.html?noEquipe=${j.noÉquipe}">${j.nomÉquipe}</a></span>
+                        <span class="thème-pts">${j.pts}</span>
+                    </div>`).join('');
+
+                const voirToutBtn = t.joueurs.length > 5
+                    ? `<button class="btn-voir-tout" onclick="voirTout(${i}, this)">Voir tout (${t.joueurs.length})</button>`
+                    : '';
+
+                return `
+                    <div class="thème-bloc" id="theme-bloc-${i}">
+                        <div class="thème-titre">${t.thème}</div>
+                        <div class="thème-joueurs">${joueursHtml}</div>
+                        ${voirToutBtn}
+                    </div>`;
+            }).join('');
+
+            document.querySelector('#sidebarThèmes a')?.classList.add('actif');
+        }
+
+        function navThème(i) {
+            document.querySelectorAll('#sidebarThèmes a').forEach(a => a.classList.remove('actif'));
+            document.getElementById(`nav-theme-${i}`).classList.add('actif');
+            document.getElementById(`theme-bloc-${i}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function voirTout(i, btn) {
+            document.querySelectorAll(`.thème-joueur[data-theme="${i}"].caché`).forEach(el => el.classList.remove('caché'));
+            btn.remove();
+        }
+
+        function toutAfficher(btn) {
+            document.querySelectorAll('.thème-joueur.caché').forEach(el => el.classList.remove('caché'));
+            document.querySelectorAll('.btn-voir-tout').forEach(b => b.remove());
+            btn.disabled = true;
+            btn.textContent = 'Tout affiché ✓';
         }
 
         document.querySelectorAll('.th-tri').forEach(th => {
@@ -391,7 +616,7 @@
             const tbody = document.getElementById('tbodyÉquipes');
             const { col, dir } = triÉtat.équipes;
             const équipes = trierPar(
-                donnéesCompteurs.filter(é => é.totalÉquipe > 0),
+                donnéesCompteurs.filter(é => é.pjÉquipe > 0),
                 col, dir
             );
 
@@ -405,13 +630,14 @@
 
             tbody.innerHTML = équipes.map((é, i) => {
                 const pj = é.pjÉquipe || '—';
-                const ptsPJ = é.ptsPJÉquipe > 0 ? é.ptsPJÉquipe.toFixed(2) : '—';
+                const pts = é.ptsÉquipeCollectif || 0;
+                const ptsPJ = é.pjÉquipe > 0 ? (pts / é.pjÉquipe).toFixed(2) : '—';
 
                 return `<tr>
                     <td class="rang">${i + 1}</td>
                     <td class="gauche"><a href="stats-equipe.html?noEquipe=${é.noÉquipe}" style="color:inherit;text-decoration:none;font-weight:600;">${é.nomÉquipe}</a></td>
                     <td>${pj}</td>
-                    <td class="pts">${é.totalÉquipe}</td>
+                    <td class="pts">${pts}</td>
                     <td>${ptsPJ}</td>
                 </tr>`;
             }).join('');
@@ -429,7 +655,7 @@
             );
 
             if (tousJoueurs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7"
+                tbody.innerHTML = `<tr><td colspan="6"
                     style="text-align:center; color:var(--gris); padding:30px;">
                     Aucune donnée pour l'instant
                 </td></tr>`;
@@ -441,28 +667,14 @@
                     ? (j.points / j.pj).toFixed(2)
                     : '—';
 
-                const idLigne = `joueur-${j.noÉquipe}-${j.noJoueur}`;
-
                 return `
-                    <tr class="ligne-joueur" id="ligne-${idLigne}">
-                        <td style="padding:6px 8px;">
-                            <button class="btn-expand" id="btn-${idLigne}"
-                                onclick="toggleDétail('${idLigne}', ${j.noÉquipe}, ${j.noJoueur})"
-                                title="Voir les parties">+</button>
-                        </td>
+                    <tr class="ligne-joueur">
                         <td class="rang">${i + 1}</td>
-                        <td class="gauche">${j.alias}${j.nom ? ` <span class="gris" style="font-weight:400;">${j.nom}</span>` : ''}</td>
+                        <td class="gauche"><a href="stats-joueur.html?noEquipe=${j.noÉquipe}&noJoueur=${j.noJoueur}" style="color:inherit;text-decoration:none;">${j.alias}${j.nom ? ` <span style="font-weight:400;color:var(--gris);">${j.nom}</span>` : ''}</a></td>
                         <td class="gauche"><a href="stats-equipe.html?noEquipe=${j.noÉquipe}" style="color:var(--accent);text-decoration:none;font-weight:600;">${j.nomÉquipe}</a></td>
                         <td>${j.pj || '—'}</td>
                         <td class="pts">${j.points}</td>
                         <td>${ptsPJ}</td>
-                    </tr>
-                    <tr class="ligne-expand" id="expand-${idLigne}">
-                        <td colspan="7" style="padding:0;">
-                            <div class="zone-détail" id="détail-${idLigne}">
-                                Chargement...
-                            </div>
-                        </td>
                     </tr>`;
             }).join('');
         }

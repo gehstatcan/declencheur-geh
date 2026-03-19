@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Joueur — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --rouge: #c0392b;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--fond); color: var(--texte); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
+        header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+        header img { mix-blend-mode: multiply; }
+        header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2em; letter-spacing: 2px; color: var(--accent); }
+        header h1 span { color: #888; }
+        nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+        nav a { padding: 6px 14px; border-radius: 20px; background: var(--fond-carte); color: var(--texte); text-decoration: none; font-size: 0.9em; font-weight: 600; border: 1px solid var(--fond-champ); }
+        nav a:hover { background: var(--fond-champ); }
+        .section { width: 100%; max-width: 860px; background: var(--fond-carte); border-radius: var(--rayon); padding: 20px; margin-bottom: 24px; }
+        h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8em; letter-spacing: 1px; color: var(--accent); margin-bottom: 4px; text-align: center; }
+        .sous-titre { text-align: center; color: var(--gris); font-size: 0.9em; margin-bottom: 20px; }
+        .sous-titre a { color: var(--accent); font-weight: 600; text-decoration: none; }
+        .sous-titre a:hover { text-decoration: underline; }
+        h3 { font-size: 1em; font-weight: 600; color: var(--accent); margin-bottom: 12px; border-bottom: 2px solid var(--fond-champ); padding-bottom: 6px; }
+        .stats-globales { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 0; }
+        .stat-carte { background: var(--blanc); border-radius: 10px; padding: 12px 20px; text-align: center; flex: 1; min-width: 80px; }
+        .stat-carte .val { font-family: 'Bebas Neue', sans-serif; font-size: 2em; color: var(--accent); }
+        .stat-carte .lbl { font-size: 0.78em; color: var(--gris); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+        thead th { background: var(--fond-champ); color: var(--texte); padding: 8px 12px; font-weight: 600; text-align: center; }
+        thead th.gauche { text-align: left; }
+        tbody tr { border-bottom: 1px solid var(--fond-champ); }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr.nouvelle-partie td { border-top: 2px solid var(--fond-champ); }
+        tbody td { padding: 8px 12px; text-align: center; }
+        tbody td.gauche { text-align: left; }
+        .résultat-V { color: var(--vert); font-weight: 700; }
+        .résultat-D { color: var(--rouge); font-weight: 700; }
+        .résultat-N { color: var(--gris); font-weight: 600; }
+        .pts { font-weight: 700; color: var(--accent); }
+        .gris { color: var(--gris); }
+        .rang { color: var(--gris); font-size: 0.85em; width: 32px; }
+        .barre-fond { background: var(--fond-champ); border-radius: 4px; height: 6px; min-width: 60px; overflow: hidden; }
+        .barre-fill { height: 6px; background: var(--accent); border-radius: 4px; }
+        .graphiques { display: flex; gap: 20px; flex-wrap: wrap; width: 100%; max-width: 860px; margin-bottom: 24px; }
+        .graphique-carte { flex: 1; min-width: 280px; background: var(--fond-carte); border-radius: var(--rayon); padding: 20px; }
+        .graphique-carte h3 { font-size: 1em; font-weight: 600; color: var(--accent); margin-bottom: 14px; border-bottom: 2px solid var(--fond-champ); padding-bottom: 6px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px;">
+        <h1>GEH <span>Statcan</span></h1>
+    </header>
+    <nav>
+        <a href="stats-calendrier.html">📅 Calendrier</a>
+        <a href="stats-classement.html">🏆 Classement</a>
+        <a href="stats-compteurs.html">📊 Compteurs</a>
+        <a href="stats-match.html">📋 Feuille de match</a>
+    </nav>
+
+    <h2 id="titreJoueur">Chargement...</h2>
+    <div class="sous-titre" id="sousTitre"></div>
+
+    <div class="section">
+        <div class="stats-globales" id="statsGlobales"></div>
+    </div>
+
+    <div class="graphiques">
+        <div class="graphique-carte">
+            <h3>Évolution des points</h3>
+            <canvas id="graphEvolution" height="200"></canvas>
+        </div>
+        <div class="graphique-carte">
+            <h3>Points par thème</h3>
+            <canvas id="graphThemes" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Parties jouées</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="gauche">Date</th>
+                    <th class="gauche">Adversaire</th>
+                    <th>Résultat</th>
+                    <th>Score</th>
+                    <th>Pts joueur</th>
+                    <th>% du match</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyParties">
+                <tr><td colspan="6" style="text-align:center;color:var(--gris);padding:30px;">Chargement...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Points par thème</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="rang">Pos</th>
+                    <th class="gauche">Thème</th>
+                    <th>Pts</th>
+                    <th style="min-width:100px;"></th>
+                </tr>
+            </thead>
+            <tbody id="tbodyThèmes">
+                <tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Chargement...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Questions réussies</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th class="gauche">Partie</th>
+                    <th class="gauche">Adversaire</th>
+                    <th>Sér.</th>
+                    <th class="gauche">Thème</th>
+                    <th class="gauche">Question</th>
+                    <th class="gauche">Réponse</th>
+                    <th>Pts</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyQuestions">
+                <tr><td colspan="7" style="text-align:center;color:var(--gris);padding:30px;">Chargement...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const noEquipe = parseInt(params.get('noEquipe'));
+        const noJoueur = parseInt(params.get('noJoueur'));
+
+        async function charger() {
+            if (!noEquipe || !noJoueur) {
+                document.getElementById('titreJoueur').textContent = 'Joueur introuvable';
+                return;
+            }
+
+            const data = await fetch(`/api/stats/joueur-profil/${noEquipe}/${noJoueur}`).then(r => r.json());
+            if (data.erreur) {
+                document.getElementById('titreJoueur').textContent = data.erreur;
+                return;
+            }
+
+            const j = data.joueur;
+            document.title = `${j.alias} — GEH Statcan`;
+            document.getElementById('titreJoueur').textContent = j.alias + (j.nom ? ` ${j.nom}` : '');
+            document.getElementById('sousTitre').innerHTML =
+                `<a href="stats-equipe.html?noEquipe=${j.noÉquipe}">${j.nomÉquipe}</a>`;
+
+            afficherStats(j);
+            afficherParties(data.parties, j.noÉquipe);
+            afficherThèmes(data.themes);
+            afficherQuestions(data.questions);
+            dessinerGraphiques(data.parties, data.themes);
+        }
+
+        function afficherStats(j) {
+            const ptsPJ = j.ptsPJ > 0 ? j.ptsPJ.toFixed(2) : '—';
+            document.getElementById('statsGlobales').innerHTML = `
+                <div class="stat-carte">
+                    <div class="val">${j.pj || 0}</div>
+                    <div class="lbl">Parties jouées</div>
+                </div>
+                <div class="stat-carte">
+                    <div class="val">${j.pts || 0}</div>
+                    <div class="lbl">Points totaux</div>
+                </div>
+                <div class="stat-carte">
+                    <div class="val">${ptsPJ}</div>
+                    <div class="lbl">Pts / PJ</div>
+                </div>`;
+        }
+
+        function afficherParties(parties, noÉquipe) {
+            const tbody = document.getElementById('tbodyParties');
+            if (!parties.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gris);padding:30px;">Aucune partie</td></tr>';
+                return;
+            }
+            tbody.innerHTML = parties.map(p => {
+                const date = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+                const classeR = `résultat-${p.résultat}`;
+                const lienAdv = `<a href="stats-equipe.html?noEquipe=${p.noAdversaire}" style="color:inherit;text-decoration:none;font-weight:600;">${p.nomAdversaire}</a>`;
+                const scoreTexte = `${p.scoreÉquipe} — ${p.scoreAdv}`;
+                const pct = p.pctJoueur.toFixed(1);
+                const largeur = Math.min(p.pctJoueur, 100);
+                return `<tr>
+                    <td class="gauche gris">${date}</td>
+                    <td class="gauche">${lienAdv}</td>
+                    <td class="${classeR}">${p.résultat}</td>
+                    <td>${scoreTexte}</td>
+                    <td class="pts">${p.ptsJoueur}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+                            <span style="font-size:0.88em;color:var(--gris);min-width:38px;text-align:right;">${pct}%</span>
+                            <div class="barre-fond" style="width:80px;">
+                                <div class="barre-fill" style="width:${largeur}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function afficherQuestions(questions) {
+            const tbody = document.getElementById('tbodyQuestions');
+            if (!questions.length) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Aucune question</td></tr>';
+                return;
+            }
+            let dernièrePartie = null;
+            tbody.innerHTML = questions.map(q => {
+                const date = new Date(q.date + 'T12:00:00').toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' });
+                const classePartie = dernièrePartie !== null && q.noPartie !== dernièrePartie ? ' nouvelle-partie' : '';
+                dernièrePartie = q.noPartie;
+                return `<tr class="${classePartie}">
+                    <td class="gauche gris" style="font-size:0.85em;white-space:nowrap;">#${q.noPartie} <span style="font-weight:400;">${date}</span></td>
+                    <td class="gauche" style="font-size:0.85em;"><a href="stats-equipe.html?noEquipe=${q.noAdversaire}" style="color:inherit;text-decoration:none;font-weight:600;">${q.nomAdversaire}</a></td>
+                    <td class="gris" style="font-size:0.85em;">${q.noSérie}</td>
+                    <td class="gauche gris" style="font-size:0.85em;white-space:nowrap;">${q.thème || '—'}</td>
+                    <td class="gauche" style="font-size:0.88em;">${q.texte}</td>
+                    <td class="gauche" style="font-size:0.88em;font-weight:600;">${q.réponse}${q.estSecondaire ? ' <span class="gris" style="font-weight:400;">(2ᵉ)</span>' : ''}</td>
+                    <td class="pts">${q.pts}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function afficherThèmes(themes) {
+            const tbody = document.getElementById('tbodyThèmes');
+            if (!themes.length) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Aucune donnée</td></tr>';
+                return;
+            }
+            const max = themes[0].pts;
+            tbody.innerHTML = themes.map((t, i) => {
+                const largeur = max > 0 ? Math.round(t.pts / max * 100) : 0;
+                return `<tr>
+                    <td class="rang">${i + 1}</td>
+                    <td class="gauche">${t.theme}</td>
+                    <td class="pts">${t.pts}</td>
+                    <td>
+                        <div class="barre-fond">
+                            <div class="barre-fill" style="width:${largeur}%;"></div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function dessinerGraphiques(parties, themes) {
+            const couleur = '#2c3e50';
+            const couleurFond = 'rgba(44,62,80,0.12)';
+
+            // — Évolution des points —
+            if (parties.length > 0) {
+                const labels = parties.map(p =>
+                    new Date(p.date + 'T12:00:00').toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' })
+                );
+                new Chart(document.getElementById('graphEvolution'), {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Pts joueur',
+                            data: parties.map(p => p.ptsJoueur),
+                            backgroundColor: parties.map(p =>
+                                p.résultat === 'V' ? 'rgba(39,174,96,0.75)' :
+                                p.résultat === 'D' ? 'rgba(192,57,43,0.65)' :
+                                'rgba(136,136,136,0.5)'
+                            ),
+                            borderRadius: 5,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    afterLabel: ctx => {
+                                        const p = parties[ctx.dataIndex];
+                                        return `${p.résultat}  ${p.scoreÉquipe}–${p.scoreAdv}  (${p.pctJoueur.toFixed(1)}% du match)`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { stepSize: 10 } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('graphEvolution').closest('.graphique-carte').style.display = 'none';
+            }
+
+            // — Radar par thème —
+            if (themes.length >= 3) {
+                const max = themes[0].pts;
+                new Chart(document.getElementById('graphThemes'), {
+                    type: 'radar',
+                    data: {
+                        labels: themes.map(t => t.theme),
+                        datasets: [{
+                            label: 'Points',
+                            data: themes.map(t => t.pts),
+                            backgroundColor: couleurFond,
+                            borderColor: couleur,
+                            borderWidth: 2,
+                            pointBackgroundColor: couleur,
+                            pointRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                suggestedMax: max,
+                                ticks: { display: false },
+                                pointLabels: { font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Moins de 3 thèmes → barres horizontales
+                new Chart(document.getElementById('graphThemes'), {
+                    type: 'bar',
+                    data: {
+                        labels: themes.map(t => t.theme),
+                        datasets: [{
+                            data: themes.map(t => t.pts),
+                            backgroundColor: couleurFond,
+                            borderColor: couleur,
+                            borderWidth: 2,
+                            borderRadius: 5,
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { beginAtZero: true },
+                            y: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        charger();
+    </script>
+</body>
+</html>
