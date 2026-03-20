@@ -82,8 +82,10 @@ function initialiserVolume() {
   }
 }
 
-// Appeler l'initialisation au démarrage
-initialiserVolume();
+// Appeler l'initialisation seulement si un Volume Railway est monté
+if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+  initialiserVolume();
+}
 
 const équipes = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
