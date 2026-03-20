@@ -92,3 +92,5 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+data/saisons/2025-2026/parties - test.json

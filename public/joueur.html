@@ -504,7 +504,21 @@
             ilxjours.setDate(ilxjours.getDate() - 5);
             const dateMin = ilxjours.toISOString().split('T')[0];
             partiesFiltrees = toutesParties.filter(p => p.date >= dateMin);
-            remplirSélecteur(partiesFiltrees);
+
+            // Pré-sélectionner la partie si noPartie est dans l'URL
+            const noPartieURL = parseInt(new URLSearchParams(location.search).get('noPartie'));
+            if (noPartieURL) {
+                if (!partiesFiltrees.find(p => p.noPartie === noPartieURL)) {
+                    document.getElementById('toutesParties').checked = true;
+                    remplirSélecteur(toutesParties);
+                } else {
+                    remplirSélecteur(partiesFiltrees);
+                }
+                document.getElementById('listeParties').value = noPartieURL;
+                chargerÉquipes();
+            } else {
+                remplirSélecteur(partiesFiltrees);
+            }
         }
 
         function remplirSélecteur(liste) {

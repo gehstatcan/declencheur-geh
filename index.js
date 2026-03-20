@@ -477,7 +477,7 @@ app.get("/api/stats/calendrier", (req, res) => {
         scoreA,
         scoreB,
         terminée,
-        lienTeams: partie.lienTeams || null,
+        lienTeams: partie.lienRéunion || null,
         noQuestionnaire: partie.noQuestionnaire,
       };
     });

@@ -217,6 +217,15 @@
             border-color: var(--accent);
         }
 
+        .lien-rejoindre {
+            background: var(--vert);
+            color: white;
+        }
+
+        .lien-rejoindre:hover {
+            background: #219a52;
+        }
+
         /* Bouton expand */
         .btn-expand {
             width: 26px;
@@ -373,9 +382,13 @@
 
                 // Liens
                 let liensHtml = '';
-                if (p.lienTeams) {
+                if (p.lienTeams && !estTerminée) {
                     liensHtml += `<a href="${p.lienTeams}" target="_blank"
                         class="lien-bouton lien-teams">📹 Teams</a>`;
+                }
+                if (!estTerminée) {
+                    liensHtml += `<a href="joueur.html?noPartie=${p.noPartie}"
+                        class="lien-bouton lien-rejoindre">▶ Rejoindre</a>`;
                 }
                 if (estTerminée) {
                     liensHtml += `<a href="stats-match.html?noPartie=${p.noPartie}"
