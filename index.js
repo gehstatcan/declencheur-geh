@@ -74,12 +74,21 @@ function initialiserVolume() {
     }
   });
 
-  // Créer répondants.json vide si inexistant
-  const cheminRépondants = path.join(dossierSaison, "répondants.json");
-  if (!fs.existsSync(cheminRépondants)) {
-    fs.writeFileSync(cheminRépondants, "[]", "utf-8");
-    console.log("📄 répondants.json initialisé sur le Volume");
-  }
+  // Copier si absent — fichiers de données de jeu
+  const fichiersJeu = ["répondants.json", "alignements.json", "questions.json"];
+  fichiersJeu.forEach((fichier) => {
+    const destination = path.join(dossierSaison, fichier);
+    const source = path.join(__dirname, "data", "saisons", saison, fichier);
+    if (!fs.existsSync(destination)) {
+      if (fs.existsSync(source)) {
+        fs.copyFileSync(source, destination);
+        console.log(`📄 ${fichier} copié sur le Volume`);
+      } else {
+        fs.writeFileSync(destination, "[]", "utf-8");
+        console.log(`📄 ${fichier} initialisé vide sur le Volume`);
+      }
+    }
+  });
 }
 
 // Appeler l'initialisation seulement si un Volume Railway est monté
