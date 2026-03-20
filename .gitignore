@@ -1,7 +1,7 @@
 
 # Données de parties — changent à chaque partie, gérées par Railway Volume
-data/saisons/*/parties/
-data/saisons/*/répondants.json
+#data/saisons/*/parties/
+#data/saisons/*/répondants.json
 
 # Logs
 logs
