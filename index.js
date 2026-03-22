@@ -55,7 +55,13 @@ function initialiserVolume() {
 
   // Toujours écraser — fichiers gérés via git uniquement
   // À déplacer dans fichiersAdmin quand un import admin sera ajouté
-  const fichiersGit = ["équipes.json", "séries.json"];
+  const fichiersGit = [
+    "équipes.json",
+    "séries.json",
+  "répondants.json", 
+    "alignements.json",
+        "joueurs.json",  
+  ];
   fichiersGit.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
     const source = path.join(__dirname, "data", "saisons", saison, fichier);
@@ -64,7 +70,10 @@ function initialiserVolume() {
   });
 
   // Copier seulement si absent — fichiers pouvant être modifiés via admin
-  const fichiersAdmin = ["joueurs.json", "parties.json", "thèmes.json"];
+
+  const fichiersAdmin = [
+    "parties.json", 
+    "thèmes.json"];
   fichiersAdmin.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
     const source = path.join(__dirname, "data", "saisons", saison, fichier);
@@ -75,7 +84,8 @@ function initialiserVolume() {
   });
 
   // Copier si absent — fichiers de données de jeu
-  const fichiersJeu = ["répondants.json", "alignements.json", "questions.json"];
+  const fichiersJeu = [
+    "questions.json"];
   fichiersJeu.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
     const source = path.join(__dirname, "data", "saisons", saison, fichier);
