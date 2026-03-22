@@ -2249,6 +2249,5 @@
   {"noPartie":32,"noÉquipe":4,"noJoueur":11,"noSérie":6,"noQuestion":6,"pointsSecondaires":false},
   {"noPartie":32,"noÉquipe":4,"noJoueur":99,"noSérie":13,"noQuestion":1,"pointsSecondaires":false},
   {"noPartie":32,"noÉquipe":4,"noJoueur":99,"noSérie":13,"noQuestion":2,"pointsSecondaires":false},
-  {"noPartie":32,"noÉquipe":4,"noJoueur":99,"noSérie":13,"noQuestion":3,"pointsSecondaires":false},
-  {"noPartie":33,"noSérie":1,"noQuestion":1,"noJoueur":10,"noÉquipe":5,"pointsSecondaires":false}
+  {"noPartie":32,"noÉquipe":4,"noJoueur":99,"noSérie":13,"noQuestion":3,"pointsSecondaires":false}
 ]
