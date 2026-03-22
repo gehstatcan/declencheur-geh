@@ -1,0 +1,26 @@
+[
+  {
+    "noPartie": 33,
+    "noSérie": 1,
+    "noQuestion": 1,
+    "noJoueur": 10,
+    "noÉquipe": 5,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 33,
+    "noSérie": 5,
+    "noQuestion": 1,
+    "noJoueur": 1,
+    "noÉquipe": 7,
+    "pointsSecondaires": false
+  },
+  {
+    "noPartie": 33,
+    "noSérie": 5,
+    "noQuestion": 2,
+    "noJoueur": 99,
+    "noÉquipe": 5,
+    "pointsSecondaires": false
+  }
+]
