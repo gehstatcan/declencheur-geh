@@ -49,7 +49,6 @@
   { "noÉquipe": 5, "noJoueur": 6, "alias": "Jean-Sébastien", "nom": "Provencal", "prénom": "Jean-Sébastien" },
   { "noÉquipe": 5, "noJoueur": 8, "alias": "Marlène", "nom": "Savard", "prénom": "Marlène" },
   { "noÉquipe": 5, "noJoueur": 9, "alias": "François", "nom": "Lavoie", "prénom": "François" },
-  { "noÉquipe": 5, "noJoueur": 10, "alias": "Orion", "nom": "Sirois", "prénom": "Orion" },
   { "noÉquipe": 5, "noJoueur": 99, "alias": "Les Méthos précieux", "estÉquipe": true },
   { "noÉquipe": 6, "noJoueur": 1, "alias": "Stéphane", "nom": "Mongeau", "prénom": "Stéphane" },
   { "noÉquipe": 6, "noJoueur": 2, "alias": "Pierre-Olivier", "nom": "Julien", "prénom": "Pierre-Olivier" },
