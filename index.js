@@ -169,7 +169,7 @@ app.get("/api/telecharger/repondants-partie/:noPartie", (req, res) => {
 // ============================================================
 // Vérification préalable — lit le noQuestionnaire sans sauvegarder
 // ============================================================
-app.post("/api/upload/questionnaire/vérifier", upload.single("fichier"), (req, res) => {
+app.post("/api/upload/questionnaire/verifier", upload.single("fichier"), (req, res) => {
   try {
     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     const feuille = workbook.Sheets["Vers BD"];
@@ -182,6 +182,11 @@ app.post("/api/upload/questionnaire/vérifier", upload.single("fichier"), (req, 
       if (!isNaN(noQ)) { noQuestionnaire = noQ; break; }
     }
     if (noQuestionnaire === null) return res.status(400).json({ erreur: "Numéro de questionnaire introuvable" });
+    let questions = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, "questions.json"), "utf-8").trim();
+      questions = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { questions = []; }
     const existe = questions.some(q => q.noQuestionnaire === noQuestionnaire);
     res.json({ noQuestionnaire, existe });
   } catch (e) {
@@ -545,7 +550,7 @@ app.get("/api/stats/partie/:noPartie/joueurs", (req, res) => {
       const noJoueurs = align ? align.joueurs : [];
       const joueursPartie = noJoueurs.map(noJ => {
         const j = joueurs.find(j => j.noÉquipe === noÉquipe && j.noJoueur === noJ);
-        return { noJoueur: noJ, alias: j?.alias || `Joueur ${noJ}`, points: pointsJoueur(noÉquipe, noJ) };
+        return { noJoueur: noJ, alias: j?.alias || `Joueur ${noJ}`, nom: j?.nom || '', points: pointsJoueur(noÉquipe, noJ) };
       });
       return { noÉquipe, pointsCollectifs: pointsJoueur(noÉquipe, 99), joueurs: joueursPartie };
     });
@@ -1195,6 +1200,11 @@ app.get('/api/stats/equipe/:noEquipe', (req, res) => {
         pjParJoueur[noJ].add(a.noPartie);
       });
     });
+
+    // PJ pour joueur 99 (collectif) = toutes les parties jouées par l'équipe
+    pjParJoueur[99] = new Set(
+      alignements.filter(a => a.noÉquipe === noÉquipe).map(a => a.noPartie)
+    );
 
     const joueursStats = membresÉquipe.map(j => {
       const pts = ptsParJoueurTotal[j.noJoueur] || 0;

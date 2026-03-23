@@ -451,7 +451,9 @@
                     return '<em style="color:var(--gris)">Aucun joueur</em>';
                 return équipeData.joueurs.map(j => `
                     <div class="joueur-ligne">
-                        <span>${j.alias}</span>
+                        <a href="stats-joueur.html?noEquipe=${équipeData.noÉquipe}&noJoueur=${j.noJoueur}" style="color:inherit;text-decoration:none;">
+                            ${j.alias}${j.nom ? ` <span style="opacity:0.7;font-size:0.9em;">${j.nom}</span>` : ''}
+                        </a>
                         <span class="pts ${j.points === 0 ? 'pts-zero' : ''}">${j.points} pts</span>
                     </div>`).join('');
             };

@@ -354,7 +354,7 @@
             const formVérif = new FormData();
             formVérif.append('fichier', fichierSélectionné);
             try {
-                const vérif = await fetch('/api/upload/questionnaire/vérifier', { method: 'POST', body: formVérif });
+                const vérif = await fetch('/api/upload/questionnaire/verifier', { method: 'POST', body: formVérif });
                 const info = await vérif.json();
                 if (info.erreur) { alert(`❌ ${info.erreur}`); return; }
                 if (info.existe) {

@@ -110,6 +110,11 @@
             color: var(--buzz-texte);
         }
 
+        #statut.équipe {
+            background: #2980b9;
+            color: var(--blanc);
+        }
+
         /* ============================================================
            Case à cocher toutes les parties
            Alignée à gauche, disparaît en mode jeu
@@ -370,8 +375,8 @@
         let tousJoueurs = [];
         let joueurActuel = null;
         let noPartieActuelle = null;
-        // Au début du script, avec les autres variables
         let modeActuel = 'initialisation';
+        let questionEstÉquipe = false;
 
         // ============================================================
         // Feedback vibration — pour le joueur presque aveugle
@@ -440,9 +445,20 @@
             const btn = document.getElementById('boutonBuzz');
             const statut = document.getElementById('statut');
             btn.disabled = false;
-            statut.className = '';
-            statut.textContent =
-                joueurActuel ? `🎯 À vous de jouer, ${joueurActuel.alias} !` : '';
+            if (questionEstÉquipe) {
+                statut.className = 'équipe';
+                statut.textContent = '👥 Question d\'équipe !';
+            } else {
+                statut.className = '';
+                statut.textContent = joueurActuel ? `🎯 À vous de jouer, ${joueurActuel.alias} !` : '';
+            }
+        });
+
+        // ============================================================
+        // Question d'équipe — afficher un message sur le buzzer
+        // ============================================================
+        socket.on('questionMisÀJour', (info) => {
+            questionEstÉquipe = !!(info && info.estÉquipe);
         });
 
         // ============================================================

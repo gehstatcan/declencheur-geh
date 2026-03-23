@@ -10,20 +10,23 @@
         rel="stylesheet">
     <style>
         /* ============================================================
-       Variables de couleurs — thème sombre accessible WCAG AA
-       Identique à joueur.html
+       Variables de couleurs — thème clair accessible WCAG AA
+       Thème sombre original (si on veut revenir) :
+         --fond: #0f0f1a;  --fond-carte: #1a1a2e;  --fond-champ: #16213e;
+         --accent: #e94560;  --vert: #2ecc71;  --orange: #e67e22;
+         --blanc: #ffffff;  --gris: #aaaaaa;
        ============================================================ */
         :root {
-            --fond: #0f0f1a;
-            --fond-carte: #1a1a2e;
-            --fond-champ: #16213e;
-            --accent: #e94560;
+            --fond: #f0f0f7;
+            --fond-carte: #ffffff;
+            --fond-champ: #e4e4f0;
+            --accent: #c0303f;
             --buzz: #FFD700;
             --buzz-texte: #000000;
-            --vert: #2ecc71;
-            --orange: #e67e22;
-            --blanc: #ffffff;
-            --gris: #aaaaaa;
+            --vert: #1a7a42;
+            --orange: #b85c00;
+            --blanc: #1a1a2e;
+            --gris: #555566;
             --rayon: 16px;
         }
 
@@ -110,7 +113,7 @@
         }
 
         select:focus {
-            border-color: var(--buzz);
+            border-color: var(--accent);
         }
 
         #labelToutesParties {
@@ -169,6 +172,7 @@
        ============================================================ */
         #infoQuestion {
             background: var(--fond-carte);
+            border: 1px solid var(--gris);
             padding: 16px 20px;
             border-radius: var(--rayon);
             margin: 10px auto;
@@ -202,8 +206,9 @@
             background: var(--vert);
             border-radius: 8px;
             font-size: 0.9em;
-            color: var(--buzz-texte);
-            display: none;
+            color: white;
+            visibility: hidden;
+            word-break: break-word;
         }
 
         /* ============================================================
@@ -216,6 +221,7 @@
             margin: 16px auto;
             padding: 15px;
             background: var(--fond-carte);
+            border: 1px solid var(--gris);
             border-radius: var(--rayon);
             width: 100%;
             max-width: 700px;
@@ -225,6 +231,7 @@
 
         #buzzer.actif {
             background: var(--accent);
+            color: white;
             animation: flash 0.5s;
         }
 
@@ -253,7 +260,8 @@
         }
 
         #boutonAnnuler {
-            display: none;
+            visibility: hidden;
+            pointer-events: none;
             margin-top: 10px;
             text-align: center;
         }
@@ -358,18 +366,20 @@
         /* ============================================================
             Zone équipes — scores + joueurs côte à côte
         ============================================================ */
-        #zoneÉquipes {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 24px;
+        #zone3colonnes {
+            display: grid;
+            grid-template-columns: 1fr 0.75fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
+            align-items: start;
         }
 
         .bloc-équipe {
             flex: 1;
             background: var(--fond-carte);
+            border: 1px solid var(--gris);
             border-radius: var(--rayon);
             padding: 20px;
             text-align: center;
@@ -378,8 +388,9 @@
 
         .bloc-équipe h2 {
             color: var(--accent);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95em;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            letter-spacing: 1px;
             margin-bottom: 8px;
         }
 
@@ -414,7 +425,7 @@
 <body>
     <!-- En-tête identique à joueur.html -->
     <header>
-        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; filter:invert(1);">
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; filter:invert(1); background:var(--accent); border-radius:12px; padding:5px;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
 
@@ -440,17 +451,24 @@
         </button>
     </div>
 
-    <!-- Série, thème, question -->
-    <div id="infoQuestion">
-        <div class="série" id="titreSérie">—</div>
-        <div class="thème" id="titreThème">—</div>
-        <div class="question" id="titreQuestion">—</div>
-        <div id="répondantExistant"></div>
-    </div>
+    <!-- Layout 3 colonnes : équipe A | question | équipe B -->
+    <div id="zone3colonnes" style="display:none;">
+        <div id="blocÉquipeA" class="bloc-équipe"></div>
 
-    <!-- Scores + joueurs côte à côte -->
-    <div id="zoneÉquipes">
-        <!-- Généré dynamiquement par afficherÉquipes() -->
+        <div id="infoQuestion">
+            <div class="série" id="titreSérie">—</div>
+            <div class="thème" id="titreThème">—</div>
+            <div class="question" id="titreQuestion">—</div>
+            <div id="modeÉquipe" style="visibility:hidden; margin-top:10px;">
+                <span style="background:#c0303f; color:white; padding:4px 12px; border-radius:6px; font-weight:bold;">🏆 MODE ÉQUIPE</span>
+            </div>
+            <div id="toggleÉquipe" style="visibility:hidden;">
+                <button id="btnToggleÉquipe" onclick="toggleModeÉquipe()" style="margin-top:8px; color:white; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:0.9em;">—</button>
+            </div>
+            <div id="répondantExistant"></div>
+        </div>
+
+        <div id="blocÉquipeB" class="bloc-équipe"></div>
     </div>
 
     <!-- Zone de jeu -->
@@ -503,7 +521,7 @@
 
     </div>
 
-    <div style="margin-top:16px;">
+    <div id="zoneTéléchargement" style="margin-top:16px; display:none;">
         <button class="bouton" style="background:#2980b9;" onclick="téléchargerPartie()">
             💾 Télécharger partie en cours
         </button>
@@ -790,21 +808,27 @@
             document.getElementById('infoQuestion').style.display =
                 mode === 'jeu' ? 'block' : 'none';
 
+            const zone3colonnes = document.getElementById('zone3colonnes');
+            const zoneTéléchargement = document.getElementById('zoneTéléchargement');
+
             if (mode === 'jeu') {
                 badge.textContent = 'Partie en cours';
                 badge.className = 'jeu';
                 zoneJeu.style.display = 'block';
                 zoneInit.style.display = 'none';
                 sélecteurPartie.style.display = 'none';
-                labelParties.style.display = 'none';  // cacher le checkbox
+                labelParties.style.display = 'none';
+                zone3colonnes.style.display = 'grid';
+                zoneTéléchargement.style.display = 'block';
             } else {
                 badge.textContent = '🔧 Initialisation';
                 badge.className = 'initialisation';
                 zoneJeu.style.display = 'none';
                 zoneInit.style.display = 'block';
                 sélecteurPartie.style.display = 'block';
-                labelParties.style.display = 'inline'; // montrer le checkbox
-                document.getElementById('infoQuestion').style.display = 'none'; //cacher la série
+                labelParties.style.display = 'inline';
+                zone3colonnes.style.display = 'none';
+                zoneTéléchargement.style.display = 'none';
             }
         }
 
@@ -838,54 +862,26 @@
                 `Question ${question.noQuestion} / ${série.questions.length} — ${question.points} pts`;
 
             // Afficher bouton annuler si répondant existant
-            document.getElementById('boutonAnnuler').style.display =
-                répondantExistant ? 'block' : 'none';
+            const btnAnnuler = document.getElementById('boutonAnnuler');
+            btnAnnuler.style.visibility = répondantExistant ? 'visible' : 'hidden';
+            btnAnnuler.style.pointerEvents = répondantExistant ? 'auto' : 'none';
 
             // ============================================================
             // Indicateur MODE ÉQUIPE
             // ============================================================
-            let divModeÉquipe = document.getElementById('modeÉquipe');
-            if (!divModeÉquipe) {
-                divModeÉquipe = document.createElement('div');
-                divModeÉquipe.id = 'modeÉquipe';
-                document.getElementById('titreQuestion').after(divModeÉquipe);
-            }
+            const divModeÉquipe = document.getElementById('modeÉquipe');
+            divModeÉquipe.style.visibility = estÉquipe ? 'visible' : 'hidden';
 
-            if (estÉquipe) {
-                divModeÉquipe.innerHTML = `
-            <span style="background:#e94560; color:white; padding:4px 12px;
-                border-radius:6px; font-weight:bold; margin-top:10px; ">
-                🏆 MODE ÉQUIPE
-            </span>`;
-                divModeÉquipe.style.display = 'block';
-                divModeÉquipe.style.marginTop = '10px';
-            } else {
-                divModeÉquipe.style.display = 'none';
-            }
-
-            // ============================================================
-            // Bouton toggle Individuel/Équipe pour série 5 Q2-5
-            // ============================================================
-            let divToggle = document.getElementById('toggleÉquipe');
-            if (!divToggle) {
-                divToggle = document.createElement('div');
-                divToggle.id = 'toggleÉquipe';
-                divModeÉquipe.after(divToggle);
-            }
-
+            const divToggle = document.getElementById('toggleÉquipe');
+            const btnToggle = document.getElementById('btnToggleÉquipe');
             if (question && question.estÉquipe === null) {
-                divToggle.innerHTML = `
-            <button onclick="toggleModeÉquipe()" style="
-            margin-top: 8px; 
-                background: ${estÉquipe ? '#2ecc71' : '#666'};
-                color: white; border: none; padding: 6px 16px;
-                border-radius:6px; cursor:pointer; font-size:0.9em;">
-                ${estÉquipe ? '🏆 Équipe — cliquer pour Individuel'
-                        : '👤 Individuel — cliquer pour Équipe'}
-            </button>`;
-                divToggle.style.display = 'block';
+                btnToggle.style.background = estÉquipe ? '#1a7a42' : '#666';
+                btnToggle.textContent = estÉquipe
+                    ? '🏆 Équipe — cliquer pour Individuel'
+                    : '👤 Individuel — cliquer pour Équipe';
+                divToggle.style.visibility = 'visible';
             } else {
-                divToggle.style.display = 'none';
+                divToggle.style.visibility = 'hidden';
             }
 
             // Afficher le répondant existant si la question a déjà été répondue
@@ -899,10 +895,10 @@
                 const alias = joueur ? joueur.alias : `Joueur ${répondantExistant.noJoueur}`;
                 const nomÉquipe = équipe ? équipe.nomÉquipe : `Équipe ${répondantExistant.noÉquipe}`;
                 divRépondant.textContent = `✅ Déjà répondue par ${alias} (${nomÉquipe})`;
-                divRépondant.style.display = 'block';
+                divRépondant.style.visibility = 'visible';
             } else {
                 divRépondant.textContent = '';
-                divRépondant.style.display = 'none';
+                divRépondant.style.visibility = 'hidden';
             }
 
             // Trouver le thème dans le questionnaire
@@ -942,9 +938,8 @@
             fetch('/api/parties').then(r => r.json()).then(parties => {
                 const partie = parties.find(p => p.noPartie === noPartie);
                 if (!partie) return;
-                const div = document.getElementById('zoneÉquipes');
-                div.innerHTML = '';
-                [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
+                [partie.noÉquipeA, partie.noÉquipeB].forEach((noÉquipe, idx) => {
+                    const div = document.getElementById(idx === 0 ? 'blocÉquipeA' : 'blocÉquipeB');
                     const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
                     const membres = tousJoueurs.filter(j => {
                         if (j.noÉquipe !== noÉquipe || j.estÉquipe) return false;
@@ -981,12 +976,10 @@
 
                     }).join('');
 
-                    div.innerHTML += `
-                <div class="bloc-équipe">
+                    div.innerHTML = `
                     <h2>${équipe ? équipe.nomÉquipe : ''}</h2>
                     <div class="score-valeur">${score}</div>
-                    ${joueursHTML}
-                </div>`;
+                    ${joueursHTML}`;
                 });
             });
         }
