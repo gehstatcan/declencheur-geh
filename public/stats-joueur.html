@@ -55,6 +55,9 @@
         .graphiques { display: flex; gap: 20px; flex-wrap: wrap; width: 100%; max-width: 860px; margin-bottom: 24px; }
         .graphique-carte { flex: 1; min-width: 280px; background: var(--fond-carte); border-radius: var(--rayon); padding: 20px; }
         .graphique-carte h3 { font-size: 1em; font-weight: 600; color: var(--accent); margin-bottom: 14px; border-bottom: 2px solid var(--fond-champ); padding-bottom: 6px; }
+        .toggle-phase { display: flex; gap: 4px; margin-bottom: 20px; background: var(--fond-carte); padding: 4px; border-radius: 20px; }
+        .toggle-phase button { padding: 6px 16px; border-radius: 16px; border: none; cursor: pointer; font-size: 0.85em; background: transparent; color: var(--gris); font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.2s; }
+        .toggle-phase button.actif { background: var(--accent); color: white; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -64,6 +67,7 @@
         <h1>GEH <span>Statcan</span></h1>
     </header>
     <nav>
+        <a href="stats-eliminations.html" id="lien-eliminations" style="display:none">🌳 Éliminatoires</a>
         <a href="stats-calendrier.html">📅 Calendrier</a>
         <a href="stats-classement.html">🏆 Classement</a>
         <a href="stats-compteurs.html">📊 Compteurs</a>
@@ -72,6 +76,12 @@
 
     <h2 id="titreJoueur">Chargement...</h2>
     <div class="sous-titre" id="sousTitre"></div>
+
+    <div class="toggle-phase">
+        <button id="btn-tous" class="actif" onclick="setPhase('tous')">Tout</button>
+        <button id="btn-saison" onclick="setPhase('saison')">Saison rég.</button>
+        <button id="btn-eliminations" onclick="setPhase('eliminations')">Éliminatoires</button>
+    </div>
 
     <div class="section">
         <div class="stats-globales" id="statsGlobales"></div>
@@ -149,13 +159,21 @@
         const noEquipe = parseInt(params.get('noEquipe'));
         const noJoueur = parseInt(params.get('noJoueur'));
 
-        async function charger() {
+        function setPhase(phase) {
+            ['tous', 'saison', 'eliminations'].forEach(p =>
+                document.getElementById(`btn-${p}`).classList.toggle('actif', p === phase)
+            );
+            charger(phase);
+        }
+
+        async function charger(phase = 'tous') {
             if (!noEquipe || !noJoueur) {
                 document.getElementById('titreJoueur').textContent = 'Joueur introuvable';
                 return;
             }
 
-            const data = await fetch(`/api/stats/joueur-profil/${noEquipe}/${noJoueur}`).then(r => r.json());
+            const phaseParam = phase !== 'tous' ? `?phase=${phase}` : '';
+            const data = await fetch(`/api/stats/joueur-profil/${noEquipe}/${noJoueur}${phaseParam}`).then(r => r.json());
             if (data.erreur) {
                 document.getElementById('titreJoueur').textContent = data.erreur;
                 return;
@@ -372,6 +390,9 @@
             }
         }
 
+        fetch('/api/stats/phase').then(r => r.json()).then(d => {
+            if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
+        });
         charger();
     </script>
 </body>

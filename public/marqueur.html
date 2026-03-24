@@ -553,6 +553,9 @@
 
         // Web Audio pour les sons
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const gainMaître = audioCtx.createGain();
+        gainMaître.gain.value = 2.0; // Amplification globale — ajuster si trop fort
+        gainMaître.connect(audioCtx.destination);
 
         function jouerSon(noÉquipe) {
             const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
@@ -570,7 +573,7 @@
             function bip(type, freq, vol, début, durée, freqFin) {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.connect(gain); gain.connect(gainMaître);
                 osc.type = type;
                 osc.frequency.setValueAtTime(freq, début);
                 if (freqFin !== undefined) osc.frequency.linearRampToValueAtTime(freqFin, début + durée);

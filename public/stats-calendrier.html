@@ -306,6 +306,33 @@
             color: var(--gris);
             text-align: center;
         }
+
+        .toggle-phase {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: var(--fond-carte);
+            padding: 4px;
+            border-radius: 20px;
+        }
+
+        .toggle-phase button {
+            padding: 6px 16px;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85em;
+            background: transparent;
+            color: var(--gris);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .toggle-phase button.actif {
+            background: var(--accent);
+            color: var(--blanc);
+        }
     </style>
 </head>
 
@@ -317,6 +344,7 @@
     </header>
 
     <nav>
+        <a href="stats-eliminations.html" id="lien-eliminations" style="display:none">🌳 Éliminatoires</a>
         <a href="stats-calendrier.html" class="actif">📅 Calendrier</a>
         <a href="stats-classement.html">🏆 Classement</a>
         <a href="stats-compteurs.html">📊 Compteurs</a>
@@ -324,6 +352,12 @@
     </nav>
 
     <h2>📅 Calendrier 2025-2026</h2>
+
+    <div class="toggle-phase">
+        <button id="btn-tous" class="actif" onclick="setPhase('tous')">Tout</button>
+        <button id="btn-saison" onclick="setPhase('saison')">Saison rég.</button>
+        <button id="btn-eliminations" onclick="setPhase('eliminations')">Éliminatoires</button>
+    </div>
 
     <div class="tableau-conteneur">
         <table>
@@ -356,13 +390,29 @@
     <script>
         let donnéesParties = [];
 
+        function setPhase(phase) {
+            ['tous', 'saison', 'eliminations'].forEach(p =>
+                document.getElementById(`btn-${p}`).classList.toggle('actif', p === phase)
+            );
+            const filtrées = phase === 'tous' ? donnéesParties : donnéesParties.filter(p => p.phase === phase);
+            afficherCalendrier(filtrées);
+        }
+
         async function chargerCalendrier() {
             donnéesParties = await fetch('/api/stats/calendrier').then(r => r.json());
+            afficherCalendrier(donnéesParties);
+        }
 
+        function afficherCalendrier(parties) {
             const tbody = document.getElementById('corpsTableau');
             const aujourdhui = new Date().toISOString().split('T')[0];
 
-            tbody.innerHTML = donnéesParties.map((p, i) => {
+            if (parties.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--gris);padding:40px;">Aucune partie dans cette catégorie</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = parties.map((p, i) => {
                 const estTerminée = p.terminée;
                 const estAujourdhui = p.date === aujourdhui;
 
@@ -419,7 +469,7 @@
                         </td>
                     </tr>`;
             }).join('');
-        }
+        }  // fin afficherCalendrier
 
         function toggleExpand(noPartie) {
             const ligneExpand = document.getElementById(`expand-${noPartie}`);
@@ -485,6 +535,9 @@
             });
         }
 
+        fetch('/api/stats/phase').then(r => r.json()).then(d => {
+            if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
+        });
         chargerCalendrier();
     </script>
 

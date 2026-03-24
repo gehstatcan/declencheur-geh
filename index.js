@@ -237,13 +237,20 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
       if (section === "questions") {
         const noQ = parseInt(ligne[0]);
         const noS = parseInt(ligne[1]);
-        const noQuestion = parseInt(ligne[2]);
+        const colQuestion = ligne[2] !== undefined ? String(ligne[2]).trim() : "";
         const texteRaw = ligne[3] ? String(ligne[3]) : "";
         const texte = texteRaw === "0" ? "" : texteRaw;
         const réponseRaw = ligne[4] ? String(ligne[4]) : "";
         const réponse = réponseRaw === "0" ? "" : réponseRaw;
-        if (!isNaN(noQ) && !isNaN(noS) && !isNaN(noQuestion) && texte !== undefined) {
-          questionsExtraites.push({ noSérie: noS, noQuestion, texte, réponse });
+        if (!isNaN(noQ) && !isNaN(noS)) {
+          if (colQuestion === "Q1" || colQuestion === "Q2") {
+            questionsExtraites.push({ noSérie: noS, groupe: colQuestion, texte });
+          } else {
+            const noQuestion = parseInt(colQuestion);
+            if (!isNaN(noQuestion)) {
+              questionsExtraites.push({ noSérie: noS, noQuestion, texte, réponse });
+            }
+          }
         }
       }
     });
@@ -278,22 +285,24 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
 
     // Grouper les questions par série
     const sériesMap = {};
+    const groupesMap = {}; // Q1/Q2 par série
     questionsExtraites.forEach((q) => {
-      if (!sériesMap[q.noSérie]) sériesMap[q.noSérie] = [];
-      sériesMap[q.noSérie].push({
-        noQuestion: q.noQuestion,
-        texte: q.texte,
-        réponse: q.réponse,
-      });
+      if (q.groupe) {
+        if (!groupesMap[q.noSérie]) groupesMap[q.noSérie] = {};
+        groupesMap[q.noSérie][q.groupe === "Q1" ? "questionGroupe1" : "questionGroupe2"] = q.texte;
+      } else {
+        if (!sériesMap[q.noSérie]) sériesMap[q.noSérie] = [];
+        sériesMap[q.noSérie].push({ noQuestion: q.noQuestion, texte: q.texte, réponse: q.réponse });
+      }
     });
 
     const sériesQuestions = Object.keys(sériesMap)
-      .map((noSérie) => ({
-        noSérie: parseInt(noSérie),
-        questions: sériesMap[noSérie].sort(
-          (a, b) => a.noQuestion - b.noQuestion,
-        ),
-      }))
+      .map((noSérie) => {
+        const entrée = { noSérie: parseInt(noSérie) };
+        if (groupesMap[noSérie]) Object.assign(entrée, groupesMap[noSérie]);
+        entrée.questions = sériesMap[noSérie].sort((a, b) => a.noQuestion - b.noQuestion);
+        return entrée;
+      })
       .sort((a, b) => a.noSérie - b.noSérie);
 
     // Retirer l'ancien questionnaire si existe
@@ -505,6 +514,8 @@ app.get("/api/stats/calendrier", (req, res) => {
         terminée,
         lienTeams: partie.lienRéunion || null,
         noQuestionnaire: partie.noQuestionnaire,
+        phase: partie.phase || 'saison',
+        matchup: partie.matchup || null,
       };
     });
 
@@ -694,6 +705,71 @@ app.get("/api/stats/classement", (req, res) => {
 });
 
 // ============================================================
+// Phase courante — saison ou eliminations
+// ============================================================
+app.get('/api/stats/phase', (req, res) => {
+  try {
+    const parties = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'parties.json'), 'utf-8'));
+    const enEliminations = parties.some(p => p.phase === 'eliminations');
+    res.json({ phase: enEliminations ? 'eliminations' : 'saison' });
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
+// Bracket éliminatoires
+// ============================================================
+app.get('/api/stats/eliminations', (req, res) => {
+  try {
+    const parties = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'parties.json'), 'utf-8'));
+    const équipes = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'équipes.json'), 'utf-8'));
+    const nomÉquipe = (no) => no ? (équipes.find(e => e.noÉquipe === no)?.nomÉquipe || `Équipe ${no}`) : null;
+
+    let répondants = [];
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      répondants = contenu ? JSON.parse(contenu) : [];
+    } catch (e) { répondants = []; }
+
+    const calcScore = (noPartie, noÉquipe) =>
+      répondants.filter(r => r.noPartie === noPartie && r.noÉquipe === noÉquipe).reduce((total, r) => {
+        const série = séries.find(s => s.noSérie === r.noSérie);
+        const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
+        const pts = r.pointsSecondaires ? (question?.pointsSecondaires ?? 5) : (question?.points ?? 10);
+        return total + pts;
+      }, 0);
+
+    const partiesElim = parties.filter(p => p.phase === 'eliminations' && p.matchup);
+    const résultats = {};
+    partiesElim.forEach(partie => {
+      const terminée = répondants.some(r => r.noPartie === partie.noPartie);
+      const scoreA = terminée ? calcScore(partie.noPartie, partie.noÉquipeA) : null;
+      const scoreB = terminée ? calcScore(partie.noPartie, partie.noÉquipeB) : null;
+      const gagnant = terminée
+        ? (scoreA > scoreB ? partie.noÉquipeA : scoreB > scoreA ? partie.noÉquipeB : null)
+        : null;
+      résultats[partie.matchup] = {
+        matchup: partie.matchup,
+        noPartie: partie.noPartie,
+        noÉquipeA: partie.noÉquipeA,
+        nomÉquipeA: nomÉquipe(partie.noÉquipeA),
+        noÉquipeB: partie.noÉquipeB,
+        nomÉquipeB: nomÉquipe(partie.noÉquipeB),
+        scoreA, scoreB, terminée, gagnant,
+        nomGagnant: nomÉquipe(gagnant),
+        date: partie.date || null,
+        lienRéunion: partie.lienRéunion || null,
+      };
+    });
+
+    res.json(résultats);
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
 // Stats par thème
 app.get('/api/stats/themes', (req, res) => {
   try {
@@ -702,6 +778,14 @@ app.get('/api/stats/themes', (req, res) => {
       const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) { répondants = []; }
+
+    const phase = req.query.phase;
+    if (phase && phase !== 'tous') {
+      const noPartiesFiltées = new Set(
+        parties.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+      );
+      répondants = répondants.filter(r => noPartiesFiltées.has(r.noPartie));
+    }
 
     // Lookup noPartie → noQuestionnaire
     const questParPartie = {};
@@ -757,6 +841,9 @@ app.get("/api/stats/compteurs", (req, res) => {
     const joueurs = JSON.parse(
       fs.readFileSync(path.join(dossierSaison, "joueurs.json"), "utf-8"),
     );
+    const partiesData = JSON.parse(
+      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+    );
 
     let répondants = [];
     try {
@@ -766,6 +853,15 @@ app.get("/api/stats/compteurs", (req, res) => {
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
       répondants = [];
+    }
+
+    // Filtrer par phase si demandé
+    const phase = req.query.phase;
+    if (phase && phase !== 'tous') {
+      const noPartiesFiltées = new Set(
+        partiesData.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+      );
+      répondants = répondants.filter(r => noPartiesFiltées.has(r.noPartie));
     }
 
     const ptsJoueur = {};
@@ -798,6 +894,13 @@ app.get("/api/stats/compteurs", (req, res) => {
       const contenu = fs.readFileSync(path.join(dossierSaison, "alignements.json"), "utf-8").trim();
       alignements = contenu ? JSON.parse(contenu) : [];
     } catch (e) { alignements = []; }
+
+    if (phase && phase !== 'tous') {
+      const noPartiesFiltées = new Set(
+        partiesData.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+      );
+      alignements = alignements.filter(a => noPartiesFiltées.has(a.noPartie));
+    }
 
     const résultat = équipes
       .map((é) => {
@@ -972,10 +1075,22 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
       alignements = contenu ? JSON.parse(contenu) : [];
     } catch (e) { alignements = []; }
 
-    const répJoueur = répondants.filter(r => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur);
+    // Filtrer par phase si demandé
+    const phase = req.query.phase;
+    let répFiltrés = répondants;
+    let alignFiltés = alignements;
+    if (phase && phase !== 'tous') {
+      const noPartiesFiltées = new Set(
+        parties.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+      );
+      répFiltrés = répondants.filter(r => noPartiesFiltées.has(r.noPartie));
+      alignFiltés = alignements.filter(a => noPartiesFiltées.has(a.noPartie));
+    }
+
+    const répJoueur = répFiltrés.filter(r => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur);
 
     // PJ depuis alignements
-    const pj = alignements.filter(a => a.noÉquipe === noÉquipe && (a.joueurs || []).includes(noJoueur)).length;
+    const pj = alignFiltés.filter(a => a.noÉquipe === noÉquipe && (a.joueurs || []).includes(noJoueur)).length;
 
     // Pts par partie
     const ptsParPartie = {};
@@ -991,7 +1106,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
 
     // Scores totaux par partie
     const scoresParPartie = {};
-    répondants.forEach(r => {
+    répFiltrés.forEach(r => {
       if (!scoresParPartie[r.noPartie]) scoresParPartie[r.noPartie] = {};
       if (!scoresParPartie[r.noPartie][r.noÉquipe]) scoresParPartie[r.noPartie][r.noÉquipe] = 0;
       const série = séries.find(s => s.noSérie === r.noSérie);

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>GEH Statcan</title>
+    <style>
+        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f5f0e8; color: #888; }
+    </style>
+</head>
+<body>
+    <p>Chargement...</p>
+    <script>
+        fetch('/api/stats/phase')
+            .then(r => r.json())
+            .then(d => window.location.replace(d.phase === 'eliminations' ? 'stats-eliminations.html' : 'stats-calendrier.html'))
+            .catch(() => window.location.replace('stats-calendrier.html'));
+    </script>
+</body>
+</html>

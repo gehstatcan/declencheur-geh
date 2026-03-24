@@ -400,6 +400,9 @@
         .btn-tout-afficher:hover { background: var(--accent); color: white; }
         .btn-tout-afficher:disabled { opacity: 0.45; cursor: default; }
         .btn-tout-afficher:disabled:hover { background: transparent; color: var(--accent); }
+        .toggle-phase { display: flex; gap: 4px; margin-bottom: 16px; background: var(--fond-carte); padding: 4px; border-radius: 20px; }
+        .toggle-phase button { padding: 6px 16px; border-radius: 16px; border: none; cursor: pointer; font-size: 0.85em; background: transparent; color: var(--gris); font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.2s; }
+        .toggle-phase button.actif { background: var(--accent); color: white; }
     </style>
 </head>
 
@@ -411,6 +414,7 @@
     </header>
 
     <nav>
+        <a href="stats-eliminations.html" id="lien-eliminations" style="display:none">🌳 Éliminatoires</a>
         <a href="stats-calendrier.html">📅 Calendrier</a>
         <a href="stats-classement.html">🏆 Classement</a>
         <a href="stats-compteurs.html" class="actif">📊 Compteurs</a>
@@ -418,6 +422,12 @@
     </nav>
 
     <h2>📊 Compteurs 2025-2026</h2>
+
+    <div class="toggle-phase">
+        <button id="btn-tous" class="actif" onclick="setPhase('tous')">Tout</button>
+        <button id="btn-saison" onclick="setPhase('saison')">Saison rég.</button>
+        <button id="btn-eliminations" onclick="setPhase('eliminations')">Éliminatoires</button>
+    </div>
 
     <div class="onglets">
         <button class="actif" onclick="afficherOnglet('joueurs', this)">Joueurs</button>
@@ -513,17 +523,33 @@
             document.querySelectorAll('.onglets button').forEach(b => b.classList.remove('actif'));
             document.getElementById('panneau-' + id).classList.add('actif');
             btn.classList.add('actif');
-            if (id === 'themes' && donnéesThèmes === null) chargerThèmes();
+            if (id === 'themes' && donnéesThèmes === null) chargerThèmes(phaseActive);
         }
 
-        async function chargerCompteurs() {
-            donnéesCompteurs = await fetch('/api/stats/compteurs').then(r => r.json());
+        let phaseActive = 'tous';
+
+        function setPhase(phase) {
+            phaseActive = phase;
+            ['tous', 'saison', 'eliminations'].forEach(p =>
+                document.getElementById(`btn-${p}`).classList.toggle('actif', p === phase)
+            );
+            donnéesThèmes = null; // forcer re-fetch
+            chargerCompteurs(phase);
+            if (document.getElementById('panneau-themes').classList.contains('actif')) {
+                chargerThèmes(phase);
+            }
+        }
+
+        async function chargerCompteurs(phase = 'tous') {
+            const phaseParam = phase !== 'tous' ? `?phase=${phase}` : '';
+            donnéesCompteurs = await fetch(`/api/stats/compteurs${phaseParam}`).then(r => r.json());
             afficherÉquipes();
             afficherJoueurs();
         }
 
-        async function chargerThèmes() {
-            donnéesThèmes = await fetch('/api/stats/themes').then(r => r.json());
+        async function chargerThèmes(phase = phaseActive) {
+            const phaseParam = phase !== 'tous' ? `?phase=${phase}` : '';
+            donnéesThèmes = await fetch(`/api/stats/themes${phaseParam}`).then(r => r.json());
             const sidebar = document.getElementById('sidebarThèmes');
             const div = document.getElementById('contenuThemes');
 
@@ -746,6 +772,9 @@
             });
         }
 
+        fetch('/api/stats/phase').then(r => r.json()).then(d => {
+            if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
+        });
         chargerCompteurs();
     </script>
 

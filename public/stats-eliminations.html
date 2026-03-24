@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Éliminatoires — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+            --or: #b8860b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        header h1 span { color: var(--accent); }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            font-size: 0.95em;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--gris);
+            background: var(--fond-carte);
+            border: 1px solid var(--fond-champ);
+            transition: all 0.2s;
+        }
+
+        nav a:hover { background: var(--fond-champ); color: var(--texte); }
+        nav a.actif { background: var(--accent); color: var(--blanc); border-color: var(--accent); }
+
+        h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* ── Bracket ── */
+        .bracket {
+            display: flex;
+            gap: 0;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .ronde {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .ronde-titre {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            color: var(--gris);
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .ronde-quarts { justify-content: space-around; }
+        .ronde-demis  { justify-content: space-evenly; }
+        .ronde-finale { justify-content: center; }
+
+        /* Connecteurs entre rondes */
+        .connecteur {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 32px;
+            flex-shrink: 0;
+            padding-top: 34px; /* compense le titre */
+        }
+
+        .connecteur-ligne {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+        .connecteur-ligne::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 16px;
+            border-top: 2px solid var(--fond-champ);
+        }
+
+        /* Carte matchup */
+        .matchup {
+            background: var(--blanc);
+            border-radius: var(--rayon);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            overflow: hidden;
+            margin: 6px 0;
+        }
+
+        .matchup-label {
+            background: var(--fond-champ);
+            font-size: 0.72em;
+            font-weight: 600;
+            color: var(--gris);
+            padding: 4px 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .équipe-ligne {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            gap: 8px;
+            border-bottom: 1px solid var(--fond);
+        }
+
+        .équipe-ligne:last-child { border-bottom: none; }
+
+        .équipe-nom {
+            font-size: 0.85em;
+            font-weight: 600;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--texte);
+        }
+
+        .équipe-nom.tbd { color: var(--gris); font-weight: 400; font-style: italic; }
+        .équipe-nom.gagnante { color: var(--vert); }
+
+        .équipe-score {
+            font-size: 0.9em;
+            font-weight: 700;
+            color: var(--texte);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        .équipe-score.gagnant { color: var(--vert); }
+        .équipe-score.perdant { color: var(--gris); }
+
+        .matchup.finale .matchup-label {
+            background: var(--accent);
+            color: var(--blanc);
+        }
+
+        .matchup.finale .équipe-ligne { padding: 12px 14px; }
+        .matchup.finale .équipe-nom { font-size: 0.95em; }
+        .matchup.finale .équipe-score { font-size: 1.05em; }
+
+        .matchup-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 10px;
+            font-size: 0.75em;
+            color: var(--gris);
+            border-top: 1px solid var(--fond);
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .matchup-liens { display: flex; gap: 4px; }
+
+        .lien-bouton {
+            font-size: 0.78em;
+            padding: 3px 8px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .lien-teams    { background: #e8f0fe; color: #1a56db; }
+        .lien-rejoindre{ background: #e6f4ea; color: #1a7a42; }
+        .lien-match    { background: var(--fond-champ); color: var(--texte); }
+
+        .note-bas {
+            margin-top: 20px;
+            font-size: 0.82em;
+            color: var(--gris);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <nav>
+        <a href="stats-eliminations.html" class="actif">🌳 Éliminatoires</a>
+        <a href="stats-calendrier.html">📅 Calendrier</a>
+        <a href="stats-classement.html">🏆 Classement</a>
+        <a href="stats-compteurs.html">📊 Compteurs</a>
+        <a href="stats-match.html">📋 Feuille de match</a>
+    </nav>
+
+    <h2>🌳 Éliminatoires 2025-2026</h2>
+
+    <div class="bracket" id="bracket">
+        <p style="color:var(--gris); padding:40px;">Chargement...</p>
+    </div>
+
+    <div class="note-bas">
+        1er → demi-finale directement &nbsp;|&nbsp; 2e vs 7e, 3e vs 6e, 4e vs 5e en quarts
+    </div>
+
+    <script>
+        // Structure fixe du bracket pour cette ligue (7 équipes)
+        // Q1=2v7, Q2=3v6, Q3=4v5 → D1=1er+Q1gag, D2=Q2gag+Q3gag → F
+        const BRACKET = {
+            quarts: ['Q1', 'Q2', 'Q3'],
+            demis:  ['D1', 'D2'],
+            finale: ['F']
+        };
+
+        // Labels lisibles
+        const LABELS = { Q1: 'Quart 1', Q2: 'Quart 2', Q3: 'Quart 3', D1: 'Demi 1', D2: 'Demi 2', F: 'Finale' };
+
+        function cartéMatchup(données, id, estFinale = false) {
+            const m = données[id];
+            const label = LABELS[id] || id;
+
+            let nomA = m ? m.nomÉquipeA : null;
+            let nomB = m ? m.nomÉquipeB : null;
+            let scoreA = m?.scoreA;
+            let scoreB = m?.scoreB;
+            let gagnant = m?.gagnant;
+
+            // TBD si pas encore défini
+            if (!nomA) nomA = null;
+            if (!nomB) nomB = null;
+
+            const classeA = !nomA ? 'tbd' : (gagnant && gagnant === m.noÉquipeA ? 'gagnante' : '');
+            const classeB = !nomB ? 'tbd' : (gagnant && gagnant === m.noÉquipeB ? 'gagnante' : '');
+            const classeScoreA = gagnant ? (gagnant === m?.noÉquipeA ? 'gagnant' : 'perdant') : '';
+            const classeScoreB = gagnant ? (gagnant === m?.noÉquipeB ? 'gagnant' : 'perdant') : '';
+
+            const date = m?.date ? new Date(m.date + 'T00:00:00').toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' }) : '';
+            let liens = '';
+            if (m) {
+                if (m.lienRéunion && !m.terminée) liens += `<a href="${m.lienRéunion}" target="_blank" class="lien-bouton lien-teams">📹 Teams</a>`;
+                if (!m.terminée) liens += `<a href="joueur.html?noPartie=${m.noPartie}" class="lien-bouton lien-rejoindre">▶ Rejoindre</a>`;
+                if (m.terminée) liens += `<a href="stats-match.html?noPartie=${m.noPartie}" class="lien-bouton lien-match">📋 Feuille</a>`;
+            }
+
+            return `
+            <div class="matchup${estFinale ? ' finale' : ''}">
+                <div class="matchup-label">${label}${m ? ` — P${m.noPartie}` : ''}${date ? ` · ${date}` : ''}</div>
+                <div class="équipe-ligne">
+                    <span class="équipe-nom ${classeA}">${nomA || 'À déterminer'}</span>
+                    <span class="équipe-score ${classeScoreA}">${scoreA !== null && scoreA !== undefined ? scoreA : ''}</span>
+                </div>
+                <div class="équipe-ligne">
+                    <span class="équipe-nom ${classeB}">${nomB || 'À déterminer'}</span>
+                    <span class="équipe-score ${classeScoreB}">${scoreB !== null && scoreB !== undefined ? scoreB : ''}</span>
+                </div>
+                ${m && liens ? `<div class="matchup-meta"><div class="matchup-liens">${liens}</div></div>` : ''}
+            </div>`;
+        }
+
+        async function chargerBracket() {
+            const données = await fetch('/api/stats/eliminations').then(r => r.json());
+            const bracket = document.getElementById('bracket');
+
+            if (Object.keys(données).length === 0) {
+                bracket.innerHTML = `<p style="color:var(--gris); padding:40px; text-align:center;">Les éliminatoires n'ont pas encore commencé.</p>`;
+                return;
+            }
+
+            bracket.innerHTML = `
+            <div class="ronde ronde-quarts">
+                <div class="ronde-titre">Quarts de finale</div>
+                ${BRACKET.quarts.map(id => cartéMatchup(données, id)).join('')}
+            </div>
+
+            <div class="connecteur">
+                <div class="connecteur-ligne"></div>
+                <div class="connecteur-ligne"></div>
+            </div>
+
+            <div class="ronde ronde-demis">
+                <div class="ronde-titre">Demi-finales</div>
+                ${BRACKET.demis.map(id => cartéMatchup(données, id)).join('')}
+            </div>
+
+            <div class="connecteur">
+                <div class="connecteur-ligne"></div>
+            </div>
+
+            <div class="ronde ronde-finale">
+                <div class="ronde-titre">Finale</div>
+                ${BRACKET.finale.map(id => cartéMatchup(données, id, true)).join('')}
+            </div>`;
+        }
+
+        chargerBracket();
+    </script>
+
+</body>
+
+</html>

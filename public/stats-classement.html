@@ -197,6 +197,7 @@
     </header>
 
     <nav>
+        <a href="stats-eliminations.html" id="lien-eliminations" style="display:none">🌳 Éliminatoires</a>
         <a href="stats-calendrier.html">📅 Calendrier</a>
         <a href="stats-classement.html" class="actif">🏆 Classement</a>
         <a href="stats-compteurs.html">📊 Compteurs</a>
@@ -328,6 +329,9 @@
             });
         }
 
+        fetch('/api/stats/phase').then(r => r.json()).then(d => {
+            if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
+        });
         chargerClassement();
     </script>
 
