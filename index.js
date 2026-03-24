@@ -53,14 +53,11 @@ function initialiserVolume() {
     console.log("📁 Dossier parties créé sur le Volume");
   }
 
-  // Toujours écraser — fichiers gérés via git uniquement
-  // À déplacer dans fichiersAdmin quand un import admin sera ajouté
+  // Toujours écraser — fichiers gérés via git uniquement (données de référence)
   const fichiersGit = [
     "équipes.json",
     "séries.json",
-    "répondants.json", 
-    "alignements.json",
-    "joueurs.json",  
+    "joueurs.json",
   ];
   fichiersGit.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
@@ -71,8 +68,9 @@ function initialiserVolume() {
 
   // Copier seulement si absent — fichiers pouvant être modifiés via admin
   const fichiersAdmin = [
-    "parties.json", 
-    "thèmes.json"];
+    "parties.json",
+    "thèmes.json",
+  ];
   fichiersAdmin.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
     const source = path.join(__dirname, "data", "saisons", saison, fichier);
@@ -82,9 +80,12 @@ function initialiserVolume() {
     }
   });
 
-  // Copier si absent — fichiers de données de jeu
+  // Copier si absent — fichiers de données de jeu (ne jamais écraser)
   const fichiersJeu = [
-    "questions.json"];
+    "questions.json",
+    "répondants.json",
+    "alignements.json",
+  ];
   fichiersJeu.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
     const source = path.join(__dirname, "data", "saisons", saison, fichier);
@@ -117,7 +118,7 @@ let parties = JSON.parse(
 const séries = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "séries.json"), "utf-8"),
 );
-const thèmes = JSON.parse(
+let thèmes = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "thèmes.json"), "utf-8"),
 );
 
@@ -258,18 +259,19 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     // Mettre à jour thèmes.json
     // --------------------------------------------------------
     const cheminThèmes = path.join(dossierSaison, "thèmes.json");
-    let thèmes = [];
+    let thèmesData = [];
     try {
-      thèmes = JSON.parse(fs.readFileSync(cheminThèmes, "utf-8"));
+      thèmesData = JSON.parse(fs.readFileSync(cheminThèmes, "utf-8"));
     } catch (e) {
-      thèmes = [];
+      thèmesData = [];
     }
 
     // Retirer l'ancien questionnaire si existe
-    thèmes = thèmes.filter((t) => t.noQuestionnaire !== noQuestionnaire);
-    thèmes.push({ noQuestionnaire, séries: thèmesExtraits });
-    thèmes.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
-    fs.writeFileSync(cheminThèmes, '[\n' + thèmes.map(q => JSON.stringify(q)).join(',\n') + '\n]');
+    thèmesData = thèmesData.filter((t) => t.noQuestionnaire !== noQuestionnaire);
+    thèmesData.push({ noQuestionnaire, séries: thèmesExtraits });
+    thèmesData.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
+    fs.writeFileSync(cheminThèmes, '[\n' + thèmesData.map(q => JSON.stringify(q)).join(',\n') + '\n]');
+    thèmes = thèmesData; // Recharger la variable globale en mémoire
 
     // --------------------------------------------------------
     // Mettre à jour questions.json

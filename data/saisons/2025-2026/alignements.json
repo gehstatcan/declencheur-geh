@@ -62,5 +62,7 @@
   {"noPartie":31,"noÉquipe":3,"joueurs":[1,3,2,4]},
   {"noPartie":31,"noÉquipe":5,"joueurs":[1,4,2,3]},
   {"noPartie":32,"noÉquipe":2,"joueurs":[1,4,7,9]},
-  {"noPartie":32,"noÉquipe":4,"joueurs":[1,3,2,11]}
+  {"noPartie":32,"noÉquipe":4,"joueurs":[1,3,2,11]},
+  {"noPartie":33,"noÉquipe":5,"joueurs":[1,2,3,4]},
+  {"noPartie":33,"noÉquipe":7,"joueurs":[1,2,3,4]}
 ]

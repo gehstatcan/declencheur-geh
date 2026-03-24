@@ -519,6 +519,17 @@
             </button>
         </div>
 
+        <!-- Volume et test des sons -->
+        <div style="display:flex; align-items:center; gap:12px; justify-content:center; margin-top:16px; flex-wrap:wrap;">
+            <label style="font-size:0.9em; font-weight:600;">🔊 Volume buzzers</label>
+            <input type="range" id="sliderVolume" min="0" max="4" step="0.1" value="2"
+                style="width:140px; cursor:pointer;"
+                oninput="gainMaître.gain.value = parseFloat(this.value); document.getElementById('valeurVolume').textContent = Math.round(this.value * 50) + '%'">
+            <span id="valeurVolume" style="font-size:0.9em; color:var(--gris); min-width:36px;">100%</span>
+            <button id="btnTestA" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 14px;" onclick="testerSonÉquipe('A')">🔔 Équipe A</button>
+            <button id="btnTestB" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 14px;" onclick="testerSonÉquipe('B')">🔔 Équipe B</button>
+        </div>
+
     </div>
 
     <div id="zoneTéléchargement" style="margin-top:16px; display:none;">
@@ -753,9 +764,25 @@
         function choisirPartie() {
             const noPartie = parseInt(document.getElementById('listeParties').value);
             if (!noPartie) return;
-            // Rejoindre la room de cette partie
             socket.emit('rejoindrePartie', noPartie);
             socket.emit('choisirPartie', noPartie);
+
+            // Mettre à jour les boutons de test de son
+            const partie = toutesPartiesData.find(p => p.noPartie === noPartie);
+            const équipeA = toutesÉquipes.find(e => e.noÉquipe === partie?.noÉquipeA);
+            const équipeB = toutesÉquipes.find(e => e.noÉquipe === partie?.noÉquipeB);
+            const btnA = document.getElementById('btnTestA');
+            const btnB = document.getElementById('btnTestB');
+            btnA.textContent = `🔔 ${équipeA?.nomÉquipe || 'Équipe A'}`;
+            btnB.textContent = `🔔 ${équipeB?.nomÉquipe || 'Équipe B'}`;
+        }
+
+        function testerSonÉquipe(position) {
+            const noPartie = parseInt(document.getElementById('listeParties').value);
+            const partie = toutesPartiesData.find(p => p.noPartie === noPartie);
+            if (!partie) return;
+            const noÉquipe = position === 'A' ? partie.noÉquipeA : partie.noÉquipeB;
+            jouerSon(noÉquipe);
         }
         function démarrerPartie() {
             socket.emit('démarrerPartie', partieActuelle);
@@ -822,6 +849,8 @@
                 sélecteurPartie.style.display = 'none';
                 labelParties.style.display = 'none';
                 zone3colonnes.style.display = 'grid';
+                zone3colonnes.style.justifyContent = '';
+                zone3colonnes.style.gap = '';
                 zoneTéléchargement.style.display = 'block';
             } else {
                 badge.textContent = '🔧 Initialisation';
@@ -830,7 +859,9 @@
                 zoneInit.style.display = 'block';
                 sélecteurPartie.style.display = 'block';
                 labelParties.style.display = 'inline';
-                zone3colonnes.style.display = 'none';
+                zone3colonnes.style.display = 'flex';
+                zone3colonnes.style.justifyContent = 'center';
+                zone3colonnes.style.gap = '16px';
                 zoneTéléchargement.style.display = 'none';
             }
         }
