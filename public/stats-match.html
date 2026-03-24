@@ -325,6 +325,17 @@
                     html += tableauQuestions(qA, d.noÉquipeA, d.noÉquipeB);
                     html += `<div class="équipe-entête badge-équipe-b">▶ Équipe B — ${d.nomÉquipeB}</div>`;
                     html += tableauQuestions(qB, d.noÉquipeA, d.noÉquipeB);
+                } else if (s.questionGroupe1) {
+                    // Série avec groupes (ex. série 13 Choix d'associations) : split en deux groupes
+                    const mi = Math.ceil(s.questions.length / 2);
+                    const q1 = s.questions.slice(0, mi);
+                    const q2 = s.questions.slice(mi);
+                    html += `<div class="équipe-entête" style="background:var(--fond-champ);color:var(--accent);">${escHtml(s.questionGroupe1)}</div>`;
+                    html += tableauQuestions(q1, d.noÉquipeA, d.noÉquipeB);
+                    if (s.questionGroupe2) {
+                        html += `<div class="équipe-entête" style="background:var(--fond-champ);color:var(--accent);">${escHtml(s.questionGroupe2)}</div>`;
+                    }
+                    html += tableauQuestions(q2, d.noÉquipeA, d.noÉquipeB);
                 } else {
                     html += tableauQuestions(s.questions, d.noÉquipeA, d.noÉquipeB);
                 }

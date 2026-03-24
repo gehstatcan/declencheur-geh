@@ -58,9 +58,9 @@ function initialiserVolume() {
   const fichiersGit = [
     "équipes.json",
     "séries.json",
-  "répondants.json", 
+    "répondants.json", 
     "alignements.json",
-        "joueurs.json",  
+    "joueurs.json",  
   ];
   fichiersGit.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
@@ -70,7 +70,6 @@ function initialiserVolume() {
   });
 
   // Copier seulement si absent — fichiers pouvant être modifiés via admin
-
   const fichiersAdmin = [
     "parties.json", 
     "thèmes.json"];
@@ -270,7 +269,7 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     thèmes = thèmes.filter((t) => t.noQuestionnaire !== noQuestionnaire);
     thèmes.push({ noQuestionnaire, séries: thèmesExtraits });
     thèmes.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
-    fs.writeFileSync(cheminThèmes, JSON.stringify(thèmes));
+    fs.writeFileSync(cheminThèmes, '[\n' + thèmes.map(q => JSON.stringify(q)).join(',\n') + '\n]');
 
     // --------------------------------------------------------
     // Mettre à jour questions.json
@@ -309,7 +308,7 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     questions = questions.filter((q) => q.noQuestionnaire !== noQuestionnaire);
     questions.push({ noQuestionnaire, séries: sériesQuestions });
     questions.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
-    fs.writeFileSync(cheminQuestions, JSON.stringify(questions));
+    fs.writeFileSync(cheminQuestions, '[\n' + questions.map(q => JSON.stringify(q)).join(',\n') + '\n]');
 
     // Analyse des thèmes — thème vide ou "-- Choisir un thème --" considéré manquant
     const thèmesSansValeur = thèmesExtraits.filter(t =>
@@ -318,8 +317,9 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     const nbAvecSousThème = thèmesExtraits.filter(t => t.sousThème).length;
 
     // Analyse des questions — séries avec texte ou réponse vides
+    // Exclure les entrées de type groupe (Q1/Q2 pour série 13) qui n'ont pas de réponse par définition
     const sériesMap2 = {};
-    questionsExtraites.forEach(q => {
+    questionsExtraites.filter(q => !q.groupe).forEach(q => {
       if (!sériesMap2[q.noSérie]) sériesMap2[q.noSérie] = { total: 0, textesVides: 0, réponsesVides: 0 };
       sériesMap2[q.noSérie].total++;
       if (!q.texte) sériesMap2[q.noSérie].textesVides++;
@@ -1481,6 +1481,8 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
         estÉquipe: sérieInfo?.estÉquipe || false,
         thème: thèmeSérie?.thème || '',
         sousThème: thèmeSérie?.sousThème || '',
+        questionGroupe1: sérieQ.questionGroupe1 || null,
+        questionGroupe2: sérieQ.questionGroupe2 || null,
         questions
       };
     });
