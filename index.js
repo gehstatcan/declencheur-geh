@@ -263,7 +263,7 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     thèmes = thèmes.filter((t) => t.noQuestionnaire !== noQuestionnaire);
     thèmes.push({ noQuestionnaire, séries: thèmesExtraits });
     thèmes.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
-    fs.writeFileSync(cheminThèmes, JSON.stringify(thèmes, null, 2));
+    fs.writeFileSync(cheminThèmes, JSON.stringify(thèmes));
 
     // --------------------------------------------------------
     // Mettre à jour questions.json
@@ -300,7 +300,7 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
     questions = questions.filter((q) => q.noQuestionnaire !== noQuestionnaire);
     questions.push({ noQuestionnaire, séries: sériesQuestions });
     questions.sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
-    fs.writeFileSync(cheminQuestions, JSON.stringify(questions, null, 2));
+    fs.writeFileSync(cheminQuestions, JSON.stringify(questions));
 
     // Analyse des thèmes — thème vide ou "-- Choisir un thème --" considéré manquant
     const thèmesSansValeur = thèmesExtraits.filter(t =>
@@ -589,6 +589,7 @@ app.get("/api/stats/classement", (req, res) => {
       classement[é.noÉquipe] = {
         noÉquipe: é.noÉquipe,
         nomÉquipe: é.nomÉquipe,
+        prioritéÉgalité: é.prioritéÉgalité ?? null,
         MJ: 0, // Matchs joués
         G: 0,
         GP: 0,
@@ -668,15 +669,22 @@ app.get("/api/stats/classement", (req, res) => {
       });
     });
 
-    // Calculer le % et trier
+    // Calculer le % et trier: % desc → prioritéÉgalité asc (null en dernier) → diff desc
     const résultat = Object.values(classement)
       .filter((c) => c.MJ > 0)
       .map((c) => ({
         ...c,
         pct:
           c.ptsPossibles > 0 ? Math.round((c.pts / c.ptsPossibles) * 100) : 0,
+        diff: c.ptsMarqués - c.ptsSubis,
       }))
-      .sort((a, b) => b.pts - a.pts || b.pct - a.pct);
+      .sort((a, b) => {
+        if (b.pct !== a.pct) return b.pct - a.pct;
+        const pa = a.prioritéÉgalité ?? Infinity;
+        const pb = b.prioritéÉgalité ?? Infinity;
+        if (pa !== pb) return pa - pb;
+        return b.diff - a.diff;
+      });
 
     res.json(résultat);
   } catch (e) {

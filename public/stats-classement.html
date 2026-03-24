@@ -98,14 +98,13 @@
             color: var(--gris);
             margin-bottom: 20px;
             text-align: left;
-            /* ← aligné à gauche comme l'ancien */
-            max-width: 800px;
+            max-width: 1000px;
             line-height: 2;
         }
 
         .tableau-conteneur {
             width: 100%;
-            max-width: 800px;
+            max-width: 1000px;
             background: var(--blanc);
             border-radius: var(--rayon);
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -126,10 +125,29 @@
             text-align: center;
             border-bottom: 1px solid var(--fond-champ);
             font-size: 0.9em;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        thead th:hover {
+            background: var(--fond-carte);
         }
 
         thead th.gauche {
             text-align: left;
+        }
+
+        thead th .tri-icone {
+            display: inline-block;
+            margin-left: 4px;
+            opacity: 0.4;
+            font-size: 0.8em;
+        }
+
+        thead th.trié-asc .tri-icone,
+        thead th.trié-desc .tri-icone {
+            opacity: 1;
         }
 
         tbody tr {
@@ -191,19 +209,19 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:40px;">Pos</th>
-                    <th class="gauche">Équipe</th>
-                    <th>MJ</th>
-                    <th>G</th>
-                    <th>GP</th>
-                    <th>PN</th>
-                    <th>PP</th>
-                    <th>P</th>
-                    <th>Pts</th>
-                    <th>%</th>
-                    <th>Pour</th>
-                    <th>Contre</th>
-                    <th>Diff</th>
+                    <th style="width:40px; cursor:default;">Pos</th>
+                    <th class="gauche" data-col="nomÉquipe" data-dir="asc">Équipe<span class="tri-icone">↕</span></th>
+                    <th data-col="MJ" data-dir="desc">MJ<span class="tri-icone">↕</span></th>
+                    <th data-col="G" data-dir="desc">G<span class="tri-icone">↕</span></th>
+                    <th data-col="GP" data-dir="desc">GP<span class="tri-icone">↕</span></th>
+                    <th data-col="PN" data-dir="desc">PN<span class="tri-icone">↕</span></th>
+                    <th data-col="PP" data-dir="desc">PP<span class="tri-icone">↕</span></th>
+                    <th data-col="P" data-dir="desc">P<span class="tri-icone">↕</span></th>
+                    <th data-col="pts" data-dir="desc">Pts<span class="tri-icone">↕</span></th>
+                    <th data-col="pct" data-dir="desc">%<span class="tri-icone">↕</span></th>
+                    <th data-col="ptsMarqués" data-dir="desc">Pour<span class="tri-icone">↕</span></th>
+                    <th data-col="ptsSubis" data-dir="desc">Contre<span class="tri-icone">↕</span></th>
+                    <th data-col="diff" data-dir="desc">Diff<span class="tri-icone">↕</span></th>
                 </tr>
             </thead>
             <tbody id="corpsTableau">
@@ -230,24 +248,26 @@
     </div>
 
     <script>
-        async function chargerClassement() {
-            const classement = await fetch('/api/stats/classement').then(r => r.json());
+        let données = [];
+        let colTri = 'pct';
+        let dirTri = 'desc';
+
+        function trierDonnées(col, dir) {
+            return [...données].sort((a, b) => {
+                let va = a[col], vb = b[col];
+                if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb, 'fr') : vb.localeCompare(va, 'fr');
+                va = va ?? Infinity;
+                vb = vb ?? Infinity;
+                return dir === 'asc' ? va - vb : vb - va;
+            });
+        }
+
+        function afficherTableau(liste) {
             const tbody = document.getElementById('corpsTableau');
-
-            if (classement.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="13"
-                    style="text-align:center; color:var(--gris); padding:40px;">
-                    Aucune partie terminée pour l'instant
-                </td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = classement.map((é, i) => {
-                const diff = é.ptsMarqués - é.ptsSubis;
+            tbody.innerHTML = liste.map((é, i) => {
+                const diff = é.diff ?? (é.ptsMarqués - é.ptsSubis);
                 const diffTexte = diff > 0 ? `+${diff}` : `${diff}`;
-                const diffCouleur = diff > 0 ? 'color:var(--vert)'
-                    : diff < 0 ? 'color:#c0392b' : '';
-
+                const diffCouleur = diff > 0 ? 'color:var(--vert)' : diff < 0 ? 'color:#c0392b' : '';
                 return `<tr>
                     <td class="gris">${i + 1}</td>
                     <td class="équipe"><a href="stats-equipe.html?noEquipe=${é.noÉquipe}" style="color:inherit;text-decoration:none;font-weight:600;">${é.nomÉquipe}</a></td>
@@ -264,6 +284,48 @@
                     <td style="${diffCouleur}">${diffTexte}</td>
                 </tr>`;
             }).join('');
+        }
+
+        function mettreÀJourEntêtes() {
+            document.querySelectorAll('thead th[data-col]').forEach(th => {
+                const col = th.dataset.col;
+                th.classList.remove('trié-asc', 'trié-desc');
+                const icone = th.querySelector('.tri-icone');
+                if (col === colTri) {
+                    th.classList.add(dirTri === 'asc' ? 'trié-asc' : 'trié-desc');
+                    icone.textContent = dirTri === 'asc' ? '↑' : '↓';
+                } else {
+                    icone.textContent = '↕';
+                }
+            });
+        }
+
+        async function chargerClassement() {
+            const classement = await fetch('/api/stats/classement').then(r => r.json());
+            const tbody = document.getElementById('corpsTableau');
+
+            if (classement.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:var(--gris); padding:40px;">Aucune partie terminée pour l'instant</td></tr>`;
+                return;
+            }
+
+            données = classement;
+            afficherTableau(trierDonnées(colTri, dirTri));
+            mettreÀJourEntêtes();
+
+            document.querySelectorAll('thead th[data-col]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const col = th.dataset.col;
+                    if (col === colTri) {
+                        dirTri = dirTri === 'desc' ? 'asc' : 'desc';
+                    } else {
+                        colTri = col;
+                        dirTri = th.dataset.dir || 'desc';
+                    }
+                    afficherTableau(trierDonnées(colTri, dirTri));
+                    mettreÀJourEntêtes();
+                });
+            });
         }
 
         chargerClassement();
