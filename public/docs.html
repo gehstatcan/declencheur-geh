@@ -150,6 +150,67 @@
             letter-spacing: 1px;
             margin-bottom: 10px;
         }
+
+        .bloc-code {
+            background: #0a0a14;
+            border-radius: 10px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82em;
+            color: var(--vert);
+            overflow-x: auto;
+            white-space: pre;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .carte h3 {
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--buzz);
+            margin: 16px 0 8px;
+        }
+
+        .carte h3:first-of-type { margin-top: 0; }
+
+        .tableau-fichiers {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88em;
+            margin-bottom: 8px;
+        }
+
+        .tableau-fichiers th {
+            text-align: left;
+            color: var(--gris);
+            padding: 6px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .tableau-fichiers td {
+            padding: 7px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--gris);
+            vertical-align: top;
+        }
+
+        .tableau-fichiers td:first-child {
+            color: var(--blanc);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .badge-comportement {
+            display: inline-block;
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .badge-git    { background: rgba(233,69,96,0.2);  color: var(--accent); }
+        .badge-admin  { background: rgba(255,215,0,0.15); color: var(--buzz); }
+        .badge-jeu    { background: rgba(46,204,113,0.15); color: var(--vert); }
     </style>
 </head>
 

@@ -11,7 +11,7 @@ Les données du système sont réparties dans `data/saisons/2025-2026/`. Le comp
 | Fichier | Local | Railway (déploiement) | Rôle |
 |---|---|---|---|
 | `équipes.json` | Git | **Toujours écrasé** depuis git | Noms, couleurs, priorité d'égalité |
-| `séries.json` | Git | **Toujours écrasé** depuis git | Structure des types de séries et pointage |
+| `séries.json` | Git | Copié **seulement si absent** | Structure des types de séries et pointage — éditable via admin.html |
 | `joueurs.json` | Git | **Toujours écrasé** depuis git | Liste des joueurs par équipe |
 | `parties.json` | Ignoré par git | Copié **seulement si absent** | Calendrier, liens Teams, matchups éliminatoires |
 | `thèmes.json` | Git | Copié **seulement si absent** | Thèmes et sous-thèmes par questionnaire |
@@ -172,3 +172,68 @@ railway run node init-volume.js --force
 ```
 
 > **Attention** : `--force` écrase `répondants.json` et `alignements.json`. À n'utiliser qu'en début de saison ou pour un reset complet.
+
+---
+
+## Pour développeurs
+
+### Flux de déploiement : Local → GitHub → Railway
+
+Chaque `git push` vers GitHub déclenche automatiquement un redéploiement sur Railway. Un redéploiement se produit à chaque push — pas besoin d'intervention manuelle.
+
+```
+LOCAL (PC)               GITHUB                    RAILWAY
+─────────────────        ──────────────            ──────────────────────
+c:\GIT\declencheur       gehstatcan/               declencheur-geh.up
+                         declencheur-geh           .railway.app
+
+      │                        │                          │
+      │  git push              │                          │
+      ├───────────────────────>│                          │
+      │                        │  déploiement auto        │
+      │                        ├─────────────────────────>│
+      │                        │    1. télécharge code    │
+      │                        │    2. npm install        │
+      │                        │    3. node index.js      │
+      │                        │    4. initialiserVolume  │
+```
+
+### Le Volume Railway
+
+Le Volume est un disque persistant attaché au serveur. Les données de jeu y sont conservées indépendamment des déploiements — un `git push` ne détruira jamais les données accumulées pendant la saison.
+
+| Comportement | Fichiers |
+|---|---|
+| **Toujours écrasé depuis git** | `équipes.json`, `joueurs.json` |
+| **Copié depuis git seulement si absent** | `séries.json`, `parties.json`, `thèmes.json` |
+| **Jamais touché** | `répondants.json`, `alignements.json`, `questions.json`, `parties/répondants-*.json` |
+
+### Cycle typique
+
+```
+1. Tu codes en local
+         ↓
+2. git push → GitHub
+         ↓
+3. Railway détecte le push → redéploie automatiquement
+         ↓
+4. initialiserVolume() s'exécute au démarrage :
+   - équipes.json / joueurs.json  → TOUJOURS écrasés depuis git
+   - séries.json / parties.json   → copiés seulement si absents du Volume
+   - répondants.json              → jamais touché s'il existe déjà
+```
+
+**Résumé** : `git` = code + données de référence. `Volume` = données de jeu persistantes.
+
+---
+
+### Workflow séries en début de saison
+
+`séries.json` est copié depuis git **seulement si absent** sur le Volume. Une fois la saison lancée, il est **verrouillé** dès qu'une première partie est jouée (l'éditeur dans admin.html le détecte automatiquement).
+
+```
+1. Modifier séries.json via admin.html
+2. Sauvegarder (sauvegarde sur le serveur)
+3. Télécharger le JSON → remplacer data/saisons/AAAA/séries.json en local
+4. git push → mis à jour dans git pour la prochaine saison
+```
