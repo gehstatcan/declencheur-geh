@@ -332,9 +332,6 @@ app.post("/api/upload/questionnaire", upload.single("fichier"), (req, res) => {
       .map(([noSérie, v]) => ({ noSérie: parseInt(noSérie), total: v.total, textesVides: v.textesVides, réponsesVides: v.réponsesVides }))
       .sort((a, b) => a.noSérie - b.noSérie);
 
-    console.log(
-      `📥 Questionnaire ${noQuestionnaire} importé — ${thèmesExtraits.length} séries, ${questionsExtraites.length} questions`,
-    );
     res.json({
       succès: true,
       noQuestionnaire,
@@ -406,7 +403,6 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
     // Recharger en mémoire
     parties = nouvellesParties;
 
-    console.log(`📥 parties.json mis à jour — ${nouvellesParties.length} parties`);
     res.json({ succès: true, nbParties: nouvellesParties.length });
   } catch (e) {
     console.error("Erreur upload parties:", e);
@@ -451,7 +447,6 @@ app.put("/api/admin/series", (req, res) => {
   const chemin = path.join(dossierSaison, "séries.json");
   fs.writeFileSync(chemin, JSON.stringify(nouvelles, null, 2), "utf-8");
   séries.splice(0, séries.length, ...nouvelles);
-  console.log(`✅ séries.json mis à jour — ${nouvelles.length} séries`);
   res.json({ succès: true, nbSéries: nouvelles.length });
 });
 
@@ -472,7 +467,6 @@ app.post("/api/joueurs/nouveau", (req, res) => {
     JSON.stringify(joueurs, null, 2),
     "utf-8",
   );
-  console.log(`✅ Nouveau joueur sauvegardé : ${alias}`);
   res.json(nouveauJoueur);
 });
 
@@ -997,8 +991,6 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
   try {
     const noÉquipe = parseInt(req.params.noEquipe);
     const noJoueur = parseInt(req.params.noJoueur);
-    console.log(`Stats joueur — équipe: ${noÉquipe}, joueur: ${noJoueur}`);
-
     const parties = JSON.parse(
       fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
     );
@@ -1020,8 +1012,6 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
     const répJoueur = répondants.filter(
       (r) => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur,
     );
-    console.log(`Répondants filtrés: ${répJoueur.length}`);
-
     // Grouper par partie avec calcul des points
     const partiesMap = {};
     répJoueur.forEach((r) => {
@@ -1555,20 +1545,6 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
 // ============================================================
 const étatsParties = {};
 
-function créerÉtat(noPartie) {
-  return {
-    mode: "initialisation",
-    noPartie,
-    joueursConnectés: [],
-    noSérieActuelle: 1,
-    noQuestionActuelle: 1,
-    scores: {},
-    scoresJoueurs: {},
-    réplique: null,
-    buzzVerrou: false,
-  };
-}
-
 function obtenirÉtat(noPartie) {
   if (!étatsParties[noPartie]) {
     // Vérifier si cette partie est terminée (dans alignements.json)
@@ -1577,12 +1553,8 @@ function obtenirÉtat(noPartie) {
       const cheminAlign = path.join(dossierSaison, "alignements.json");
       const alignements = JSON.parse(fs.readFileSync(cheminAlign, "utf-8"));
       estTerminée = alignements.some((a) => a.noPartie === noPartie);
-      console.log(
-        `obtenirÉtat(${noPartie}) — estTerminée: ${estTerminée}, alignements trouvés: ${alignements.length}`,
-      );
     } catch (e) {
       estTerminée = false;
-      console.log(`obtenirÉtat(${noPartie}) — erreur: ${e.message}`);
     }
 
     étatsParties[noPartie] = {
@@ -1742,9 +1714,6 @@ function enregistrerRépondant(
   io.to(room).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
   io.to(room).emit("questionMisÀJour", questionCourante(état));
   io.to(room).emit("reset");
-  console.log(
-    `✅ ${points} pts → équipe ${noÉquipe} (partie ${état.noPartie})`,
-  );
 }
 
 // ============================================================
@@ -1752,8 +1721,6 @@ function enregistrerRépondant(
 // Chaque socket rejoint une room selon la partie choisie
 // ============================================================
 io.on("connection", (socket) => {
-  console.log("Connexion reçue");
-
   // --------------------------------------------------------
   // Un animateur ou joueur choisit sa partie
   // Il rejoint la room correspondante
@@ -1765,22 +1732,6 @@ io.on("connection", (socket) => {
     }
     socket.noPartie = noPartie;
     socket.join(`partie-${noPartie}`);
-    console.log(`Socket a rejoint la room partie-${noPartie}`);
-
-    // Vérifier si cette partie a déjà des répondants
-    const cheminPartie = path.join(
-      dossierSaison,
-      "parties",
-      `répondants-${noPartie}.json`,
-    );
-    let aDesRépondants = false;
-    try {
-      const contenu = fs.readFileSync(cheminPartie, "utf-8").trim();
-      const répondants = contenu ? JSON.parse(contenu) : [];
-      aDesRépondants = répondants.length > 0;
-    } catch (e) {
-      aDesRépondants = false;
-    }
 
     // Envoyer l'état actuel de cette partie
     const état = obtenirÉtat(noPartie);
@@ -1798,7 +1749,6 @@ io.on("connection", (socket) => {
         !(j.noÉquipe === joueur.noÉquipe && j.noJoueur === joueur.noJoueur),
     );
     état.joueursConnectés.push(joueur);
-    console.log(`✅ ${joueur.alias} enregistré (partie ${joueur.noPartie})`);
     io.to(`partie-${joueur.noPartie}`).emit(
       "joueursConnectés",
       état.joueursConnectés,
@@ -1810,7 +1760,6 @@ io.on("connection", (socket) => {
 
     // Envoyer l'état actuel au joueur qui vient de s'enregistrer
     // Permet de détecter si la partie est déjà en cours
-    console.log("État envoyé au joueur:", état.mode);
     socket.emit("état", état);
   });
 
@@ -1845,13 +1794,8 @@ io.on("connection", (socket) => {
           // Remettre les scores à zéro avant de recalculer
           état.scores = {};
 
-          console.log("Nombre de répondants à traiter:", répondants.length);
-
           // Recalculer les scores à partir des répondants existants
           répondants.forEach((r) => {
-            console.log(
-              `Traitement: équipe ${r.noÉquipe}, série ${r.noSérie}, Q${r.noQuestion}`,
-            );
             if (!état.scores[r.noÉquipe]) état.scores[r.noÉquipe] = 0;
             const clefJoueurR = `${r.noÉquipe}_${r.noJoueur}`;
             if (!état.scoresJoueurs[clefJoueurR]) état.scoresJoueurs[clefJoueurR] = 0;
@@ -1866,14 +1810,9 @@ io.on("connection", (socket) => {
               : question
                 ? question.points
                 : 10;
-            console.log(
-              `Répondant: équipe ${r.noÉquipe}, série ${r.noSérie}, Q${r.noQuestion}, points calculés: ${points}`,
-            );
             état.scores[r.noÉquipe] += points;
             état.scoresJoueurs[clefJoueurR] += points;
           });
-
-          console.log("Scores après recalcul:", état.scores);
 
           // Trouver la dernière question répondue et avancer
           const dernier = répondants
@@ -1896,10 +1835,6 @@ io.on("connection", (socket) => {
             scores: état.scores,
           };
 
-          console.log(`🔄 Reprise détectée — ${répondants.length} répondants`);
-          console.log(
-            `   Reprise à Série ${état.noSérieActuelle} Q${état.noQuestionActuelle}`,
-          );
         }
       } catch (e) {
         console.error("Erreur lors de la reprise :", e);
@@ -1928,7 +1863,6 @@ io.on("connection", (socket) => {
     io.to(`partie-${noPartie}`).emit("réenregistrer");
     io.to(`partie-${noPartie}`).emit("reset");
 
-    console.log(`📋 Partie ${noPartie} sélectionnée`);
   });
 
   // --------------------------------------------------------
@@ -1956,7 +1890,6 @@ io.on("connection", (socket) => {
       questionCourante(état),
     );
     io.to(`partie-${noPartie}`).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
-    console.log(`🎯 Partie ${noPartie} démarrée !`);
   });
 
   // --------------------------------------------------------
@@ -1967,7 +1900,6 @@ io.on("connection", (socket) => {
     état.mode = "initialisation";
     état.buzzVerrou = false;
     io.to(`partie-${noPartie}`).emit("état", état);
-    console.log(`🔄 Partie ${noPartie} — retour en initialisation`);
   });
 
   // --------------------------------------------------------
@@ -1996,7 +1928,6 @@ io.on("connection", (socket) => {
       "questionMisÀJour",
       questionCourante(état),
     );
-    console.log(`🗑️ Partie ${noPartie} réinitialisée`);
   });
 
   // --------------------------------------------------------
@@ -2012,10 +1943,8 @@ io.on("connection", (socket) => {
     // Calculer le temps de réaction si mode débogage activé
     if (AFFICHER_TEMPS_RÉACTION && joueur.tempsClic) {
       joueur.tempsRéaction = Date.now() - joueur.tempsClic;
-      console.log(`🔔 ${joueur.alias} a buzzé en ${joueur.tempsRéaction}ms`);
     }
 
-    console.log(`🔔 ${joueur.alias} a buzzé ! (partie ${joueur.noPartie})`);
     io.to(`partie-${joueur.noPartie}`).emit("buzz", joueur);
   });
 
@@ -2122,9 +2051,6 @@ io.on("connection", (socket) => {
         if (état.scoresJoueurs[clefAncien]) {
           état.scoresJoueurs[clefAncien] -= ancienPoints;
         }
-        console.log(
-          `↩️ Retrait de ${ancienPoints} pts à l'équipe ${ancienRépondant.noÉquipe}`,
-        );
       }
 
       // Retirer l'ancien répondant
@@ -2159,9 +2085,6 @@ io.on("connection", (socket) => {
         noÉquipe === partie.noÉquipeA ? partie.noÉquipeB : partie.noÉquipeA;
       état.buzzVerrou = false;
       io.to(`partie-${noPartie}`).emit("réplique", état.réplique);
-      console.log(
-        `↩️ Droit de réplique → équipe ${état.réplique} (partie ${noPartie})`,
-      );
     } else {
       // Pas de réplique — question suivante
       avancerQuestion(état);
@@ -2186,7 +2109,6 @@ io.on("connection", (socket) => {
       questionCourante(état),
     );
     io.to(`partie-${noPartie}`).emit("reset");
-    console.log(`⏭️ Question suivante (partie ${noPartie})`);
   });
 
   // --------------------------------------------------------
@@ -2201,7 +2123,6 @@ io.on("connection", (socket) => {
       questionCourante(état),
     );
     io.to(`partie-${noPartie}`).emit("reset");
-    console.log(`⏮️ Question précédente (partie ${noPartie})`);
   });
 
   socket.on("sériePrécédente", (noPartie) => {
@@ -2277,9 +2198,6 @@ io.on("connection", (socket) => {
         répondants.splice(idx, 1);
         fs.writeFileSync(cheminPartie, JSON.stringify(répondants, null, 2));
 
-        console.log(
-          `🗑️ Réponse annulée — Série ${état.noSérieActuelle} Q${état.noQuestionActuelle}`,
-        );
       }
     } catch (e) {
       console.error("Erreur annulation:", e);
@@ -2383,7 +2301,6 @@ io.on("connection", (socket) => {
       alignements.sort((a, b) => a.noPartie !== b.noPartie ? a.noPartie - b.noPartie : a.noÉquipe - b.noÉquipe);
       const contenuAlign = '[\n' + alignements.map(a => '  ' + JSON.stringify(a)).join(',\n') + '\n]';
       fs.writeFileSync(cheminAlignements, contenuAlign, 'utf-8');
-      console.log(`📋 Alignements sauvegardés pour partie ${noPartie}`);
 
       // ============================================================
       // Construire le résumé avec noms d'équipes et joueurs
@@ -2465,9 +2382,6 @@ io.on("connection", (socket) => {
         résumé,
       });
 
-      console.log(
-        `✅ Partie ${noPartie} fusionnée — ${répondantsPartie.length} répondants`,
-      );
     } catch (e) {
       console.error("Erreur lors de la fusion :", e);
     }
@@ -2488,9 +2402,6 @@ io.on("connection", (socket) => {
         "joueursConnectés",
         état.joueursConnectés,
       );
-      console.log(`👋 ${socket.joueur.alias} déconnecté`);
-    } else {
-      console.log("Déconnexion");
     }
   });
 
