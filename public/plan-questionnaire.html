@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Plan du questionnaire — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+        }
+
+        header h1 span { color: var(--accent); }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            font-size: 0.95em;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--gris);
+            background: var(--fond-carte);
+            border: 1px solid var(--fond-champ);
+            transition: all 0.2s;
+        }
+
+        nav a:hover { background: var(--fond-champ); color: var(--texte); }
+
+        nav a.actif {
+            background: var(--accent);
+            color: var(--blanc);
+            border-color: var(--accent);
+        }
+
+        .dropdown { position: relative; }
+        .dropdown-btn { font-size: 0.95em; padding: 8px 20px; border-radius: 20px; color: var(--blanc); background: var(--accent); border: 1px solid var(--accent); cursor: pointer; transition: all 0.2s; font-family: inherit; font-weight: 600; }
+        .dropdown-menu { display: none; position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--fond-carte); border: 1px solid var(--fond-champ); border-radius: 12px; padding: 6px; min-width: 200px; z-index: 100; flex-direction: column; gap: 4px; }
+        .dropdown-menu.ouvert { display: flex; }
+        .dropdown-menu a { font-size: 0.9em; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: var(--gris); background: transparent; border: none; transition: all 0.2s; white-space: nowrap; }
+        .dropdown-menu a:hover { background: var(--fond-champ); color: var(--texte); }
+        .dropdown-menu a.actif { background: var(--fond-champ); color: var(--texte); font-weight: 600; }
+
+        .contenu {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .page-titre {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .page-sous-titre {
+            font-size: 0.85em;
+            color: var(--gris);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .actions-haut {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .bouton-dl {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent);
+            color: var(--blanc);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .bouton-dl:hover { background: #1a252f; }
+
+        .carte {
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .carte h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .carte p {
+            color: #4a4a4a;
+            font-size: 0.92em;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        /* Tableau séries */
+        .tableau-séries {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .tableau-séries th {
+            background: var(--fond-champ);
+            color: var(--texte);
+            font-weight: 600;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--fond-champ);
+        }
+
+        .tableau-séries td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--fond-champ);
+            vertical-align: top;
+        }
+
+        .tableau-séries tr:last-child td { border-bottom: none; }
+
+        .tableau-séries tr:hover td { background: rgba(0,0,0,0.03); }
+
+        .badge-type {
+            display: inline-block;
+            font-size: 0.78em;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .badge-indiv { background: #dbeafe; color: #1d4ed8; }
+        .badge-collec { background: #dcfce7; color: #15803d; }
+        .badge-controle { background: #fef9c3; color: #854d0e; }
+        .badge-4v { background: #fce7f3; color: #9d174d; }
+        .badge-indice { background: #ede9fe; color: #6d28d9; }
+        .badge-vis { background: #ffedd5; color: #9a3412; }
+        .badge-assoc { background: #e0f2fe; color: #075985; }
+        .badge-eclair { background: var(--fond-champ); color: var(--gris); }
+        .badge-prime { background: #fef3c7; color: #b45309; }
+
+        /* Section thèmes */
+        .grille-themes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 12px;
+        }
+
+        .theme-carte {
+            background: var(--fond-champ);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .theme-carte h3 {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--texte);
+        }
+
+        .theme-carte p {
+            font-size: 0.82em;
+            color: #4a4a4a;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Section types de questions */
+        .type-question {
+            border-left: 3px solid var(--fond-champ);
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            background: var(--blanc);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .type-question h3 {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .type-question p {
+            font-size: 0.87em;
+            color: #4a4a4a;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        .note-màj {
+            font-size: 0.8em;
+            color: var(--gris);
+            text-align: center;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <nav>
+        <a href="stats-eliminations.html" id="lien-eliminations" style="display:none">🌳 Éliminatoires</a>
+        <a href="stats-calendrier.html">📅 Calendrier</a>
+        <a href="stats-classement.html">🏆 Classement</a>
+        <a href="stats-compteurs.html">📊 Compteurs</a>
+        <div class="dropdown">
+            <button class="dropdown-btn" onclick="toggleRessources(this)">📚 Ressources ▾</button>
+            <div class="dropdown-menu" id="menu-ressources">
+                <a href="docs.html">📄 Documentation</a>
+                <a href="plan-questionnaire.html" class="actif">📋 Plan du questionnaire</a>
+                <a href="https://gehstatcan.github.io/Saison24/SaisonReg/p5saisonPr%C3%A9c%C3%A9dentes.html" target="_blank">🕐 Saisons précédentes</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="contenu">
+
+        <div class="page-titre">📋 Plan du questionnaire</div>
+        <div class="page-sous-titre">Saison 2025-2026 — Dernière mise à jour : septembre 2025</div>
+
+        <div class="actions-haut">
+            <a class="bouton-dl" href="ressources/2025-2026/plan-questionnaire.doc" download="Plan du questionnaire 2025-2026.doc">⬇ Télécharger .doc</a>
+        </div>
+
+        <!-- Tableau des séries -->
+        <div class="carte">
+            <h2>Les séries</h2>
+            <p>Il y a 15 séries dans le questionnaire. 9 sont avec thèmes imposés, 5 avec thèmes au choix et une sans thème. Pour les thèmes au choix, vous ne devez pas choisir le même deux fois.</p>
+            <table class="tableau-séries">
+                <thead>
+                    <tr>
+                        <th style="width:40px">Série</th>
+                        <th style="width:130px">Type</th>
+                        <th>Thème</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td><span class="badge-type badge-indiv">Individuelle</span></td>
+                        <td>Langue</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td><span class="badge-type badge-collec">Collective</span></td>
+                        <td>Géographie</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td><span class="badge-type badge-collec">Collective</span></td>
+                        <td>Cinéma et télévision</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4</strong></td>
+                        <td><span class="badge-type badge-collec">Collective</span></td>
+                        <td>Histoire et société</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5</strong></td>
+                        <td><span class="badge-type badge-controle">Contrôle</span></td>
+                        <td>Une année ou plus (première question 5 points)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>6</strong></td>
+                        <td><span class="badge-type badge-4v">Les 4 V</span></td>
+                        <td>Libre</td>
+                    </tr>
+                    <tr>
+                        <td><strong>7</strong></td>
+                        <td><span class="badge-type badge-collec">Collective</span></td>
+                        <td>Arts et littérature</td>
+                    </tr>
+                    <tr>
+                        <td><strong>8</strong></td>
+                        <td><span class="badge-type badge-collec">Collective</span></td>
+                        <td>Sports et loisirs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>9</strong></td>
+                        <td><span class="badge-type badge-indice">Indice</span></td>
+                        <td>Libre (3 indices : 30, 20 et 10 points)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>10</strong></td>
+                        <td><span class="badge-type badge-vis">Vis-à-vis</span></td>
+                        <td>Libre</td>
+                    </tr>
+                    <tr>
+                        <td><strong>11</strong></td>
+                        <td><span class="badge-type badge-collec">Collective</span></td>
+                        <td>Musique</td>
+                    </tr>
+                    <tr>
+                        <td><strong>12</strong></td>
+                        <td><span class="badge-type badge-collec">Collective</span></td>
+                        <td>Sciences</td>
+                    </tr>
+                    <tr>
+                        <td><strong>13</strong></td>
+                        <td><span class="badge-type badge-assoc">Choix d'associations</span></td>
+                        <td>Libre</td>
+                    </tr>
+                    <tr>
+                        <td><strong>14</strong></td>
+                        <td><span class="badge-type badge-eclair">Éclairs</span></td>
+                        <td>Aucun</td>
+                    </tr>
+                    <tr>
+                        <td><strong>15</strong></td>
+                        <td><span class="badge-type badge-prime">Prime</span></td>
+                        <td>Depuis 2020</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Idées par thème -->
+        <div class="carte">
+            <h2>Idées par thème</h2>
+            <div class="grille-themes">
+                <div class="theme-carte">
+                    <h3>1 — Langue</h3>
+                    <p>Proverbes, expressions populaires, conjugaisons, épellation (singulier/pluriel), homonymes, origine des mots, genre des mots, gentilés, traductions, préfixes/suffixes, définitions, anagrammes, vocabulaire, grammaire.</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>2 — Géographie</h3>
+                    <p>Canada, Québec, le monde, climat, population, tourisme, géographie physique (roches, volcans, vents…).</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>3 — Cinéma et télévision</h3>
+                    <p>Films, émissions, téléromans, variétés, enfants…</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>4 — Histoire et société</h3>
+                    <p><strong>Histoire :</strong> Canada, Québec, époques (antiquité, renaissance…)<br>
+                    <strong>Politique :</strong> Dirigeants, partis, élections, lois, relations internationales<br>
+                    <strong>Économie :</strong> Sciences économiques, théories, événements, devises<br>
+                    <strong>Sciences sociales :</strong> Sociologie, psychologie, théories<br>
+                    <strong>Religion :</strong> Religions, rites, mythologie, croyances</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>7 — Arts et littérature</h3>
+                    <p><strong>Arts :</strong> Théâtre, peinture, danse…<br>
+                    <strong>Littérature :</strong> Romans, écrivains, bande dessinée, prix (Nobel, Fémina, Goncourt), genres littéraires, personnages, citations, courants littéraires, nationalité/prénom/pseudonymes d'auteurs.</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>8 — Sports et loisirs</h3>
+                    <p>Hockey, escrime, judo, tennis, ping-pong, golf, chasse, pêche, passe-temps (Monopoly, échecs…), Jeux olympiques.</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>11 — Musique</h3>
+                    <p>Chanson, instruments, compositeurs, solfège et vocabulaire musical, musique québécoise, musique actuelle, paroles de chansons, courants musicaux, chanson française d'ici et d'ailleurs, extraits de musique (liste m3u).</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>12 — Sciences</h3>
+                    <p><strong>Sciences de la vie :</strong> Anatomie, zoologie, biologie, botanique<br>
+                    <strong>Sciences physiques :</strong> Physique, chimie, géologie, astronomie<br>
+                    <strong>Mathématiques :</strong> Géométrie, probabilités, calcul mental, suites, formules, algèbre<br>
+                    <strong>Technologie :</strong> Découvertes, informatique, inventions, prix Nobel</p>
+                </div>
+                <div class="theme-carte">
+                    <h3>15 — Depuis 2020</h3>
+                    <p>Éléments de l'actualité récente : sport en général et Jeux olympiques, politique, mortalités, spectacles et musique, films récents, grands événements.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Types de questions -->
+        <div class="carte">
+            <h2>Types de questions</h2>
+
+            <div class="type-question">
+                <h3>Individuelles</h3>
+                <p>Série de 8 questions adressées une à la fois à chacun des joueurs des deux équipes, avec droit de réplique en vis-à-vis.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Collectives</h3>
+                <p>Série de 5 questions thématiques en appel à tous, avec droit de réplique.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Les 4 V</h3>
+                <p>Série de 8 questions posées aux huit joueurs. Une bonne réponse élimine le joueur qui a répondu pour le reste de la série. Une mauvaise réponse donne droit à la réplique. Si tous les joueurs d'une équipe répondent à une question, la série devient collective (tous les joueurs éliminés sont ressuscités) et les dernières questions sont posées pour 5 points chacune.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Identification (Indice)</h3>
+                <p>Posée en collective avec droit de réplique. Une réponse au premier indice vaut 30 points, 20 points au second et 10 points au dernier indice. Autant que possible, la question ne devrait être reliée qu'à une seule bonne réponse dès le 1er indice.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Contrôle</h3>
+                <p>Série de 5 questions dont la première (question discipline), en appel à tous, décidera quelle équipe pourra répondre à la question suivante avec consultation, avec droit de réplique. Si la première question n'est pas répondue, la deuxième question devient la question discipline, et ainsi de suite. 5 points pour la première question, 10 points pour les suivantes.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Vis-à-vis</h3>
+                <p>Série de 4 questions posées à chaque paire d'adversaires (joueur 1 équipe A contre joueur 1 équipe B), le plus rapide donne une réponse, avec droit de réplique au joueur adverse si la réponse est mauvaise.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Choix d'associations</h3>
+                <p>Deux séries d'associations à 4 éléments (associez 4 éléments avec 4 autres éléments, incluant une inconnue). Une association peut valoir jusqu'à 50 points : 20 points pour l'élément correctement associé à l'inconnue trouvée, puis 10 points pour chaque autre bonne association. Les deux associations doivent être de domaines différents. Questions par équipe avec droit de consultation et sans droit de réplique.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Questions Éclair</h3>
+                <p>Série de 10 questions courtes et rapides posées aux deux équipes.</p>
+            </div>
+
+            <div class="type-question">
+                <h3>Question Prime</h3>
+                <p>Une même question est demandée aux 8 joueurs. Ils doivent répondre par écrit sans consultation. Possibilité de 40 points par équipe.</p>
+            </div>
+        </div>
+
+        <div class="note-màj">Bonne rédaction !</div>
+
+    </div>
+
+    <script>
+        function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
+        document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
+        fetch('/api/stats/phase').then(r => r.json()).then(d => {
+            if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
+        }).catch(() => {});
+    </script>
+
+</body>
+
+</html>

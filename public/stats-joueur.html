@@ -71,8 +71,13 @@
         <a href="stats-calendrier.html">📅 Calendrier</a>
         <a href="stats-classement.html">🏆 Classement</a>
         <a href="stats-compteurs.html">📊 Compteurs</a>
-        <a href="stats-match.html">📋 Feuille de match</a>
-        <a href="https://gehstatcan.github.io/Saison24/SaisonReg/p5saisonPr%C3%A9c%C3%A9dentes.html" target="_blank">🕐 Saisons précédentes</a>
+        <div class="dropdown">
+            <button class="dropdown-btn" onclick="toggleRessources(this)">📚 Ressources ▾</button>
+            <div class="dropdown-menu" id="menu-ressources">
+                <a href="docs.html">📄 Documentation</a>
+                <a href="https://gehstatcan.github.io/Saison24/SaisonReg/p5saisonPr%C3%A9c%C3%A9dentes.html" target="_blank">🕐 Saisons précédentes</a>
+            </div>
+        </div>
     </nav>
 
     <h2 id="titreJoueur">Chargement...</h2>
@@ -395,6 +400,8 @@
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         });
         charger();
+        function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
+        document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
     </script>
 </body>
 </html>
