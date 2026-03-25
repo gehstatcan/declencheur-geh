@@ -425,7 +425,7 @@
 <body>
     <!-- En-tête identique à joueur.html -->
     <header>
-        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; filter:invert(1); background:var(--accent); border-radius:12px; padding:5px;">
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
 
@@ -519,6 +519,13 @@
             </button>
         </div>
 
+        <!-- Toggle points par joueur -->
+        <div style="text-align:center; margin-top:8px;">
+            <button id="btnPtsJoueurs" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 16px;" onclick="togglePtsJoueurs()">
+                📊 Afficher pts/joueur
+            </button>
+        </div>
+
         <!-- Volume et test des sons -->
         <div style="display:flex; align-items:center; gap:12px; justify-content:center; margin-top:16px; flex-wrap:wrap;">
             <label style="font-size:0.9em; font-weight:600;">🔊 Volume buzzers</label>
@@ -558,6 +565,8 @@
         let joueurAyantBuzzé = null;
         let modeActuel = 'initialisation';
         let derniersScores = {};
+        let derniersScoresJoueurs = {};
+        let afficherPtsJoueurs = false;
         // Conserver la liste des joueurs connectés entre les événements socket
         // Évite de passer [] par erreur lors des appels à afficherÉquipes()
         let derniersJoueursConnectés = [];
@@ -613,6 +622,7 @@
         socket.on('état', (état) => {
             modeActuel = état.mode;
             derniersScores = état.scores || {};
+            derniersScoresJoueurs = état.scoresJoueurs || {};
             derniersJoueursConnectés = état.joueursConnectés || []; // Sauvegarder les joueurs connectés reçus du serveur
             partieActuelle = état.noPartie;
             mettreÀJourMode(état.mode);
@@ -750,10 +760,11 @@
             document.getElementById('boutonsPoints').style.display = 'none';
         });
 
-        socket.on('scoresMisÀJour', (scores) => {
+        socket.on('scoresMisÀJour', ({ scores, scoresJoueurs }) => {
             derniersScores = scores;
+            derniersScoresJoueurs = scoresJoueurs || {};
             mettreÀJourScores(scores);
-            afficherÉquipes(partieActuelle, derniersJoueursConnectés, scores); // Mettre à jour les scores dans les blocs équipes
+            afficherÉquipes(partieActuelle, derniersJoueursConnectés, scores);
         });
 
         socket.on('questionMisÀJour', (info) => {
@@ -870,6 +881,15 @@
             if (!partieActuelle) return;
             derniersScores = scores;
             afficherÉquipes(partieActuelle, derniersJoueursConnectés, scores);
+        }
+
+        function togglePtsJoueurs() {
+            afficherPtsJoueurs = !afficherPtsJoueurs;
+            const btn = document.getElementById('btnPtsJoueurs');
+            btn.textContent = afficherPtsJoueurs ? '📊 Cacher pts/joueur' : '📊 Afficher pts/joueur';
+            btn.style.background = afficherPtsJoueurs ? 'var(--accent)' : 'var(--fond-champ)';
+            btn.style.color = afficherPtsJoueurs ? 'white' : 'var(--blanc)';
+            afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
         }
 
         function obtenirQuestionCourante() {
@@ -1003,8 +1023,9 @@
                             if (estBuzzeur) { classe = 'connecté'; icône = '🟢'; }
                         }
 
-                        //return `<div class="joueur ${classe}">${icône} ${j.alias}</div>`;  //avec icône
-                        return `<div class="joueur ${classe}">${j.alias}</div>`; //sans icône
+                        const pts = afficherPtsJoueurs ? (derniersScoresJoueurs[`${j.noÉquipe}_${j.noJoueur}`] || 0) : null;
+                        const ptsHTML = pts !== null ? ` <span style="font-weight:700;color:var(--accent);margin-left:6px;">${pts}</span>` : '';
+                        return `<div class="joueur ${classe}" style="display:flex;justify-content:space-between;align-items:center;">${j.alias}${ptsHTML}</div>`;
 
 
 

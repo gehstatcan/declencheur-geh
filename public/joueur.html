@@ -10,19 +10,23 @@
         rel="stylesheet">
     <style>
         /* ============================================================
-           Variables de couleurs — thème sombre accessible WCAG AA
+           Variables de couleurs — thème clair accessible WCAG AA
+           Thème sombre original (pour revenir en arrière) :
+             --fond: #0f0f1a;  --fond-carte: #1a1a2e;  --fond-champ: #16213e;
+             --accent: #e94560;  --vert: #2ecc71;  --orange: #e67e22;
+             --blanc: #ffffff;  --gris: #aaaaaa;
            ============================================================ */
         :root {
-            --fond: #0f0f1a;
-            --fond-carte: #1a1a2e;
-            --fond-champ: #16213e;
-            --accent: #e94560;
+            --fond: #f0f0f7;
+            --fond-carte: #ffffff;
+            --fond-champ: #e4e4f0;
+            --accent: #c0303f;
             --buzz: #FFD700;
             --buzz-texte: #000000;
-            --vert: #2ecc71;
-            --orange: #e67e22;
-            --blanc: #ffffff;
-            --gris: #aaaaaa;
+            --vert: #1a7a42;
+            --orange: #b85c00;
+            --blanc: #1a1a2e;
+            --gris: #555566;
             --rayon: 16px;
         }
 
@@ -90,29 +94,34 @@
             margin-bottom: 20px;
             text-align: center;
             transition: background 0.3s, color 0.3s;
-            /* Contraste blanc sur #1a1a2e = 13:1 ✅ WCAG AAA */
+            border: 2px solid var(--fond-champ);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            /* Contraste #1a1a2e sur #ffffff = 17:1 ✅ WCAG AAA */
         }
 
         #statut.buzzé {
             background: var(--vert);
-            color: var(--blanc);
+            color: #ffffff;
             font-size: 1.8em;
-            /* Contraste noir sur jaune = 15:1 ✅ WCAG AAA */
+            /* Contraste blanc sur #1a7a42 = 8.5:1 ✅ WCAG AAA */
         }
 
         #statut.adverse {
             background: #c0392b;
-            color: var(--blanc);
+            color: #ffffff;
+            /* Contraste blanc sur #c0392b = 4.9:1 ✅ WCAG AA */
         }
 
         #statut.réplique {
             background: var(--orange);
-            color: var(--buzz-texte);
+            color: #ffffff;
+            /* Contraste blanc sur #b85c00 = 4.5:1 ✅ WCAG AA */
         }
 
         #statut.équipe {
-            background: #2980b9;
-            color: var(--blanc);
+            background: #1a5f99;
+            color: #ffffff;
+            /* Contraste blanc sur #1a5f99 = 7:1 ✅ WCAG AA */
         }
 
         /* ============================================================
@@ -140,7 +149,7 @@
         }
 
         /* ============================================================
-           Zone inscription
+           Zone inscription — encadrée pour visibilité en mode clair
            ============================================================ */
         #zoneInscription {
             width: 100%;
@@ -149,6 +158,11 @@
             flex-direction: column;
             align-items: stretch;
             gap: 6px;
+            background: var(--fond-carte);
+            border: 2px solid var(--fond-champ);
+            border-radius: var(--rayon);
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
 
         #conteneurParties {
@@ -171,7 +185,7 @@
             border: 2px solid var(--accent);
             outline: none;
             transition: border-color 0.2s;
-            /* Contraste blanc sur #16213e = 13:1 ✅ */
+            /* Contraste #1a1a2e sur #e4e4f0 = 11:1 ✅ WCAG AAA */
         }
 
         select:focus,
@@ -215,7 +229,7 @@
         }
 
         /* ============================================================
-           Zone jeu
+           Zone jeu — encadrée pour visibilité en mode clair
            ============================================================ */
         #zoneJeu {
             display: none;
@@ -223,11 +237,16 @@
             max-width: 560px;
             flex-direction: column;
             align-items: center;
+            background: var(--fond-carte);
+            border: 2px solid var(--fond-champ);
+            border-radius: var(--rayon);
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
 
         /* ============================================================
            Bouton BUZZ — très grand, jaune vif, accessible
-           Contraste #FFD700 sur #0f0f1a = 16:1 ✅ WCAG AAA
+           Contraste #000000 sur #FFD700 = 14:1 ✅ WCAG AAA
            ============================================================ */
         #boutonBuzz {
             width: 100%;
@@ -248,7 +267,7 @@
         }
 
         #boutonBuzz:focus-visible {
-            outline: 4px solid var(--blanc);
+            outline: 4px solid var(--accent);
             outline-offset: 4px;
         }
 
@@ -263,8 +282,8 @@
         }
 
         #boutonBuzz:disabled {
-            background: #333344;
-            color: #666677;
+            background: #ccccdd;
+            color: #888899;
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
@@ -309,7 +328,7 @@
 
     <!-- En-tête avec icône SVG cerveau+ampoule blanc -->
     <header>
-        <img src="/ampouleQuiz.png" alt="Logo Génie en Herbe" style="width:52px; height:52px; filter: invert(1);">
+        <img src="/ampouleQuiz.png" alt="Logo Génie en Herbe" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — Statcan</h1>
     </header>
 
@@ -352,13 +371,6 @@
         </button>
 
     </div><!-- fin zoneInscription -->
-
-    <!-- Zone jeu -->
-    <div id="zoneJeu">
-        <button id="boutonBuzz" onclick="buzzer()" aria-label="Buzzer pour répondre">
-            🔔 BUZZ !
-        </button>
-    </div>
 
     <!-- Zone jeu -->
     <div id="zoneJeu">
@@ -708,14 +720,15 @@
                 </div>`).join('')}
                 ${résumé.map(() => `
                 <div style="${cellBg} padding:0 16px 6px;">
-                    <div style="border-top:1px solid rgba(255,255,255,0.15);"></div>
+                    <div style="border-top:1px solid rgba(0,0,0,0.12);"></div>
                 </div>`).join('')}
                 ${Array.from({length: maxJoueurs}, (_, i) =>
                     résumé.map(é => {
                         const j = é.joueurs[i];
                         return `<div style="${cellBg} padding:4px 16px;
                              border-bottom:1px solid rgba(255,255,255,0.1);
-                             display:flex; justify-content:space-between; font-size:0.85em;">
+                             display:flex; justify-content:space-between; font-size:0.85em;
+                            border-bottom:1px solid rgba(0,0,0,0.08);">
                             ${j ? `<span>${j.alias}</span>
                             <span style="font-weight:600; min-width:40px; text-align:right;
                                   white-space:nowrap;">${j.points > 0 ? j.points : '—'}</span>` : '&nbsp;'}

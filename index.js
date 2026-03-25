@@ -1522,6 +1522,7 @@ function créerÉtat(noPartie) {
     noSérieActuelle: 1,
     noQuestionActuelle: 1,
     scores: {},
+    scoresJoueurs: {},
     réplique: null,
     buzzVerrou: false,
   };
@@ -1548,6 +1549,7 @@ function obtenirÉtat(noPartie) {
       mode: estTerminée ? "terminée" : "initialisation",
       joueursConnectés: [],
       scores: {},
+      scoresJoueurs: {},
       noSérieActuelle: 1,
       noQuestionActuelle: 1,
       réplique: null,
@@ -1671,6 +1673,9 @@ function enregistrerRépondant(
 ) {
   if (!état.scores[noÉquipe]) état.scores[noÉquipe] = 0;
   état.scores[noÉquipe] += points;
+  const clefJoueur = `${noÉquipe}_${noJoueur}`;
+  if (!état.scoresJoueurs[clefJoueur]) état.scoresJoueurs[clefJoueur] = 0;
+  état.scoresJoueurs[clefJoueur] += points;
 
   répondants.push({
     noPartie: état.noPartie,
@@ -1693,7 +1698,7 @@ function enregistrerRépondant(
 
   // Diffuser à tous les membres de la room de cette partie
   const room = `partie-${état.noPartie}`;
-  io.to(room).emit("scoresMisÀJour", état.scores);
+  io.to(room).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
   io.to(room).emit("questionMisÀJour", questionCourante(état));
   io.to(room).emit("reset");
   console.log(
@@ -1807,6 +1812,8 @@ io.on("connection", (socket) => {
               `Traitement: équipe ${r.noÉquipe}, série ${r.noSérie}, Q${r.noQuestion}`,
             );
             if (!état.scores[r.noÉquipe]) état.scores[r.noÉquipe] = 0;
+            const clefJoueurR = `${r.noÉquipe}_${r.noJoueur}`;
+            if (!état.scoresJoueurs[clefJoueurR]) état.scoresJoueurs[clefJoueurR] = 0;
             const série = séries.find((s) => s.noSérie === r.noSérie);
             const question = série
               ? série.questions.find((q) => q.noQuestion === r.noQuestion)
@@ -1822,6 +1829,7 @@ io.on("connection", (socket) => {
               `Répondant: équipe ${r.noÉquipe}, série ${r.noSérie}, Q${r.noQuestion}, points calculés: ${points}`,
             );
             état.scores[r.noÉquipe] += points;
+            état.scoresJoueurs[clefJoueurR] += points;
           });
 
           console.log("Scores après recalcul:", état.scores);
@@ -1859,7 +1867,7 @@ io.on("connection", (socket) => {
 
     // Envoyer les scores recalculés à la room
     if (reprise) {
-      io.to(`partie-${noPartie}`).emit("scoresMisÀJour", état.scores);
+      io.to(`partie-${noPartie}`).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
       io.to(`partie-${noPartie}`).emit(
         "questionMisÀJour",
         questionCourante(état),
@@ -1906,7 +1914,7 @@ io.on("connection", (socket) => {
       "questionMisÀJour",
       questionCourante(état),
     );
-    io.to(`partie-${noPartie}`).emit("scoresMisÀJour", état.scores);
+    io.to(`partie-${noPartie}`).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
     console.log(`🎯 Partie ${noPartie} démarrée !`);
   });
 
@@ -1942,7 +1950,7 @@ io.on("connection", (socket) => {
     fs.writeFileSync(cheminPartie, "[]", "utf-8");
 
     io.to(`partie-${noPartie}`).emit("état", état);
-    io.to(`partie-${noPartie}`).emit("scoresMisÀJour", état.scores);
+    io.to(`partie-${noPartie}`).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
     io.to(`partie-${noPartie}`).emit(
       "questionMisÀJour",
       questionCourante(état),
@@ -2068,6 +2076,10 @@ io.on("connection", (socket) => {
         // Soustraire les anciens points
         if (état.scores[ancienRépondant.noÉquipe]) {
           état.scores[ancienRépondant.noÉquipe] -= ancienPoints;
+        }
+        const clefAncien = `${ancienRépondant.noÉquipe}_${ancienRépondant.noJoueur}`;
+        if (état.scoresJoueurs[clefAncien]) {
+          état.scoresJoueurs[clefAncien] -= ancienPoints;
         }
         console.log(
           `↩️ Retrait de ${ancienPoints} pts à l'équipe ${ancienRépondant.noÉquipe}`,
@@ -2215,6 +2227,10 @@ io.on("connection", (socket) => {
         if (état.scores[répondant.noÉquipe]) {
           état.scores[répondant.noÉquipe] -= points;
         }
+        const clefJoueurAnn = `${répondant.noÉquipe}_${répondant.noJoueur}`;
+        if (état.scoresJoueurs[clefJoueurAnn]) {
+          état.scoresJoueurs[clefJoueurAnn] -= points;
+        }
 
         // Supprimer le répondant
         répondants.splice(idx, 1);
@@ -2229,7 +2245,7 @@ io.on("connection", (socket) => {
     }
 
     // Mettre à jour les scores et la question
-    io.to(`partie-${noPartie}`).emit("scoresMisÀJour", état.scores);
+    io.to(`partie-${noPartie}`).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
     const info = questionCourante(état);
     io.to(`partie-${noPartie}`).emit("questionMisÀJour", info);
   });
