@@ -22,8 +22,52 @@ const XLSX = require("xlsx");
 // Configuration multer — stockage en mémoire (pas sur disque)
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.use(express.static("public"));
 app.use(express.json());
+
+// ============================================================
+// Authentification — protection des pages animateur
+// ============================================================
+const crypto = require("crypto");
+const sessions = new Set();
+const MOT_DE_PASSE_ADMIN = process.env.MOT_DE_PASSE_ADMIN || "Fellegi";
+const PAGES_PROTÉGÉES = ["/admin.html", "/marqueur.html", "/test-sons.html", "/guide-animateur.html"];
+
+function getCookie(req, name) {
+  const cookies = req.headers.cookie || "";
+  const match = cookies.split(";").map(c => c.trim()).find(c => c.startsWith(name + "="));
+  return match ? match.slice(name.length + 1) : null;
+}
+
+app.use((req, res, next) => {
+  if (!PAGES_PROTÉGÉES.includes(req.path)) return next();
+  const token = getCookie(req, "geh_session");
+  if (token && sessions.has(token)) return next();
+  res.redirect("/login.html?redirect=" + encodeURIComponent(req.path));
+});
+
+app.post("/api/auth/login", (req, res) => {
+  const { motDePasse } = req.body;
+  if (motDePasse !== MOT_DE_PASSE_ADMIN)
+    return res.status(401).json({ erreur: "Mot de passe incorrect" });
+  const token = crypto.randomBytes(32).toString("hex");
+  sessions.add(token);
+  res.setHeader("Set-Cookie", `geh_session=${token}; HttpOnly; SameSite=Strict; Path=/`);
+  res.json({ succès: true });
+});
+
+app.post("/api/auth/logout", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (token) sessions.delete(token);
+  res.setHeader("Set-Cookie", "geh_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0");
+  res.json({ succès: true });
+});
+
+app.get("/api/auth/check", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  res.json({ authentifié: token ? sessions.has(token) : false });
+});
+
+app.use(express.static("public"));
 
 // ============================================================
 // Chargement des données de la saison

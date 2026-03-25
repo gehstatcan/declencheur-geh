@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Guide animateur — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+        }
+
+        header h1 span { color: var(--accent); }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            font-size: 0.95em;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--gris);
+            background: var(--fond-carte);
+            border: 1px solid var(--fond-champ);
+            transition: all 0.2s;
+        }
+
+        nav a:hover { background: var(--fond-champ); color: var(--texte); }
+        nav a.actif { background: var(--accent); color: var(--blanc); border-color: var(--accent); }
+
+        .bouton-deconnexion {
+            font-size: 0.95em;
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: var(--gris);
+            background: var(--fond-carte);
+            border: 1px solid var(--fond-champ);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .bouton-deconnexion:hover { background: var(--fond-champ); color: var(--texte); }
+
+        .mise-en-page {
+            display: flex;
+            align-items: flex-start;
+            gap: 28px;
+            width: 100%;
+            max-width: 1080px;
+        }
+
+        .index-sidebar {
+            width: 185px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 24px;
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            padding: 16px;
+        }
+
+        .index-titre {
+            font-size: 0.75em;
+            font-weight: 600;
+            color: var(--gris);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .index-sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .index-sidebar nav a {
+            display: block;
+            font-size: 0.88em;
+            padding: 7px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #4a4a4a;
+            transition: all 0.15s;
+        }
+
+        .index-sidebar nav a:hover { background: var(--fond-champ); color: var(--texte); }
+        .index-sidebar nav a.actif-section { background: var(--fond-champ); color: var(--accent); font-weight: 600; }
+
+        .contenu {
+            flex: 1;
+            min-width: 0;
+        }
+
+        [data-section] { scroll-margin-top: 16px; }
+
+        @media (max-width: 700px) { .index-sidebar { display: none; } }
+
+        .page-titre {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 1080px;
+        }
+
+        .carte {
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .carte h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .carte h3 {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: var(--texte);
+            margin-bottom: 10px;
+            margin-top: 16px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--fond-champ);
+        }
+
+        .carte h3:first-of-type { margin-top: 0; }
+
+        .carte p {
+            font-size: 0.92em;
+            color: #4a4a4a;
+            line-height: 1.75;
+            margin-bottom: 10px;
+        }
+
+        .carte p:last-child { margin-bottom: 0; }
+
+        .carte ul, .carte ol {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .carte ul li, .carte ol li {
+            font-size: 0.92em;
+            color: #4a4a4a;
+            line-height: 1.65;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .carte ul li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--fond-champ);
+        }
+
+        .carte ol { counter-reset: ol-counter; }
+        .carte ol li { counter-increment: ol-counter; }
+        .carte ol li::before {
+            content: counter(ol-counter) '.';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .note {
+            background: var(--fond-champ);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.88em;
+            color: #4a4a4a;
+            line-height: 1.65;
+            margin-top: 10px;
+        }
+
+        .note strong { color: var(--texte); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88em;
+            margin-bottom: 10px;
+        }
+
+        thead th {
+            background: var(--fond-champ);
+            color: var(--texte);
+            font-weight: 600;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        tbody td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--fond-champ);
+            color: #4a4a4a;
+            vertical-align: top;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: var(--fond-champ);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: var(--texte);
+        }
+
+        pre {
+            background: var(--accent);
+            color: #ecf0f1;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82em;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre;
+        }
+
+        .badge-toujours { background: #fce7f3; color: #9d174d; padding: 2px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; white-space: nowrap; }
+        .badge-absent { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; white-space: nowrap; }
+        .badge-jamais { background: var(--fond-champ); color: var(--gris); padding: 2px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; white-space: nowrap; }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <nav>
+        <a href="admin.html">⚙️ Administration</a>
+        <a href="marqueur.html">🎮 Marqueur</a>
+        <a href="test-sons.html">🔊 Test sons</a>
+        <a href="guide-animateur.html" class="actif">📖 Guide</a>
+        <button class="bouton-deconnexion" onclick="déconnexion()">🔒 Déconnexion</button>
+    </nav>
+
+    <div class="page-titre">📖 Guide animateur</div>
+
+    <div class="mise-en-page">
+
+    <aside class="index-sidebar">
+        <div class="index-titre">Sections</div>
+        <nav id="index-nav">
+            <a href="#fichiers">📁 Fichiers</a>
+            <a href="#volume">🔊 Volume buzzers</a>
+            <a href="#administration">⚙️ Administration</a>
+            <a href="#repondants">📝 Répondants</a>
+            <a href="#developpeurs">💻 Développeurs</a>
+        </nav>
+    </aside>
+
+    <div class="contenu">
+
+        <!-- Gestion des fichiers -->
+        <div class="carte" id="fichiers" data-section>
+            <h2>Gestion des fichiers</h2>
+
+            <p>Les données du système sont réparties dans <code>data/saisons/2025-2026/</code>. Le comportement de chaque fichier diffère selon qu'on est en <strong>local</strong> ou sur <strong>Railway (production)</strong>.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fichier</th>
+                        <th>Railway au déploiement</th>
+                        <th>Rôle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>équipes.json</code></td>
+                        <td><span class="badge-toujours">Toujours écrasé</span></td>
+                        <td>Noms, couleurs, priorité d'égalité</td>
+                    </tr>
+                    <tr>
+                        <td><code>joueurs.json</code></td>
+                        <td><span class="badge-toujours">Toujours écrasé</span></td>
+                        <td>Liste des joueurs par équipe</td>
+                    </tr>
+                    <tr>
+                        <td><code>séries.json</code></td>
+                        <td><span class="badge-absent">Copié si absent</span></td>
+                        <td>Structure des séries — éditable via admin.html</td>
+                    </tr>
+                    <tr>
+                        <td><code>parties.json</code></td>
+                        <td><span class="badge-absent">Copié si absent</span></td>
+                        <td>Calendrier, liens Teams, matchups éliminatoires</td>
+                    </tr>
+                    <tr>
+                        <td><code>thèmes.json</code></td>
+                        <td><span class="badge-absent">Copié si absent</span></td>
+                        <td>Thèmes et sous-thèmes par questionnaire</td>
+                    </tr>
+                    <tr>
+                        <td><code>questions.json</code></td>
+                        <td><span class="badge-jamais">Jamais touché</span></td>
+                        <td>Textes et réponses des questions</td>
+                    </tr>
+                    <tr>
+                        <td><code>répondants.json</code></td>
+                        <td><span class="badge-jamais">Jamais touché</span></td>
+                        <td>Données accumulées en jeu — toute la saison</td>
+                    </tr>
+                    <tr>
+                        <td><code>alignements.json</code></td>
+                        <td><span class="badge-jamais">Jamais touché</span></td>
+                        <td>Alignements des joueurs par partie</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="note"><strong>Règle clé :</strong> un déploiement Railway ne détruira jamais <code>répondants.json</code> ni <code>alignements.json</code> s'ils existent déjà sur le Volume. Les données de la saison sont protégées.</div>
+        </div>
+
+        <!-- Volume des buzzers -->
+        <div class="carte" id="volume" data-section>
+            <h2>Volume des buzzers</h2>
+            <p>Le volume des buzzers se règle dans <strong>marqueur.html</strong> via un curseur affiché dans la zone d'initialisation, avant de démarrer la partie.</p>
+            <ul>
+                <li><strong>0 %</strong> — muet</li>
+                <li><strong>100 %</strong> — amplification par défaut (2× le volume système)</li>
+                <li><strong>200 %</strong> — amplification maximale</li>
+            </ul>
+            <p>Deux boutons permettent de tester le son de chaque équipe une fois la partie sélectionnée, avant de la démarrer.</p>
+            <div class="note">À tester en salle — le rendu varie beaucoup selon les haut-parleurs et l'acoustique.</div>
+        </div>
+
+        <!-- Administration -->
+        <div class="carte" id="administration" data-section>
+            <h2>Page d'administration</h2>
+
+            <h3>📅 Importer le calendrier → <code>parties.json</code></h3>
+            <p><strong>Source :</strong> fichier CSV ou Excel &nbsp;|&nbsp; <strong>Effet :</strong> remplace entièrement le calendrier existant sur le serveur</p>
+            <table>
+                <thead><tr><th>Colonne</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>NoPartie</code></td><td>Numéro unique de la partie</td></tr>
+                    <tr><td><code>Date</code></td><td>Format AAAA-MM-JJ</td></tr>
+                    <tr><td><code>Salle</code></td><td>Salle ou lieu</td></tr>
+                    <tr><td><code>NomAnimateur</code></td><td>Nom de l'animateur</td></tr>
+                    <tr><td><code>NoQuestionnaire</code></td><td>Numéro du questionnaire utilisé</td></tr>
+                    <tr><td><code>NoÉquipeA</code></td><td>Numéro de l'équipe A</td></tr>
+                    <tr><td><code>NoÉquipeB</code></td><td>Numéro de l'équipe B</td></tr>
+                    <tr><td><code>NoÉquipeQuestionnaire</code></td><td>Équipe qui a préparé le questionnaire</td></tr>
+                    <tr><td><code>LienReunion</code></td><td>Lien Teams pour rejoindre la réunion</td></tr>
+                    <tr><td><code>Phase</code></td><td><em>(optionnel)</em> Valeur : <code>eliminations</code></td></tr>
+                    <tr><td><code>Matchup</code></td><td><em>(optionnel)</em> Bracket : <code>Q1</code>, <code>Q2</code>, <code>Q3</code>, <code>D1</code>, <code>D2</code>, <code>F</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>📥 Importer un questionnaire → <code>thèmes.json</code> + <code>questions.json</code></h3>
+            <p><strong>Source :</strong> fichier Excel avec une feuille nommée <strong>Vers BD</strong> &nbsp;|&nbsp; <strong>Effet :</strong> ajoute ou remplace le questionnaire correspondant</p>
+            <p>Le fichier doit contenir deux tableaux : <code>tblThèmes</code> (un thème par série) et <code>tblQuestionnaires</code> (une question par ligne).</p>
+            <div class="note">
+                <strong>Série 9 (Indice) :</strong> Q1 et Q2 sans réponse sont normales — la réponse n'est inscrite qu'à Q3.<br>
+                <strong>Série 13 (Associations) :</strong> Q1 et Q2 contiennent les textes d'introduction des deux groupes.
+            </div>
+
+            <h3>📋 Éditeur de séries</h3>
+            <p>La structure des séries est modifiable via l'éditeur intégré dans admin.html. Une fois la saison lancée (au moins une partie jouée), l'éditeur est verrouillé automatiquement.</p>
+            <ol>
+                <li>Modifier les séries via l'éditeur</li>
+                <li>Sauvegarder (enregistré directement sur le serveur)</li>
+                <li>Télécharger le JSON pour mettre à jour la copie locale</li>
+            </ol>
+        </div>
+
+        <!-- Répondants -->
+        <div class="carte" id="repondants" data-section>
+            <h2>Répondants — deux fichiers, deux rôles</h2>
+
+            <h3><code>parties/répondants-{N}.json</code> — fichier de travail en direct</h3>
+            <p>Créé dès qu'un premier point est attribué durant la partie N. Mis à jour en temps réel :</p>
+            <ul>
+                <li><strong>Attribuer</strong> → ajoute une entrée</li>
+                <li><strong>Annuler</strong> → supprime l'entrée</li>
+                <li><strong>Écraser</strong> (nouvelle réponse sur une question déjà répondue) → remplace l'entrée après confirmation</li>
+            </ul>
+            <p>Sert aussi à la <strong>reprise automatique</strong> : si le navigateur du marqueur plante ou est fermé, la reconnexion recharge l'état complet depuis ce fichier.</p>
+
+            <h3><code>répondants.json</code> — fichier cumulatif de la saison</h3>
+            <p>Mis à jour <strong>uniquement au moment de terminer une partie</strong>. Alimente toutes les pages de statistiques (classement, compteurs, feuille de match, profil joueur).</p>
+
+            <table>
+                <thead><tr><th></th><th><code>répondants-{N}.json</code></th><th><code>répondants.json</code></th></tr></thead>
+                <tbody>
+                    <tr><td>Mise à jour</td><td>En continu durant la partie</td><td>À la fin seulement</td></tr>
+                    <tr><td>Portée</td><td>Une seule partie</td><td>Toute la saison</td></tr>
+                    <tr><td>Usage</td><td>Score live, marqueur</td><td>Toutes les stats</td></tr>
+                    <tr><td>Ignoré par git</td><td>Oui</td><td>Non (sauvegarde)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pour développeurs -->
+        <div class="carte" id="developpeurs" data-section>
+            <h2>Pour développeurs</h2>
+
+            <h3>Flux de déploiement : Local → GitHub → Railway</h3>
+            <p>Chaque <code>git push</code> vers GitHub déclenche automatiquement un redéploiement sur Railway.</p>
+            <pre>LOCAL (PC)               GITHUB                    RAILWAY
+─────────────────        ──────────────            ──────────────────────
+c:\GIT\declencheur       gehstatcan/               declencheur-geh.up
+                         declencheur-geh           .railway.app
+
+      │                        │                          │
+      │  git push              │                          │
+      ├───────────────────────>│                          │
+      │                        │  déploiement auto        │
+      │                        ├─────────────────────────>│
+      │                        │    1. télécharge code    │
+      │                        │    2. npm install        │
+      │                        │    3. node index.js      │
+      │                        │    4. initialiserVolume  │</pre>
+
+            <h3>Réinitialisation du Volume (reset)</h3>
+            <p>En cas de besoin, le script <code>init-volume.js</code> permet de réinitialiser le Volume depuis les fichiers git :</p>
+            <pre># Sans --force : copie seulement les fichiers absents (sécuritaire)
+railway run node init-volume.js
+
+# Avec --force : écrase TOUT depuis git (⚠️ détruit les données de jeu)
+railway run node init-volume.js --force</pre>
+            <div class="note"><strong>Attention :</strong> <code>--force</code> écrase <code>répondants.json</code> et <code>alignements.json</code>. À n'utiliser qu'en début de saison ou pour un reset complet.</div>
+
+            <h3>Workflow séries en début de saison</h3>
+            <pre>1. Modifier séries.json via admin.html
+2. Sauvegarder (enregistré sur le serveur)
+3. Télécharger le JSON → remplacer data/saisons/AAAA/séries.json en local
+4. git push → mis à jour dans git pour la prochaine saison</pre>
+        </div>
+
+    </div><!-- fin contenu -->
+    </div><!-- fin mise-en-page -->
+
+    <script>
+        async function déconnexion() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    document.querySelectorAll('.index-sidebar nav a').forEach(l => l.classList.remove('actif-section'));
+                    const lien = document.querySelector(`.index-sidebar nav a[href="#${e.target.id}"]`);
+                    if (lien) lien.classList.add('actif-section');
+                }
+            });
+        }, { rootMargin: '-10% 0px -70% 0px' });
+        document.querySelectorAll('[data-section]').forEach(s => observer.observe(s));
+    </script>
+
+</body>
+
+</html>

@@ -416,6 +416,13 @@
             color: var(--buzz-texte);
             font-weight: bold;
         }
+
+        .nav-animateur { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
+        .nav-animateur a { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; text-decoration: none; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); transition: all 0.2s; }
+        .nav-animateur a:hover { background: var(--fond-champ); color: var(--texte); }
+        .nav-animateur a.actif { background: var(--accent); color: var(--blanc); border-color: var(--accent); }
+        .nav-animateur button { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .nav-animateur button:hover { background: var(--fond-champ); color: var(--texte); }
     </style>
 </head>
 
@@ -428,6 +435,14 @@
         <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
+
+    <nav class="nav-animateur">
+        <a href="admin.html">⚙️ Administration</a>
+        <a href="marqueur.html" class="actif">🎮 Marqueur</a>
+        <a href="test-sons.html">🔊 Test sons</a>
+        <a href="guide-animateur.html">📖 Guide</a>
+        <button onclick="déconnexion()">🔒 Déconnexion</button>
+    </nav>
 
     <div id="modePartie" class="initialisation">🔧 Initialisation</div>
 
@@ -553,6 +568,11 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        async function déconnexion() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+
         const socket = io();
 
         let toutesÉquipes = [];

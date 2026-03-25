@@ -1,43 +1,150 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
-    <title>Test sons — Génie en Herbe</title>
+    <title>Test sons — GEH Statcan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #1a1a2e; color: #eee; padding: 30px; }
-        h1 { color: #f0c040; margin-bottom: 8px; }
-        p { color: #aaa; margin-bottom: 30px; }
-        .grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-        .carte {
-            background: #16213e;
-            border: 2px solid #0f3460;
-            border-radius: 12px;
-            padding: 20px;
+        :root {
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
+            --blanc: #ffffff;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.4em;
+            color: var(--texte);
+            letter-spacing: 2px;
+        }
+
+        header h1 span { color: var(--accent); }
+
+        .nav-animateur { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
+        .nav-animateur a { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; text-decoration: none; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); transition: all 0.2s; }
+        .nav-animateur a:hover { background: var(--fond-champ); color: var(--texte); }
+        .nav-animateur a.actif { background: var(--accent); color: var(--blanc); border-color: var(--accent); }
+        .nav-animateur button { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .nav-animateur button:hover { background: var(--fond-champ); color: var(--texte); }
+
+        .page-titre {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
             text-align: center;
         }
-        .nom { font-size: 1.1em; font-weight: bold; margin-bottom: 4px; color: #f0c040; }
-        .desc { font-size: 0.85em; color: #aaa; margin-bottom: 14px; }
-        button {
-            background: #0f3460;
-            color: #fff;
+
+        .page-sous-titre {
+            font-size: 0.85em;
+            color: var(--gris);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .grille {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .carte {
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            padding: 18px;
+            text-align: center;
+        }
+
+        .nom {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--texte);
+        }
+
+        .desc {
+            font-size: 0.82em;
+            color: var(--gris);
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        button.jouer {
+            background: var(--accent);
+            color: var(--blanc);
             border: none;
             border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 1em;
+            padding: 9px 20px;
+            font-family: inherit;
+            font-size: 0.9em;
+            font-weight: 600;
             cursor: pointer;
             width: 100%;
             transition: background 0.15s;
         }
-        button:hover { background: #1a5c9a; }
-        button:active { background: #f0c040; color: #1a1a2e; }
+
+        button.jouer:hover { background: #1a252f; }
+        button.jouer:active { background: var(--vert); }
     </style>
 </head>
+
 <body>
-    <h1>Test des sons de buzzer</h1>
-    <p>Cliquez pour écouter chaque son. Notez ceux que vous préférez pour chaque équipe.</p>
+
+    <header>
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
+        <h1>GEH — <span>Statcan</span></h1>
+    </header>
+
+    <nav class="nav-animateur">
+        <a href="admin.html">⚙️ Administration</a>
+        <a href="marqueur.html">🎮 Marqueur</a>
+        <a href="test-sons.html" class="actif">🔊 Test sons</a>
+        <a href="guide-animateur.html">📖 Guide</a>
+        <button onclick="déconnexion()">🔒 Déconnexion</button>
+    </nav>
+
+    <div class="page-titre">🔊 Test des sons de buzzer</div>
+    <div class="page-sous-titre">Cliquez pour écouter chaque son. Notez ceux que vous préférez pour chaque équipe.</div>
+
     <div class="grille" id="grille"></div>
 
     <script>
+        async function déconnexion() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function bip(type, freq, vol, début, durée, freqFin) {
@@ -53,85 +160,18 @@
         }
 
         const sons = [
-            {
-                id: 'buzzer_tv',
-                nom: '1 — Buzzer TV',
-                desc: 'Son grave descendant, style émission télé',
-                jouer: (t) => bip('sawtooth', 200, 0.4, t, 0.4, 80)
-            },
-            {
-                id: 'ding_dong',
-                nom: '2 — Ding-dong',
-                desc: 'Deux notes descendantes, clochette de porte',
-                jouer: (t) => { bip('sine', 880, 0.5, t, 0.25); bip('sine', 660, 0.5, t + 0.25, 0.25); }
-            },
-            {
-                id: 'bip_grave',
-                nom: '3 — Bip grave',
-                desc: 'Onde carrée basse fréquence, robuste',
-                jouer: (t) => bip('square', 150, 0.3, t, 0.5)
-            },
-            {
-                id: 'alarme_montante',
-                nom: '4 — Alarme montante',
-                desc: 'Fréquence qui monte, style urgence',
-                jouer: (t) => bip('sawtooth', 300, 0.4, t, 0.4, 650)
-            },
-            {
-                id: 'triple_bip',
-                nom: '5 — Triple bip',
-                desc: 'Trois bips rapides aigus',
-                jouer: (t) => {
-                    bip('sine', 880, 0.5, t, 0.12);
-                    bip('sine', 880, 0.5, t + 0.16, 0.12);
-                    bip('sine', 880, 0.5, t + 0.32, 0.12);
-                }
-            },
-            {
-                id: 'cloche',
-                nom: '6 — Cloche',
-                desc: 'Triangle aigu avec longue décroissance',
-                jouer: (t) => bip('triangle', 1046, 0.6, t, 0.9)
-            },
-            {
-                id: 'klaxon',
-                nom: '7 — Klaxon',
-                desc: 'Deux fréquences superposées, klaxon de voiture',
-                jouer: (t) => { bip('sawtooth', 220, 0.2, t, 0.5); bip('sawtooth', 440, 0.2, t, 0.5); }
-            },
-            {
-                id: 'bip_aigu',
-                nom: '8 — Bip aigu',
-                desc: 'Bip simple aigu et court',
-                jouer: (t) => bip('sine', 1320, 0.4, t, 0.3)
-            },
-            {
-                id: 'descente_rapide',
-                nom: '9 — Descente rapide',
-                desc: 'Note qui chute vite, style cartoon',
-                jouer: (t) => bip('sine', 800, 0.5, t, 0.35, 200)
-            },
-            {
-                id: 'double_bip',
-                nom: '10 — Double bip',
-                desc: 'Deux bips moyens rapprochés',
-                jouer: (t) => {
-                    bip('sine', 660, 0.5, t, 0.15);
-                    bip('sine', 660, 0.5, t + 0.2, 0.15);
-                }
-            },
-            {
-                id: 'montee_douce',
-                nom: '11 — Montée douce',
-                desc: 'Sine qui monte doucement, style notification',
-                jouer: (t) => bip('sine', 440, 0.45, t, 0.4, 880)
-            },
-            {
-                id: 'gong',
-                nom: '12 — Gong',
-                desc: 'Triangle grave avec résonance',
-                jouer: (t) => bip('triangle', 220, 0.7, t, 1.2)
-            },
+            { id: 'buzzer_tv', nom: '1 — Buzzer TV', desc: 'Son grave descendant, style émission télé', jouer: (t) => bip('sawtooth', 200, 0.4, t, 0.4, 80) },
+            { id: 'ding_dong', nom: '2 — Ding-dong', desc: 'Deux notes descendantes, clochette de porte', jouer: (t) => { bip('sine', 880, 0.5, t, 0.25); bip('sine', 660, 0.5, t + 0.25, 0.25); } },
+            { id: 'bip_grave', nom: '3 — Bip grave', desc: 'Onde carrée basse fréquence, robuste', jouer: (t) => bip('square', 150, 0.3, t, 0.5) },
+            { id: 'alarme_montante', nom: '4 — Alarme montante', desc: 'Fréquence qui monte, style urgence', jouer: (t) => bip('sawtooth', 300, 0.4, t, 0.4, 650) },
+            { id: 'triple_bip', nom: '5 — Triple bip', desc: 'Trois bips rapides aigus', jouer: (t) => { bip('sine', 880, 0.5, t, 0.12); bip('sine', 880, 0.5, t + 0.16, 0.12); bip('sine', 880, 0.5, t + 0.32, 0.12); } },
+            { id: 'cloche', nom: '6 — Cloche', desc: 'Triangle aigu avec longue décroissance', jouer: (t) => bip('triangle', 1046, 0.6, t, 0.9) },
+            { id: 'klaxon', nom: '7 — Klaxon', desc: 'Deux fréquences superposées, klaxon de voiture', jouer: (t) => { bip('sawtooth', 220, 0.2, t, 0.5); bip('sawtooth', 440, 0.2, t, 0.5); } },
+            { id: 'bip_aigu', nom: '8 — Bip aigu', desc: 'Bip simple aigu et court', jouer: (t) => bip('sine', 1320, 0.4, t, 0.3) },
+            { id: 'descente_rapide', nom: '9 — Descente rapide', desc: 'Note qui chute vite, style cartoon', jouer: (t) => bip('sine', 800, 0.5, t, 0.35, 200) },
+            { id: 'double_bip', nom: '10 — Double bip', desc: 'Deux bips moyens rapprochés', jouer: (t) => { bip('sine', 660, 0.5, t, 0.15); bip('sine', 660, 0.5, t + 0.2, 0.15); } },
+            { id: 'montee_douce', nom: '11 — Montée douce', desc: 'Sine qui monte doucement, style notification', jouer: (t) => bip('sine', 440, 0.45, t, 0.4, 880) },
+            { id: 'gong', nom: '12 — Gong', desc: 'Triangle grave avec résonance', jouer: (t) => bip('triangle', 220, 0.7, t, 1.2) },
         ];
 
         const grille = document.getElementById('grille');
@@ -141,11 +181,12 @@
             carte.innerHTML = `
                 <div class="nom">${s.nom}</div>
                 <div class="desc">${s.desc}</div>
-                <button onclick="audioCtx.resume().then(() => ${s.id}())">▶ Écouter</button>
+                <button class="jouer" onclick="audioCtx.resume().then(() => ${s.id}())">▶ Écouter</button>
             `;
             grille.appendChild(carte);
             window[s.id] = () => s.jouer(audioCtx.currentTime);
         });
     </script>
+
 </body>
 </html>

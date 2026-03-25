@@ -8,17 +8,16 @@
         rel="stylesheet">
     <style>
         :root {
-            --fond: #0f0f1a;
-            --fond-carte: #1a1a2e;
-            --fond-champ: #16213e;
-            --accent: #e94560;
-            --buzz: #FFD700;
-            --buzz-texte: #000000;
-            --vert: #2ecc71;
+            --fond: #f5f0e8;
+            --fond-carte: #ede8dc;
+            --fond-champ: #e0d9cc;
+            --accent: #2c3e50;
+            --vert: #27ae60;
             --orange: #e67e22;
             --blanc: #ffffff;
-            --gris: #aaaaaa;
-            --rayon: 16px;
+            --texte: #2c2c2c;
+            --gris: #888888;
+            --rayon: 12px;
         }
 
         * {
@@ -30,7 +29,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background: var(--fond);
-            color: var(--blanc);
+            color: var(--texte);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -42,13 +41,13 @@
             display: flex;
             align-items: center;
             gap: 14px;
-            margin-bottom: 32px;
+            margin-bottom: 8px;
         }
 
         header h1 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: 2.4em;
-            color: var(--blanc);
+            color: var(--texte);
             letter-spacing: 2px;
             line-height: 1;
         }
@@ -96,7 +95,7 @@
         .zone-upload label {
             cursor: pointer;
             font-size: 1em;
-            color: var(--gris);
+            color: #4a4a4a;
         }
 
         .zone-upload .icone {
@@ -105,7 +104,7 @@
         }
 
         #nomFichier {
-            color: var(--buzz);
+            color: var(--accent);
             font-weight: 600;
             margin-top: 8px;
             font-size: 0.95em;
@@ -134,11 +133,12 @@
         }
 
         .bouton-upload:hover {
-            background: #c0392b;
+            background: #1a252f;
         }
 
         .bouton-upload:disabled {
-            background: #555;
+            background: var(--fond-champ);
+            color: var(--gris);
             cursor: not-allowed;
         }
 
@@ -166,17 +166,17 @@
 
         .résultat-ligne {
             padding: 10px 16px;
-            border-top: 1px solid rgba(255,255,255,0.07);
+            border-top: 1px solid var(--fond-champ);
         }
 
         .résultat-ligne.succès {
-            background: #1a3a2a;
-            color: #2ecc71;
+            background: #dcfce7;
+            color: #15803d;
         }
 
         .résultat-ligne.avertissement {
-            background: #3a2a10;
-            color: var(--orange);
+            background: #fef3c7;
+            color: #b45309;
         }
 
         .table-résultat {
@@ -186,7 +186,7 @@
         }
 
         .table-résultat th {
-            background: rgba(0,0,0,0.3);
+            background: var(--fond-champ);
             padding: 8px 16px;
             text-align: left;
             color: var(--gris);
@@ -195,12 +195,12 @@
 
         .table-résultat td {
             padding: 7px 16px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--fond-champ);
         }
 
         .info {
             font-size: 0.9em;
-            color: var(--gris);
+            color: #4a4a4a;
             margin-top: 12px;
             line-height: 1.6;
         }
@@ -210,7 +210,7 @@
         }
 
         .série-item {
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-bottom: 1px solid var(--fond-champ);
         }
 
         .série-item:last-child {
@@ -242,10 +242,10 @@
         .input-type-série {
             flex: 1;
             min-width: 140px;
-            background: var(--fond-champ);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--blanc);
+            border: 1px solid var(--fond-champ);
             border-radius: 8px;
-            color: var(--blanc);
+            color: var(--texte);
             font-family: 'Inter', sans-serif;
             font-size: 0.95em;
             padding: 6px 10px;
@@ -275,7 +275,7 @@
 
         .résumé-pts {
             font-size: 0.82em;
-            color: var(--buzz);
+            color: var(--gris);
             white-space: nowrap;
             margin-left: auto;
         }
@@ -296,7 +296,7 @@
             color: var(--gris);
         }
 
-        .btn-détail:hover { background: #1e2d4e; color: var(--blanc); }
+        .btn-détail:hover { background: var(--fond-carte); color: var(--texte); }
 
         .btn-suppr-série {
             background: transparent;
@@ -330,15 +330,15 @@
 
         .questions-table td {
             padding: 4px 8px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--fond-champ);
         }
 
         .input-pts {
             width: 64px;
-            background: var(--fond-carte);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--blanc);
+            border: 1px solid var(--fond-champ);
             border-radius: 6px;
-            color: var(--blanc);
+            color: var(--texte);
             font-family: 'Inter', sans-serif;
             font-size: 0.9em;
             padding: 4px 6px;
@@ -351,10 +351,10 @@
         }
 
         .select-equipe-q {
-            background: var(--fond-carte);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--blanc);
+            border: 1px solid var(--fond-champ);
             border-radius: 6px;
-            color: var(--blanc);
+            color: var(--texte);
             font-family: 'Inter', sans-serif;
             font-size: 0.85em;
             padding: 4px 6px;
@@ -399,10 +399,10 @@
 
         .bouton-neutre {
             background: var(--fond-champ);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid var(--fond-carte);
         }
 
-        .bouton-neutre:hover { background: #1e2d4e; }
+        .bouton-neutre:hover { background: var(--fond-carte); }
 
         #résultat-séries {
             display: none;
@@ -412,22 +412,113 @@
             font-size: 0.95em;
         }
 
-        #résultat-séries.succès { background: #1a3a2a; color: var(--vert); }
-        #résultat-séries.erreur { background: rgba(233,69,96,0.15); color: var(--accent); }
+        #résultat-séries.succès { background: #dcfce7; color: #15803d; }
+        #résultat-séries.erreur { background: #fdecea; color: #c0392b; }
+
+        .mise-en-page {
+            display: flex;
+            align-items: flex-start;
+            gap: 28px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .index-sidebar {
+            width: 185px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 24px;
+            background: var(--fond-carte);
+            border-radius: var(--rayon);
+            padding: 16px;
+        }
+
+        .index-titre {
+            font-size: 0.75em;
+            font-weight: 600;
+            color: var(--gris);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .index-sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .index-sidebar nav a {
+            display: block;
+            font-size: 0.88em;
+            padding: 7px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #4a4a4a;
+            transition: all 0.15s;
+        }
+
+        .index-sidebar nav a:hover {
+            background: var(--fond-champ);
+            color: var(--texte);
+        }
+
+        .index-sidebar nav a.actif-section {
+            background: var(--fond-champ);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .contenu-principal {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contenu-principal .carte { max-width: none; }
+
+        [data-section] { scroll-margin-top: 16px; }
+
+        @media (max-width: 700px) { .index-sidebar { display: none; } }
+
+        .nav-animateur { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
+        .nav-animateur a { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; text-decoration: none; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); transition: all 0.2s; }
+        .nav-animateur a:hover { background: var(--fond-champ); color: var(--texte); }
+        .nav-animateur a.actif { background: var(--accent); color: var(--blanc); border-color: var(--accent); }
+        .nav-animateur button { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .nav-animateur button:hover { background: var(--fond-champ); color: var(--texte); }
     </style>
 </head>
 
 <body>
 
     <header>
-        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; filter:invert(1);">
+        <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
 
-    <h2>🛠️ Administration</h2>
+    <nav class="nav-animateur">
+        <a href="admin.html" class="actif">⚙️ Administration</a>
+        <a href="marqueur.html">🎮 Marqueur</a>
+        <a href="test-sons.html">🔊 Test sons</a>
+        <a href="guide-animateur.html">📖 Guide</a>
+        <button onclick="déconnexion()">🔒 Déconnexion</button>
+    </nav>
+
+    <div class="mise-en-page">
+
+    <aside class="index-sidebar">
+        <div class="index-titre">Sections</div>
+        <nav id="index-nav">
+            <a href="#calendrier">📅 Calendrier</a>
+            <a href="#questionnaire">📥 Questionnaire</a>
+            <a href="#series">📋 Séries</a>
+        </nav>
+    </aside>
+
+    <div class="contenu-principal">
 
     <!-- Upload parties -->
-    <div class="carte">
+    <div class="carte" id="calendrier" data-section>
         <h2>📅 Importer le calendrier</h2>
 
         <div class="zone-upload" onclick="document.getElementById('fichierParties').click()">
@@ -452,7 +543,7 @@
     </div>
 
     <!-- Upload questionnaire -->
-    <div class="carte">
+    <div class="carte" id="questionnaire" data-section>
         <h2>📥 Importer un questionnaire</h2>
 
         <div class="zone-upload" onclick="document.getElementById('fichierExcel').click()">
@@ -478,7 +569,7 @@
     </div>
 
     <!-- Éditeur structure des séries -->
-    <div class="carte carte-large">
+    <div class="carte carte-large" id="series" data-section>
         <h2>📋 Structure des séries</h2>
         <div id="liste-séries">⏳ Chargement...</div>
         <div class="série-actions-bas">
@@ -490,7 +581,15 @@
         <div class="info">ℹ️ Les modifications sont sauvegardées directement sur le serveur. Téléchargez le JSON pour mettre à jour votre copie locale.</div>
     </div>
 
+    </div><!-- fin contenu-principal -->
+    </div><!-- fin mise-en-page -->
+
     <script>
+        async function déconnexion() {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login.html';
+        }
+
         let fichierPartisSélectionné = null;
 
         function partiesChoisi(input) {
@@ -863,6 +962,18 @@
                 document.getElementById('liste-séries').textContent = `❌ Impossible de charger les séries : ${e.message}`;
             }
         })();
+
+        // Scroll spy — surligne la section active dans l'index
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    document.querySelectorAll('.index-sidebar nav a').forEach(l => l.classList.remove('actif-section'));
+                    const lien = document.querySelector(`.index-sidebar nav a[href="#${e.target.id}"]`);
+                    if (lien) lien.classList.add('actif-section');
+                }
+            });
+        }, { rootMargin: '-10% 0px -70% 0px' });
+        document.querySelectorAll('[data-section]').forEach(s => observer.observe(s));
     </script>
 
 </body>
