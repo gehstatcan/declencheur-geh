@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(node generer-saison24.js)",
-      "Bash(node -e \"const q=require\\(''''./data/saisons/2025-2026/questions.json''''\\); console.log\\(JSON.stringify\\(q[0], null, 2\\)\\)\")",
-      "Bash(node -e \":*)"
-    ]
-  }
-}

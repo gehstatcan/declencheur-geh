@@ -1,4 +1,7 @@
 
+# Config locale Claude Code — permissions accordées en session
+.claude/settings.local.json
+
 # Données de parties — changent à chaque partie, gérées par Railway Volume
 data/saisons/*/parties/
 data/saisons/2025-2026/parties.json
