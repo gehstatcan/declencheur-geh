@@ -204,6 +204,216 @@
             margin-top: 12px;
             line-height: 1.6;
         }
+
+        .carte-large {
+            max-width: 860px;
+        }
+
+        .série-item {
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .série-item:last-child {
+            border-bottom: none;
+        }
+
+        .série-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .badge-série {
+            background: var(--accent);
+            color: var(--blanc);
+            font-weight: 700;
+            font-size: 0.85em;
+            min-width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .input-type-série {
+            flex: 1;
+            min-width: 140px;
+            background: var(--fond-champ);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            color: var(--blanc);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            padding: 6px 10px;
+        }
+
+        .input-type-série:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .toggle-flag {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85em;
+            color: var(--gris);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .toggle-flag input[type="checkbox"] {
+            accent-color: var(--accent);
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+
+        .résumé-pts {
+            font-size: 0.82em;
+            color: var(--buzz);
+            white-space: nowrap;
+            margin-left: auto;
+        }
+
+        .btn-petit {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8em;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-détail {
+            background: var(--fond-champ);
+            color: var(--gris);
+        }
+
+        .btn-détail:hover { background: #1e2d4e; color: var(--blanc); }
+
+        .btn-suppr-série {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .btn-suppr-série:hover { background: var(--accent); color: var(--blanc); }
+
+        .série-détail {
+            background: var(--fond-champ);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .questions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88em;
+            margin-bottom: 10px;
+        }
+
+        .questions-table th {
+            text-align: left;
+            color: var(--gris);
+            padding: 4px 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .questions-table td {
+            padding: 4px 8px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .input-pts {
+            width: 64px;
+            background: var(--fond-carte);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            color: var(--blanc);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            padding: 4px 6px;
+            text-align: center;
+        }
+
+        .input-pts:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .select-equipe-q {
+            background: var(--fond-carte);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            color: var(--blanc);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85em;
+            padding: 4px 6px;
+        }
+
+        .btn-suppr-q {
+            background: transparent;
+            color: var(--accent);
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-suppr-q:hover { background: rgba(233,69,96,0.15); }
+
+        .btn-ajouter-q {
+            font-size: 0.82em;
+            padding: 5px 12px;
+            background: var(--fond-carte);
+            color: var(--vert);
+            border: 1px solid var(--vert);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-ajouter-q:hover { background: rgba(46,204,113,0.1); }
+
+        .série-actions-bas {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .bouton-vert {
+            background: var(--vert);
+        }
+
+        .bouton-vert:hover { background: #27ae60; }
+
+        .bouton-neutre {
+            background: var(--fond-champ);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .bouton-neutre:hover { background: #1e2d4e; }
+
+        #résultat-séries {
+            display: none;
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: var(--rayon);
+            font-size: 0.95em;
+        }
+
+        #résultat-séries.succès { background: #1a3a2a; color: var(--vert); }
+        #résultat-séries.erreur { background: rgba(233,69,96,0.15); color: var(--accent); }
     </style>
 </head>
 
@@ -265,6 +475,19 @@
             Le numéro de questionnaire doit correspondre à celui dans
             <strong>parties.json</strong>.
         </div>
+    </div>
+
+    <!-- Éditeur structure des séries -->
+    <div class="carte carte-large">
+        <h2>📋 Structure des séries</h2>
+        <div id="liste-séries">⏳ Chargement...</div>
+        <div class="série-actions-bas">
+            <button class="bouton bouton-vert" style="width:auto" onclick="ajouterSérie()">+ Ajouter une série</button>
+            <button class="bouton bouton-upload" style="width:auto" onclick="sauvegarderSéries()">💾 Sauvegarder</button>
+            <button class="bouton bouton-neutre" style="width:auto" onclick="téléchargerSéries()">⬇️ Télécharger JSON</button>
+        </div>
+        <div id="résultat-séries"></div>
+        <div class="info">ℹ️ Les modifications sont sauvegardées directement sur le serveur. Téléchargez le JSON pour mettre à jour votre copie locale.</div>
     </div>
 
     <script>
@@ -429,6 +652,217 @@
             btn.disabled = false;
             btn.textContent = '📥 Importer le questionnaire';
         }
+
+        // ============================================================
+        // Éditeur structure des séries
+        // ============================================================
+        let sériesData = [];
+
+        function estUniforme(questions, champ) {
+            if (!questions.length) return true;
+            return questions.every(q => q[champ] === questions[0][champ]);
+        }
+
+        function résumépPts(questions) {
+            if (!questions.length) return '0 Q';
+            const n = questions.length;
+            if (estUniforme(questions, 'points') && estUniforme(questions, 'pointsSecondaires')) {
+                const pts = questions[0].points;
+                const sec = questions[0].pointsSecondaires;
+                return sec > 0 ? `${n} Q × ${pts} pts (+${sec})` : `${n} Q × ${pts} pts`;
+            }
+            return `${n} Q — variable`;
+        }
+
+        function rendreSéries() {
+            const container = document.getElementById('liste-séries');
+            if (!sériesData.length) { container.innerHTML = '<p style="color:var(--gris)">Aucune série.</p>'; return; }
+            container.innerHTML = sériesData.map((s, idx) => rendreSérieHTML(s, idx)).join('');
+        }
+
+        function rendreSérieHTML(s, idx) {
+            const détailId = `détail-${idx}`;
+            const questionsHTML = s.questions.map((q, qIdx) => {
+                const hasEstÉquipeQ = q.estÉquipe !== undefined;
+                const optEstÉquipe = hasEstÉquipeQ ? `
+                    <td>
+                        <select class="select-equipe-q" onchange="màjQuestion(${idx},${qIdx},'estÉquipe', this.value === 'null' ? null : this.value === 'true')">
+                            <option value="null" ${q.estÉquipe === null ? 'selected' : ''}>—</option>
+                            <option value="true" ${q.estÉquipe === true ? 'selected' : ''}>Équipe</option>
+                            <option value="false" ${q.estÉquipe === false ? 'selected' : ''}>Indiv.</option>
+                        </select>
+                    </td>` : '<td></td>';
+                return `<tr>
+                    <td style="color:var(--gris);text-align:center">Q${q.noQuestion}</td>
+                    <td><input class="input-pts" type="number" min="0" value="${q.points}" oninput="màjQuestion(${idx},${qIdx},'points',+this.value)"></td>
+                    <td><input class="input-pts" type="number" min="0" value="${q.pointsSecondaires}" oninput="màjQuestion(${idx},${qIdx},'pointsSecondaires',+this.value)"></td>
+                    ${optEstÉquipe}
+                    <td><button class="btn-suppr-q" title="Supprimer" onclick="supprimerQuestion(${idx},${qIdx})">✕</button></td>
+                </tr>`;
+            }).join('');
+            const hasEstÉquipeQ = s.questions.some(q => q.estÉquipe !== undefined);
+
+            return `<div class="série-item">
+                <div class="série-header">
+                    <span class="badge-série">${s.noSérie}</span>
+                    <input class="input-type-série" type="text" value="${s.typeSérie}" oninput="màjSérie(${idx},'typeSérie',this.value)" placeholder="Type de série">
+                    <label class="toggle-flag"><input type="checkbox" ${s.réplique ? 'checked' : ''} onchange="màjSérie(${idx},'réplique',this.checked)"> Réplique</label>
+                    <label class="toggle-flag"><input type="checkbox" ${s.estÉquipe ? 'checked' : ''} onchange="màjSérie(${idx},'estÉquipe',this.checked)"> Équipe</label>
+                    <label class="toggle-flag"><input type="checkbox" ${s.consultation ? 'checked' : ''} onchange="màjSérie(${idx},'consultation',this.checked)"> Consultation</label>
+                    <span class="résumé-pts">${résumépPts(s.questions)}</span>
+                    <button class="btn-petit btn-détail" onclick="toggleDétail('${détailId}',this)">▼ Détail</button>
+                    <button class="btn-petit btn-suppr-série" onclick="supprimerSérie(${idx})">✕</button>
+                </div>
+                <div class="série-détail" id="${détailId}" style="display:none">
+                    <table class="questions-table">
+                        <thead><tr>
+                            <th style="text-align:center;width:36px">Q</th>
+                            <th>Points</th>
+                            <th>Pts sec.</th>
+                            <th>${hasEstÉquipeQ ? 'Mode' : ''}</th>
+                            <th></th>
+                        </tr></thead>
+                        <tbody id="tbody-${idx}">${questionsHTML}</tbody>
+                    </table>
+                    <button class="btn-ajouter-q" onclick="ajouterQuestion(${idx})">+ Question</button>
+                </div>
+            </div>`;
+        }
+
+        function toggleDétail(id, btn) {
+            const el = document.getElementById(id);
+            const ouvert = el.style.display !== 'none';
+            el.style.display = ouvert ? 'none' : 'block';
+            btn.textContent = ouvert ? '▼ Détail' : '▲ Fermer';
+        }
+
+        function màjSérie(idx, champ, valeur) {
+            sériesData[idx][champ] = valeur;
+            // Rafraîchir le résumé pts
+            const header = document.querySelector(`#liste-séries .série-item:nth-child(${idx+1}) .résumé-pts`);
+            if (header) header.textContent = résumépPts(sériesData[idx].questions);
+        }
+
+        function màjQuestion(sIdx, qIdx, champ, valeur) {
+            sériesData[sIdx].questions[qIdx][champ] = valeur;
+            const header = document.querySelector(`#liste-séries .série-item:nth-child(${sIdx+1}) .résumé-pts`);
+            if (header) header.textContent = résumépPts(sériesData[sIdx].questions);
+        }
+
+        function supprimerQuestion(sIdx, qIdx) {
+            if (sériesData[sIdx].questions.length <= 1) { alert('Une série doit avoir au moins 1 question.'); return; }
+            sériesData[sIdx].questions.splice(qIdx, 1);
+            // Renuméroter
+            sériesData[sIdx].questions.forEach((q, i) => { q.noQuestion = i + 1; });
+            rendreSéries();
+        }
+
+        function ajouterQuestion(sIdx) {
+            const qs = sériesData[sIdx].questions;
+            const dernierPts = qs.length ? qs[qs.length - 1].points : 10;
+            qs.push({ noQuestion: qs.length + 1, points: dernierPts, pointsSecondaires: 0 });
+            rendreSéries();
+            // Rouvrir le détail
+            const détailId = `détail-${sIdx}`;
+            const el = document.getElementById(détailId);
+            if (el) {
+                el.style.display = 'block';
+                const btn = el.closest('.série-item').querySelector('.btn-détail');
+                if (btn) btn.textContent = '▲ Fermer';
+            }
+        }
+
+        function supprimerSérie(idx) {
+            const s = sériesData[idx];
+            if (!confirm(`Supprimer la série ${s.noSérie} (${s.typeSérie}) ?`)) return;
+            sériesData.splice(idx, 1);
+            rendreSéries();
+        }
+
+        function ajouterSérie() {
+            const maxNo = sériesData.reduce((m, s) => Math.max(m, s.noSérie), 0);
+            sériesData.push({
+                noSérie: maxNo + 1,
+                typeSérie: 'Nouvelle série',
+                réplique: true,
+                estÉquipe: false,
+                consultation: false,
+                questions: [
+                    { noQuestion: 1, points: 10, pointsSecondaires: 0 },
+                    { noQuestion: 2, points: 10, pointsSecondaires: 0 },
+                    { noQuestion: 3, points: 10, pointsSecondaires: 0 },
+                    { noQuestion: 4, points: 10, pointsSecondaires: 0 },
+                    { noQuestion: 5, points: 10, pointsSecondaires: 0 }
+                ]
+            });
+            rendreSéries();
+        }
+
+        async function sauvegarderSéries() {
+            const div = document.getElementById('résultat-séries');
+            try {
+                const resp = await fetch('/api/admin/series', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sériesData)
+                });
+                const résultat = await resp.json();
+                div.style.display = 'block';
+                if (résultat.succès) {
+                    div.className = 'succès';
+                    div.textContent = `✅ ${résultat.nbSéries} séries sauvegardées avec succès.`;
+                } else {
+                    div.className = 'erreur';
+                    div.textContent = `❌ ${résultat.erreur}`;
+                }
+            } catch (e) {
+                div.style.display = 'block';
+                div.className = 'erreur';
+                div.textContent = `❌ Erreur : ${e.message}`;
+            }
+        }
+
+        function téléchargerSéries() {
+            const json = JSON.stringify(sériesData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'séries.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        let sériesVerrouillées = false;
+
+        function afficherStatutVerrou(statut) {
+            sériesVerrouillées = statut.verrouillé;
+            const btn = document.querySelector('[onclick="sauvegarderSéries()"]');
+            const div = document.getElementById('résultat-séries');
+            if (statut.verrouillé) {
+                btn.disabled = true;
+                btn.title = 'Modifications verrouillées — saison en cours';
+                div.style.display = 'block';
+                div.className = 'erreur';
+                div.textContent = `🔒 Séries verrouillées — ${statut.nbParties} partie(s) déjà jouée(s). Modification impossible en cours de saison.`;
+            }
+        }
+
+        // Charger les séries et vérifier le statut au démarrage
+        (async () => {
+            try {
+                const [respSéries, respStatut] = await Promise.all([
+                    fetch('/api/series'),
+                    fetch('/api/admin/series/statut')
+                ]);
+                sériesData = await respSéries.json();
+                const statut = await respStatut.json();
+                rendreSéries();
+                afficherStatutVerrou(statut);
+            } catch (e) {
+                document.getElementById('liste-séries').textContent = `❌ Impossible de charger les séries : ${e.message}`;
+            }
+        })();
     </script>
 
 </body>

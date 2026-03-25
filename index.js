@@ -56,7 +56,6 @@ function initialiserVolume() {
   // Toujours écraser — fichiers gérés via git uniquement (données de référence)
   const fichiersGit = [
     "équipes.json",
-    "séries.json",
     "joueurs.json",
   ];
   fichiersGit.forEach((fichier) => {
@@ -70,6 +69,7 @@ function initialiserVolume() {
   const fichiersAdmin = [
     "parties.json",
     "thèmes.json",
+    "séries.json",
   ];
   fichiersAdmin.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
@@ -412,6 +412,47 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
     console.error("Erreur upload parties:", e);
     res.status(500).json({ erreur: e.message });
   }
+});
+
+// ============================================================
+// Sauvegarder la structure des séries (admin)
+// Verrouillé dès qu'au moins une partie a été jouée
+// ============================================================
+function saisonADémarré() {
+  const dossierParties = path.join(dossierSaison, "parties");
+  if (!fs.existsSync(dossierParties)) return false;
+  return fs.readdirSync(dossierParties).some(
+    (f) => f.startsWith("répondants-") && f.endsWith(".json")
+  );
+}
+
+app.get("/api/admin/series/statut", (_req, res) => {
+  const verrouillé = saisonADémarré();
+  const dossierParties = path.join(dossierSaison, "parties");
+  let nbParties = 0;
+  if (verrouillé) {
+    nbParties = fs.readdirSync(dossierParties).filter(
+      (f) => f.startsWith("répondants-") && f.endsWith(".json")
+    ).length;
+  }
+  res.json({ verrouillé, nbParties });
+});
+
+app.put("/api/admin/series", (req, res) => {
+  if (saisonADémarré())
+    return res.status(403).json({ erreur: "Modification impossible — des parties ont déjà été jouées cette saison." });
+  const nouvelles = req.body;
+  if (!Array.isArray(nouvelles) || nouvelles.length === 0)
+    return res.status(400).json({ erreur: "Format invalide — tableau attendu" });
+  for (const s of nouvelles) {
+    if (!s.noSérie || !s.typeSérie || !Array.isArray(s.questions) || s.questions.length === 0)
+      return res.status(400).json({ erreur: `Série ${s.noSérie || "?"} : données incomplètes` });
+  }
+  const chemin = path.join(dossierSaison, "séries.json");
+  fs.writeFileSync(chemin, JSON.stringify(nouvelles, null, 2), "utf-8");
+  séries.splice(0, séries.length, ...nouvelles);
+  console.log(`✅ séries.json mis à jour — ${nouvelles.length} séries`);
+  res.json({ succès: true, nbSéries: nouvelles.length });
 });
 
 // ============================================================
