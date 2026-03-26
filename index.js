@@ -111,8 +111,6 @@ function initialiserVolume() {
   const fichiersGit = [
     "équipes.json",
     "joueurs.json",
-    "répondants.json",   // temporaire — import saison 24
-    "alignements.json",  // temporaire — import saison 24
   ];
   fichiersGit.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
