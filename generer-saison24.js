@@ -65,12 +65,16 @@ csvRows.forEach(r => {
   groups[key].rows.push(r);
 });
 
+// ── Filtre de parties (null = toutes) ──────────────────────────
+const PARTIES_FILTRE = [32, 33, 34];
+
 // ── Génération ─────────────────────────────────────────────────
 const répondants  = [];
 const alignements = [];
 const warnings    = [];
 
 Object.values(groups)
+  .filter(g => !PARTIES_FILTRE || PARTIES_FILTRE.includes(g.noPartie))
   .sort((a, b) => a.noPartie - b.noPartie || a.noÉquipe - b.noÉquipe)
   .forEach(({ noPartie, noÉquipe, rows }) => {
 
@@ -170,11 +174,21 @@ csvRows.filter(r => r.points > 0).forEach(r => {
 });
 console.log(`  ✅ ${ok} joueurs corrects, ❌ ${ko} avec écart`);
 
-// ── Écriture ──────────────────────────────────────────────────
+// ── Écriture (fusion si filtre actif) ─────────────────────────
 const fmt = arr => '[\n' + arr.map(o => '  ' + JSON.stringify(o)).join(',\n') + '\n]';
 
-fs.writeFileSync(path.join(DATA_DIR, 'répondants.json'),  fmt(répondants),  'utf-8');
-fs.writeFileSync(path.join(DATA_DIR, 'alignements.json'), fmt(alignements), 'utf-8');
+let répFinal  = répondants;
+let alignFinal = alignements;
+
+if (PARTIES_FILTRE) {
+  const répExist  = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'répondants.json'),  'utf-8'));
+  const alignExist = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'alignements.json'), 'utf-8'));
+  répFinal  = [...répExist.filter(r => !PARTIES_FILTRE.includes(r.noPartie)),  ...répondants];
+  alignFinal = [...alignExist.filter(a => !PARTIES_FILTRE.includes(a.noPartie)), ...alignements];
+}
+
+fs.writeFileSync(path.join(DATA_DIR, 'répondants.json'),  fmt(répFinal),  'utf-8');
+fs.writeFileSync(path.join(DATA_DIR, 'alignements.json'), fmt(alignFinal), 'utf-8');
 
 console.log(`\n✅ ${répondants.length}  entrées répondants écrites`);
 console.log(`✅ ${alignements.length} alignements écrits`);

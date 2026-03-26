@@ -411,17 +411,20 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
     const ws = wb.Sheets[wb.SheetNames[0]];
     const lignes = XLSX.utils.sheet_to_json(ws, { raw: true, defval: "" });
 
+    const parseÉquipe = v => (!v || String(v).trim() === "" || String(v).trim() === "NA") ? null : parseInt(v);
+
     const nouvellesParties = lignes.map(l => ({
       noPartie:               parseInt(l["NoPartie"]),
       date:                   String(l["Date"] || ""),
       salle:                  String(l["Salle"] || ""),
       animateur:              String(l["NomAnimateur"] || ""),
       noQuestionnaire:        parseInt(l["NoQuestionnaire"]),
-      noÉquipeA:              parseInt(l["NoÉquipeA"]),
-      noÉquipeB:              parseInt(l["NoÉquipeB"]),
-      noÉquipeQuestionnaire:  String(l["NoÉquipeQuestionnaire"]) === "NA" || !l["NoÉquipeQuestionnaire"]
-                                ? null : parseInt(l["NoÉquipeQuestionnaire"]),
+      noÉquipeA:              parseÉquipe(l["NoÉquipeA"]),
+      noÉquipeB:              parseÉquipe(l["NoÉquipeB"]),
+      noÉquipeQuestionnaire:  parseÉquipe(l["NoÉquipeQuestionnaire"]),
       lienRéunion:            String(l["LienReunion"] || ""),
+      phase:                  String(l["Phase"] || "saison"),
+      matchup:                l["Matchup"] ? String(l["Matchup"]) : null,
     })).filter(p => !isNaN(p.noPartie));
 
     nouvellesParties.sort((a, b) => a.noPartie - b.noPartie);
@@ -438,9 +441,9 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
       nosParties.add(p.noPartie);
       if (!p.date || !dateRegex.test(p.date)) erreurs.push({ partie: id, message: `Date invalide : "${p.date}"` });
       if (isNaN(p.noQuestionnaire) || p.noQuestionnaire <= 0) erreurs.push({ partie: id, message: `noQuestionnaire invalide` });
-      if (!noÉquipesValides.has(p.noÉquipeA)) erreurs.push({ partie: id, message: `noÉquipeA (${p.noÉquipeA}) introuvable` });
-      if (!noÉquipesValides.has(p.noÉquipeB)) erreurs.push({ partie: id, message: `noÉquipeB (${p.noÉquipeB}) introuvable` });
-      if (p.noÉquipeA === p.noÉquipeB) erreurs.push({ partie: id, message: `noÉquipeA et noÉquipeB identiques` });
+      if (p.noÉquipeA !== null && !noÉquipesValides.has(p.noÉquipeA)) erreurs.push({ partie: id, message: `noÉquipeA (${p.noÉquipeA}) introuvable` });
+      if (p.noÉquipeB !== null && !noÉquipesValides.has(p.noÉquipeB)) erreurs.push({ partie: id, message: `noÉquipeB (${p.noÉquipeB}) introuvable` });
+      if (p.noÉquipeA !== null && p.noÉquipeB !== null && p.noÉquipeA === p.noÉquipeB) erreurs.push({ partie: id, message: `noÉquipeA et noÉquipeB identiques` });
       if (p.noÉquipeQuestionnaire !== null) {
         if (!noÉquipesValides.has(p.noÉquipeQuestionnaire)) erreurs.push({ partie: id, message: `noÉquipeQuestionnaire (${p.noÉquipeQuestionnaire}) introuvable` });
         if (p.noÉquipeQuestionnaire === p.noÉquipeA || p.noÉquipeQuestionnaire === p.noÉquipeB)

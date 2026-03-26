@@ -312,6 +312,7 @@
             <a href="#repondants">📝 Répondants</a>
             <a href="#developpeurs">💻 Développeurs</a>
             <a href="#nouvelle-saison">🗓️ Nouvelle saison</a>
+            <a href="#import-historique">📤 Import historique</a>
         </nav>
     </aside>
 
@@ -525,6 +526,40 @@ railway run node init-volume.js --force</pre>
           <h3>Sur Railway (production)</h3>
           <p>La variable d'environnement <code>SAISON_ACTIVE</code> est un fallback — elle n'est lue qu'au démarrage si <code>data/saison-active.txt</code> est absent. En utilisant l'interface Administration, <code>saison-active.txt</code> est mis à jour automatiquement et aucun redéploiement n'est nécessaire.</p>
         </div>
+      </div>
+    </section>
+
+    <section id="import-historique" data-section="import-historique" style="scroll-margin-top:80px">
+      <div class="carte">
+        <h2>📤 Importer des données historiques sur Railway</h2>
+
+        <p>En temps normal, <code>répondants.json</code> et <code>alignements.json</code> sont ignorés par git (<code>skip-worktree</code>) pour éviter d'écraser accidentellement les données de jeu sur le Volume. Mais il est possible de les pousser ponctuellement via git.</p>
+
+        <div class="carte" style="margin-top:16px;margin-bottom:16px">
+          <h3>Pourquoi skip-worktree et pas .gitignore ?</h3>
+          <p><code>.gitignore</code> empêche git de <em>jamais</em> suivre un fichier — impossible de le pousser ensuite. <code>skip-worktree</code> dit à git d'ignorer les modifications locales au quotidien, tout en gardant le fichier suivi. On peut lever le flag temporairement pour faire un push, puis le remettre.</p>
+        </div>
+
+        <div class="carte" style="margin-bottom:16px">
+          <h3>Procédure d'import</h3>
+          <ol>
+            <li>Générer les fichiers localement (ex: script <code>generer-saison24.js</code>)</li>
+            <li>Lever le flag <code>skip-worktree</code> sur les deux fichiers :
+              <pre>git update-index --no-skip-worktree "data/saisons/AAAA-AAAA/répondants.json"
+git update-index --no-skip-worktree "data/saisons/AAAA-AAAA/alignements.json"</pre>
+            </li>
+            <li>Ajouter temporairement ces fichiers dans <code>fichiersGit</code> (section <code>initialiserVolume</code> dans <code>index.js</code>) pour qu'ils soient copiés sur le Volume au démarrage</li>
+            <li>Commit + push → Railway redéploie et copie les fichiers sur le Volume</li>
+            <li><strong>Dès que Railway confirme le déploiement</strong>, revert immédiatement :
+              <pre>git revert HEAD --no-edit
+git update-index --skip-worktree "data/saisons/AAAA-AAAA/répondants.json"
+git update-index --skip-worktree "data/saisons/AAAA-AAAA/alignements.json"
+git push</pre>
+            </li>
+          </ol>
+        </div>
+
+        <div class="note"><strong>Important :</strong> ne pas laisser ces fichiers dans <code>fichiersGit</code> plus longtemps que nécessaire — chaque redéploiement écraserait le Volume avec la version git, effaçant toutes les nouvelles parties jouées.</div>
       </div>
     </section>
 
