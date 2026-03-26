@@ -435,6 +435,10 @@
         </div>
     </nav>
 
+    <div id="sel-saison-wrap" style="text-align:center;margin-bottom:16px">
+      <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
+    </div>
+
     <h2>📊 Compteurs 2025-2026</h2>
 
     <div class="toggle-phase">
@@ -525,6 +529,7 @@
     </div>
 
     <script>
+        let saisonStats = new URLSearchParams(window.location.search).get("saison") || null;
         let donnéesCompteurs = [];
         let donnéesThèmes = null;
         const triÉtat = {
@@ -554,16 +559,37 @@
             }
         }
 
+        async function chargerSélécteurSaison() {
+          const [saisonsRes, activeRes] = await Promise.all([
+            fetch("/api/saisons"), fetch("/api/saison-active")
+          ]);
+          const saisons = await saisonsRes.json();
+          const { saison: active } = await activeRes.json();
+          if (!saisonStats) saisonStats = active;
+          const sel = document.getElementById("sel-saison");
+          sel.innerHTML = saisons.map(s =>
+            `<option value="${s}" ${s === saisonStats ? "selected" : ""}>${s}</option>`
+          ).join("");
+        }
+
+        function changerSaisonStats() {
+          saisonStats = document.getElementById("sel-saison").value;
+          donnéesThèmes = null;
+          chargerCompteurs();
+        }
+
         async function chargerCompteurs(phase = 'tous') {
-            const phaseParam = phase !== 'tous' ? `?phase=${phase}` : '';
-            donnéesCompteurs = await fetch(`/api/stats/compteurs${phaseParam}`).then(r => r.json());
+            const params = new URLSearchParams({ saison: saisonStats });
+            if (phase !== 'tous') params.set('phase', phase);
+            donnéesCompteurs = await fetch(`/api/stats/compteurs?${params}`).then(r => r.json());
             afficherÉquipes();
             afficherJoueurs();
         }
 
         async function chargerThèmes(phase = phaseActive) {
-            const phaseParam = phase !== 'tous' ? `?phase=${phase}` : '';
-            donnéesThèmes = await fetch(`/api/stats/themes${phaseParam}`).then(r => r.json());
+            const params = new URLSearchParams({ saison: saisonStats });
+            if (phase !== 'tous') params.set('phase', phase);
+            donnéesThèmes = await fetch(`/api/stats/themes?${params}`).then(r => r.json());
             const sidebar = document.getElementById('sidebarThèmes');
             const div = document.getElementById('contenuThemes');
 
@@ -789,7 +815,7 @@
         fetch('/api/stats/phase').then(r => r.json()).then(d => {
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         });
-        chargerCompteurs();
+        chargerSélécteurSaison().then(() => chargerCompteurs());
         function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
         document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
     </script>

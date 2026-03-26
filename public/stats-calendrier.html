@@ -415,6 +415,10 @@
         </div>
     </nav>
 
+    <div id="sel-saison-wrap" style="text-align:center;margin-bottom:16px">
+      <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
+    </div>
+
     <h2>📅 Calendrier 2025-2026</h2>
 
     <div class="toggle-phase">
@@ -452,6 +456,7 @@
     </div>
 
     <script>
+        let saisonStats = new URLSearchParams(window.location.search).get("saison") || null;
         let donnéesParties = [];
 
         function setPhase(phase) {
@@ -462,8 +467,26 @@
             afficherCalendrier(filtrées);
         }
 
+        async function chargerSélécteurSaison() {
+          const [saisonsRes, activeRes] = await Promise.all([
+            fetch("/api/saisons"), fetch("/api/saison-active")
+          ]);
+          const saisons = await saisonsRes.json();
+          const { saison: active } = await activeRes.json();
+          if (!saisonStats) saisonStats = active;
+          const sel = document.getElementById("sel-saison");
+          sel.innerHTML = saisons.map(s =>
+            `<option value="${s}" ${s === saisonStats ? "selected" : ""}>${s}</option>`
+          ).join("");
+        }
+
+        function changerSaisonStats() {
+          saisonStats = document.getElementById("sel-saison").value;
+          chargerCalendrier();
+        }
+
         async function chargerCalendrier() {
-            donnéesParties = await fetch('/api/stats/calendrier').then(r => r.json());
+            donnéesParties = await fetch(`/api/stats/calendrier?saison=${saisonStats}`).then(r => r.json());
             afficherCalendrier(donnéesParties);
         }
 
@@ -602,7 +625,7 @@
         fetch('/api/stats/phase').then(r => r.json()).then(d => {
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         });
-        chargerCalendrier();
+        chargerSélécteurSaison().then(() => chargerCalendrier());
 
         function toggleRessources(btn) {
             const menu = document.getElementById('menu-ressources');

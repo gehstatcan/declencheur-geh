@@ -213,6 +213,10 @@
         </div>
     </nav>
 
+    <div id="sel-saison-wrap" style="text-align:center;margin-bottom:16px">
+      <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
+    </div>
+
     <div class="sélecteur">
         <label for="selectPartie" style="font-weight:600; color:var(--accent)">Partie :</label>
         <select id="selectPartie">
@@ -225,10 +229,35 @@
     </div>
 
     <script>
+        const urlParamsInit = new URLSearchParams(location.search);
+        let saisonStats = urlParamsInit.get("saison") || null;
+
+        async function chargerSélécteurSaison() {
+          const [saisonsRes, activeRes] = await Promise.all([
+            fetch("/api/saisons"), fetch("/api/saison-active")
+          ]);
+          const saisons = await saisonsRes.json();
+          const { saison: active } = await activeRes.json();
+          if (!saisonStats) saisonStats = active;
+          const sel = document.getElementById("sel-saison");
+          sel.innerHTML = saisons.map(s =>
+            `<option value="${s}" ${s === saisonStats ? "selected" : ""}>${s}</option>`
+          ).join("");
+        }
+
+        function changerSaisonStats() {
+          saisonStats = document.getElementById("sel-saison").value;
+          // Réinitialiser le sélecteur de parties
+          const sel = document.getElementById('selectPartie');
+          sel.innerHTML = '<option value="">— Choisir une partie —</option>';
+          document.getElementById('feuille').innerHTML = '<div id="msg">Sélectionne une partie pour afficher la feuille de match.</div>';
+          charger();
+        }
+
         async function charger() {
             // Charger la liste des parties jouées
             const [calendrier] = await Promise.all([
-                fetch('/api/stats/calendrier').then(r => r.json())
+                fetch(`/api/stats/calendrier?saison=${saisonStats}`).then(r => r.json())
             ]);
             const jouées = calendrier.filter(p => p.terminée);
             const sel = document.getElementById('selectPartie');
@@ -256,7 +285,7 @@
         async function afficherPartie(noPartie) {
             document.getElementById('feuille').innerHTML = '<div id="msg">Chargement...</div>';
             try {
-                const resp = await fetch(`/api/stats/match/${noPartie}`);
+                const resp = await fetch(`/api/stats/match/${noPartie}?saison=${saisonStats}`);
                 const data = await resp.json();
                 if (resp.status === 403) {
                     const infoQ = data.équipeQuestionnaire ? `#${data.noQuestionnaire} — ${data.équipeQuestionnaire}` : `#${data.noQuestionnaire}`;
@@ -428,7 +457,7 @@
         fetch('/api/stats/phase').then(r => r.json()).then(d => {
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         });
-        charger();
+        chargerSélécteurSaison().then(() => charger());
         function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
         document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
     </script>

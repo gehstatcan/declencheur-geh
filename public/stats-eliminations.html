@@ -264,6 +264,10 @@
         </div>
     </nav>
 
+    <div id="sel-saison-wrap" style="text-align:center;margin-bottom:16px">
+      <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
+    </div>
+
     <h2>🌳 Éliminatoires 2025-2026</h2>
 
     <div class="bracket" id="bracket">
@@ -275,6 +279,26 @@
     </div>
 
     <script>
+        let saisonStats = new URLSearchParams(window.location.search).get("saison") || null;
+
+        async function chargerSélécteurSaison() {
+          const [saisonsRes, activeRes] = await Promise.all([
+            fetch("/api/saisons"), fetch("/api/saison-active")
+          ]);
+          const saisons = await saisonsRes.json();
+          const { saison: active } = await activeRes.json();
+          if (!saisonStats) saisonStats = active;
+          const sel = document.getElementById("sel-saison");
+          sel.innerHTML = saisons.map(s =>
+            `<option value="${s}" ${s === saisonStats ? "selected" : ""}>${s}</option>`
+          ).join("");
+        }
+
+        function changerSaisonStats() {
+          saisonStats = document.getElementById("sel-saison").value;
+          chargerBracket();
+        }
+
         // Structure fixe du bracket pour cette ligue (7 équipes)
         // Q1=2v7, Q2=3v6, Q3=4v5 → D1=1er+Q1gag, D2=Q2gag+Q3gag → F
         const BRACKET = {
@@ -329,7 +353,7 @@
         }
 
         async function chargerBracket() {
-            const données = await fetch('/api/stats/eliminations').then(r => r.json());
+            const données = await fetch(`/api/stats/eliminations?saison=${saisonStats}`).then(r => r.json());
             const bracket = document.getElementById('bracket');
 
             if (Object.keys(données).length === 0) {
@@ -363,7 +387,7 @@
             </div>`;
         }
 
-        chargerBracket();
+        chargerSélécteurSaison().then(() => chargerBracket());
         function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
         document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
     </script>

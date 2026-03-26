@@ -417,6 +417,16 @@
             font-weight: bold;
         }
 
+        .joueur.cliquable {
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .joueur.cliquable:hover {
+            background: var(--accent);
+            color: white;
+        }
+
         .nav-animateur { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
         .nav-animateur a { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; text-decoration: none; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); transition: all 0.2s; }
         .nav-animateur a:hover { background: var(--fond-champ); color: var(--texte); }
@@ -833,6 +843,26 @@
             });
         }
 
+        function buzzManuel(noÉquipe, noJoueur, alias, nomÉquipe) {
+            if (modeActuel !== 'jeu') return;
+            joueurAyantBuzzé = { noÉquipe, noJoueur, alias, nomÉquipe };
+            jouerSon(noÉquipe);
+            const buzzer = document.getElementById('buzzer');
+            buzzer.textContent = `👆 ${alias} (${nomÉquipe}) — attribution manuelle`;
+            buzzer.className = 'actif';
+            afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
+            const { série, question } = obtenirQuestionCourante();
+            const pts = question ? question.points : 10;
+            document.getElementById('btnBonne').textContent = `✅ ${pts} pts`;
+            document.getElementById('btnBonne').onclick = () => bonneRéponse(pts);
+            const ptsSecondaires = question ? question.pointsSecondaires : 5;
+            document.getElementById('btnSecondaire').textContent = `✅ ${ptsSecondaires} pts`;
+            document.getElementById('btnSecondaire').onclick = () => bonneRéponse(ptsSecondaires, true);
+            document.getElementById('btnSecondaire').style.display =
+                (question && question.pointsSecondaires > 0) ? 'inline-block' : 'none';
+            document.getElementById('boutonsPoints').style.display = 'block';
+        }
+
         function mauvaiseRéponse() {
             if (!joueurAyantBuzzé) return;
             socket.emit('mauvaiseRéponse', {
@@ -1045,7 +1075,13 @@
 
                         const pts = afficherPtsJoueurs ? (derniersScoresJoueurs[`${j.noÉquipe}_${j.noJoueur}`] || 0) : null;
                         const ptsHTML = pts !== null ? ` <span style="font-weight:700;color:var(--accent);margin-left:6px;">${pts}</span>` : '';
-                        return `<div class="joueur ${classe}" style="display:flex;justify-content:space-between;align-items:center;">${j.alias}${ptsHTML}</div>`;
+                        const nomÉquipeSafe = (équipe?.nomÉquipe || '').replace(/'/g, "\\'");
+                        const aliasSafe = j.alias.replace(/'/g, "\\'");
+                        const cliquable = modeActuel === 'jeu' ? 'cliquable' : '';
+                        const onclick = modeActuel === 'jeu'
+                            ? `onclick="buzzManuel(${j.noÉquipe}, ${j.noJoueur}, '${aliasSafe}', '${nomÉquipeSafe}')"`
+                            : '';
+                        return `<div class="joueur ${classe} ${cliquable}" ${onclick} style="display:flex;justify-content:space-between;align-items:center;">${j.alias}${ptsHTML}</div>`;
 
 
 

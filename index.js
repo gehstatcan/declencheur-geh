@@ -72,13 +72,23 @@ app.use(express.static("public"));
 // ============================================================
 // Chargement des données de la saison
 // ============================================================
-const saison = "2025-2026";
-//const dossierSaison = path.join(__dirname, 'data', 'saisons', saison);
 
 // Volume Railway monté sur /data
 const dossierBase =
   process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, "data");
-const dossierSaison = path.join(dossierBase, "saisons", saison);
+
+// Saison active — lit depuis data/saison-active.txt ou variable d'environnement
+function lireSaisonActive() {
+  const fichier = path.join(dossierBase, "saison-active.txt");
+  if (fs.existsSync(fichier)) {
+    const contenu = fs.readFileSync(fichier, "utf-8").trim();
+    if (/^\d{4}-\d{4}$/.test(contenu)) return contenu;
+  }
+  return process.env.SAISON_ACTIVE || "2025-2026";
+}
+
+let saisonActive = lireSaisonActive();
+let dossierSaison = path.join(dossierBase, "saisons", saisonActive);
 
 // ============================================================
 // Initialisation du Volume — copier les données si nécessaire
@@ -104,7 +114,7 @@ function initialiserVolume() {
   ];
   fichiersGit.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
-    const source = path.join(__dirname, "data", "saisons", saison, fichier);
+    const source = path.join(__dirname, "data", "saisons", saisonActive, fichier);
     fs.copyFileSync(source, destination);
     console.log(`📄 ${fichier} mis à jour sur le Volume`);
   });
@@ -117,7 +127,7 @@ function initialiserVolume() {
   ];
   fichiersAdmin.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
-    const source = path.join(__dirname, "data", "saisons", saison, fichier);
+    const source = path.join(__dirname, "data", "saisons", saisonActive, fichier);
     if (!fs.existsSync(destination)) {
       fs.copyFileSync(source, destination);
       console.log(`📄 ${fichier} copié sur le Volume`);
@@ -132,7 +142,7 @@ function initialiserVolume() {
   ];
   fichiersJeu.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
-    const source = path.join(__dirname, "data", "saisons", saison, fichier);
+    const source = path.join(__dirname, "data", "saisons", saisonActive, fichier);
     if (!fs.existsSync(destination)) {
       if (fs.existsSync(source)) {
         fs.copyFileSync(source, destination);
@@ -150,10 +160,10 @@ if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
   initialiserVolume();
 }
 
-const équipes = JSON.parse(
+let équipes = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
 );
-const joueurs = JSON.parse(
+let joueurs = JSON.parse(
   fs.readFileSync(path.join(dossierSaison, "joueurs.json"), "utf-8"),
 );
 let parties = JSON.parse(
@@ -560,6 +570,78 @@ app.post("/api/joueurs/nouveau", (req, res) => {
   res.json(nouveauJoueur);
 });
 
+// ============================================================
+// Routes API — Gestion des saisons
+// ============================================================
+app.get("/api/saisons", (_req, res) => {
+  try {
+    const dossierSaisons = path.join(dossierBase, "saisons");
+    if (!fs.existsSync(dossierSaisons)) return res.json([]);
+    const saisons = fs.readdirSync(dossierSaisons)
+      .filter(f => /^\d{4}-\d{4}$/.test(f) && fs.statSync(path.join(dossierSaisons, f)).isDirectory())
+      .sort()
+      .reverse();
+    res.json(saisons);
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+app.get("/api/saison-active", (_req, res) => {
+  res.json({ saison: saisonActive });
+});
+
+app.post("/api/admin/saison-active", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  const { saison } = req.body;
+  if (!saison || !/^\d{4}-\d{4}$/.test(saison))
+    return res.status(400).json({ erreur: "Format de saison invalide (ex: 2026-2027)" });
+  const dossierCible = path.join(dossierBase, "saisons", saison);
+  if (!fs.existsSync(dossierCible))
+    return res.status(404).json({ erreur: `Saison ${saison} introuvable` });
+  saisonActive = saison;
+  dossierSaison = dossierCible;
+  fs.writeFileSync(path.join(dossierBase, "saison-active.txt"), saison, "utf-8");
+  // Recharger les données en mémoire
+  try {
+    équipes.splice(0, équipes.length, ...JSON.parse(fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8")));
+    joueurs.splice(0, joueurs.length, ...JSON.parse(fs.readFileSync(path.join(dossierSaison, "joueurs.json"), "utf-8")));
+    parties.splice(0, parties.length, ...JSON.parse(fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8")));
+    séries.splice(0, séries.length, ...JSON.parse(fs.readFileSync(path.join(dossierSaison, "séries.json"), "utf-8")));
+    thèmes.splice(0, thèmes.length, ...JSON.parse(fs.readFileSync(path.join(dossierSaison, "thèmes.json"), "utf-8")));
+  } catch (e) {
+    console.error("Erreur rechargement données saison:", e);
+  }
+  res.json({ succès: true, saison });
+});
+
+app.post("/api/admin/nouvelle-saison", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  const { saison } = req.body;
+  if (!saison || !/^\d{4}-\d{4}$/.test(saison))
+    return res.status(400).json({ erreur: "Format invalide (ex: 2026-2027)" });
+  const dossierNouveau = path.join(dossierBase, "saisons", saison);
+  if (fs.existsSync(dossierNouveau))
+    return res.status(409).json({ erreur: `La saison ${saison} existe déjà` });
+  fs.mkdirSync(path.join(dossierNouveau, "parties"), { recursive: true });
+  const fichiersVides = {
+    "équipes.json": "[]",
+    "joueurs.json": "[]",
+    "parties.json": "[]",
+    "séries.json": "[]",
+    "thèmes.json": "[]",
+    "questions.json": "[]",
+    "répondants.json": "[]",
+    "alignements.json": "[]",
+  };
+  for (const [nom, contenu] of Object.entries(fichiersVides)) {
+    fs.writeFileSync(path.join(dossierNouveau, nom), contenu, "utf-8");
+  }
+  res.json({ succès: true, saison });
+});
+
 app.get("/api/alignements", (req, res) => {
   try {
     const cheminAlignements = path.join(dossierSaison, "alignements.json");
@@ -580,21 +662,39 @@ app.get("/api/alignements", (req, res) => {
 // Routes API — Statistiques
 // ============================================================
 
+// Helper — dossier à utiliser pour les routes stats (respecte ?saison= si valide)
+function getDossierStats(req) {
+  const s = req.query && req.query.saison;
+  if (s && /^\d{4}-\d{4}$/.test(s)) {
+    return path.join(dossierBase, "saisons", s);
+  }
+  return dossierSaison;
+}
+
+function getSériesStats(dossier) {
+  if (dossier === dossierSaison) return séries;
+  try {
+    return JSON.parse(fs.readFileSync(path.join(dossier, "séries.json"), "utf-8"));
+  } catch { return séries; }
+}
+
 // Calendrier — parties avec scores calculés
 app.get("/api/stats/calendrier", (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
     const parties = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "parties.json"), "utf-8"),
     );
     const équipes = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "équipes.json"), "utf-8"),
     );
 
     // Lire les répondants cumulatifs
     let répondants = [];
     try {
       const contenu = fs
-        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .readFileSync(path.join(ds, "répondants.json"), "utf-8")
         .trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
@@ -609,7 +709,7 @@ app.get("/api/stats/calendrier", (req, res) => {
       const scores = {};
       rép.forEach((r) => {
         if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
-        const série = séries.find((s) => s.noSérie === r.noSérie);
+        const série = sr.find((s) => s.noSérie === r.noSérie);
         const question = série
           ? série.questions.find((q) => q.noQuestion === r.noQuestion)
           : null;
@@ -660,16 +760,18 @@ app.get("/api/stats/calendrier", (req, res) => {
 // ============================================================
 app.get("/api/stats/partie/:noPartie/joueurs", (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
     const noPartie = parseInt(req.params.noPartie);
     const partie = parties.find(p => p.noPartie === noPartie);
     if (!partie) return res.status(404).json({ erreur: 'Partie introuvable' });
 
-    const alignements = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'alignements.json'), 'utf-8'));
-    const joueurs = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'joueurs.json'), 'utf-8'));
+    const alignements = JSON.parse(fs.readFileSync(path.join(ds, 'alignements.json'), 'utf-8'));
+    const joueurs = JSON.parse(fs.readFileSync(path.join(ds, 'joueurs.json'), 'utf-8'));
 
     let répondants = [];
     try {
-      const tous = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim() || '[]');
+      const tous = JSON.parse(fs.readFileSync(path.join(ds, 'répondants.json'), 'utf-8').trim() || '[]');
       répondants = tous.filter(r => r.noPartie === noPartie);
     } catch (e) {}
 
@@ -677,7 +779,7 @@ app.get("/api/stats/partie/:noPartie/joueurs", (req, res) => {
       return répondants
         .filter(r => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur)
         .reduce((sum, r) => {
-          const sérieInfo = séries.find(s => s.noSérie === r.noSérie);
+          const sérieInfo = sr.find(s => s.noSérie === r.noSérie);
           const qInfo = sérieInfo?.questions.find(q => q.noQuestion === r.noQuestion);
           return sum + (r.pointsSecondaires ? (qInfo?.pointsSecondaires ?? 0) : (qInfo?.points ?? 0));
         }, 0);
@@ -704,17 +806,19 @@ app.get("/api/stats/partie/:noPartie/joueurs", (req, res) => {
 // ============================================================
 app.get("/api/stats/classement", (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
     const parties = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "parties.json"), "utf-8"),
     );
     const équipes = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "équipes.json"), "utf-8"),
     );
 
     let répondants = [];
     try {
       const contenu = fs
-        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .readFileSync(path.join(ds, "répondants.json"), "utf-8")
         .trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
@@ -751,7 +855,7 @@ app.get("/api/stats/classement", (req, res) => {
       const scores = {};
       rép.forEach((r) => {
         if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
-        const série = séries.find((s) => s.noSérie === r.noSérie);
+        const série = sr.find((s) => s.noSérie === r.noSérie);
         const question = série
           ? série.questions.find((q) => q.noQuestion === r.noQuestion)
           : null;
@@ -836,7 +940,8 @@ app.get("/api/stats/classement", (req, res) => {
 // ============================================================
 app.get('/api/stats/phase', (req, res) => {
   try {
-    const parties = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'parties.json'), 'utf-8'));
+    const ds = getDossierStats(req);
+    const parties = JSON.parse(fs.readFileSync(path.join(ds, 'parties.json'), 'utf-8'));
     const enEliminations = parties.some(p => p.phase === 'eliminations');
     res.json({ phase: enEliminations ? 'eliminations' : 'saison' });
   } catch (e) {
@@ -849,19 +954,21 @@ app.get('/api/stats/phase', (req, res) => {
 // ============================================================
 app.get('/api/stats/eliminations', (req, res) => {
   try {
-    const parties = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'parties.json'), 'utf-8'));
-    const équipes = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'équipes.json'), 'utf-8'));
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
+    const parties = JSON.parse(fs.readFileSync(path.join(ds, 'parties.json'), 'utf-8'));
+    const équipes = JSON.parse(fs.readFileSync(path.join(ds, 'équipes.json'), 'utf-8'));
     const nomÉquipe = (no) => no ? (équipes.find(e => e.noÉquipe === no)?.nomÉquipe || `Équipe ${no}`) : null;
 
     let répondants = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'répondants.json'), 'utf-8').trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) { répondants = []; }
 
     const calcScore = (noPartie, noÉquipe) =>
       répondants.filter(r => r.noPartie === noPartie && r.noÉquipe === noÉquipe).reduce((total, r) => {
-        const série = séries.find(s => s.noSérie === r.noSérie);
+        const série = sr.find(s => s.noSérie === r.noSérie);
         const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
         const pts = r.pointsSecondaires ? (question?.pointsSecondaires ?? 5) : (question?.points ?? 10);
         return total + pts;
@@ -900,27 +1007,33 @@ app.get('/api/stats/eliminations', (req, res) => {
 // Stats par thème
 app.get('/api/stats/themes', (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
+    const partiesDs = ds === dossierSaison ? parties : JSON.parse(fs.readFileSync(path.join(ds, 'parties.json'), 'utf-8'));
+    const thèmesDs = ds === dossierSaison ? thèmes : JSON.parse(fs.readFileSync(path.join(ds, 'thèmes.json'), 'utf-8'));
+    const joueursDs = ds === dossierSaison ? joueurs : JSON.parse(fs.readFileSync(path.join(ds, 'joueurs.json'), 'utf-8'));
+    const équipesDs = ds === dossierSaison ? équipes : JSON.parse(fs.readFileSync(path.join(ds, 'équipes.json'), 'utf-8'));
     let répondants = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'répondants.json'), 'utf-8').trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) { répondants = []; }
 
     const phase = req.query.phase;
     if (phase && phase !== 'tous') {
       const noPartiesFiltées = new Set(
-        parties.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+        partiesDs.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
       );
       répondants = répondants.filter(r => noPartiesFiltées.has(r.noPartie));
     }
 
     // Lookup noPartie → noQuestionnaire
     const questParPartie = {};
-    parties.forEach(p => { questParPartie[p.noPartie] = p.noQuestionnaire; });
+    partiesDs.forEach(p => { questParPartie[p.noPartie] = p.noQuestionnaire; });
 
     // Lookup noQuestionnaire → noSérie → { thème, sousThème }
     const thèmeLookup = {};
-    thèmes.forEach(t => {
+    thèmesDs.forEach(t => {
       thèmeLookup[t.noQuestionnaire] = {};
       t.séries.forEach(s => { thèmeLookup[t.noQuestionnaire][s.noSérie] = { thème: s.thème, sousThème: s.sousThème }; });
     });
@@ -937,7 +1050,7 @@ app.get('/api/stats/themes', (req, res) => {
       if (!statsParThème[clé]) statsParThème[clé] = {};
       const joueurClé = `${r.noÉquipe}-${r.noJoueur}`;
       if (!statsParThème[clé][joueurClé]) statsParThème[clé][joueurClé] = { noÉquipe: r.noÉquipe, noJoueur: r.noJoueur, pts: 0 };
-      const série = séries.find(s => s.noSérie === r.noSérie);
+      const série = sr.find(s => s.noSérie === r.noSérie);
       const q = série?.questions.find(q => q.noQuestion === r.noQuestion);
       const pts = r.pointsSecondaires ? (q?.pointsSecondaires ?? 5) : (q?.points ?? 10);
       statsParThème[clé][joueurClé].pts += pts;
@@ -945,8 +1058,8 @@ app.get('/api/stats/themes', (req, res) => {
 
     const résultat = Object.entries(statsParThème).map(([thème, joueursMap]) => {
       const joueursList = Object.values(joueursMap).map(j => {
-        const joueur = joueurs.find(jj => jj.noÉquipe === j.noÉquipe && jj.noJoueur === j.noJoueur);
-        const équipe = équipes.find(e => e.noÉquipe === j.noÉquipe);
+        const joueur = joueursDs.find(jj => jj.noÉquipe === j.noÉquipe && jj.noJoueur === j.noJoueur);
+        const équipe = équipesDs.find(e => e.noÉquipe === j.noÉquipe);
         return { noJoueur: j.noJoueur, alias: joueur?.alias || `J${j.noJoueur}`, nom: joueur?.nom || '', nomÉquipe: équipe?.nomÉquipe || '', noÉquipe: j.noÉquipe, pts: j.pts };
       }).sort((a, b) => b.pts - a.pts);
       return { thème, joueurs: joueursList };
@@ -962,20 +1075,22 @@ app.get('/api/stats/themes', (req, res) => {
 // ============================================================
 app.get("/api/stats/compteurs", (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
     const équipes = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "équipes.json"), "utf-8"),
     );
     const joueurs = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "joueurs.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "joueurs.json"), "utf-8"),
     );
     const partiesData = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "parties.json"), "utf-8"),
     );
 
     let répondants = [];
     try {
       const contenu = fs
-        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .readFileSync(path.join(ds, "répondants.json"), "utf-8")
         .trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
@@ -995,7 +1110,7 @@ app.get("/api/stats/compteurs", (req, res) => {
     répondants.forEach((r) => {
       const clé = `${r.noÉquipe}-${r.noJoueur}`;
       if (!ptsJoueur[clé]) ptsJoueur[clé] = 0;
-      const série = séries.find((s) => s.noSérie === r.noSérie);
+      const série = sr.find((s) => s.noSérie === r.noSérie);
       const question = série
         ? série.questions.find((q) => q.noQuestion === r.noQuestion)
         : null;
@@ -1018,7 +1133,7 @@ app.get("/api/stats/compteurs", (req, res) => {
 
     let alignements = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, "alignements.json"), "utf-8").trim();
+      const contenu = fs.readFileSync(path.join(ds, "alignements.json"), "utf-8").trim();
       alignements = contenu ? JSON.parse(contenu) : [];
     } catch (e) { alignements = []; }
 
@@ -1079,19 +1194,21 @@ app.get("/api/stats/compteurs", (req, res) => {
 // ============================================================
 app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
     const noÉquipe = parseInt(req.params.noEquipe);
     const noJoueur = parseInt(req.params.noJoueur);
     const parties = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "parties.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "parties.json"), "utf-8"),
     );
     const équipes = JSON.parse(
-      fs.readFileSync(path.join(dossierSaison, "équipes.json"), "utf-8"),
+      fs.readFileSync(path.join(ds, "équipes.json"), "utf-8"),
     );
 
     let répondants = [];
     try {
       const contenu = fs
-        .readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8")
+        .readFileSync(path.join(ds, "répondants.json"), "utf-8")
         .trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) {
@@ -1106,7 +1223,7 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
     const partiesMap = {};
     répJoueur.forEach((r) => {
       if (!partiesMap[r.noPartie]) partiesMap[r.noPartie] = 0;
-      const série = séries.find((s) => s.noSérie === r.noSérie);
+      const série = sr.find((s) => s.noSérie === r.noSérie);
       const question = série
         ? série.questions.find((q) => q.noQuestion === r.noQuestion)
         : null;
@@ -1126,7 +1243,7 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
       if (!scoresParPartie[r.noPartie]) scoresParPartie[r.noPartie] = {};
       if (!scoresParPartie[r.noPartie][r.noÉquipe])
         scoresParPartie[r.noPartie][r.noÉquipe] = 0;
-      const série = séries.find((s) => s.noSérie === r.noSérie);
+      const série = sr.find((s) => s.noSérie === r.noSérie);
       const question = série
         ? série.questions.find((q) => q.noQuestion === r.noQuestion)
         : null;
@@ -1178,23 +1295,29 @@ app.get("/api/stats/joueur/:noEquipe/:noJoueur", (req, res) => {
 // ============================================================
 app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
+    const joueursDs = ds === dossierSaison ? joueurs : JSON.parse(fs.readFileSync(path.join(ds, 'joueurs.json'), 'utf-8'));
+    const équipesDs = ds === dossierSaison ? équipes : JSON.parse(fs.readFileSync(path.join(ds, 'équipes.json'), 'utf-8'));
+    const partiesDs = ds === dossierSaison ? parties : JSON.parse(fs.readFileSync(path.join(ds, 'parties.json'), 'utf-8'));
+    const thèmesDs = ds === dossierSaison ? thèmes : JSON.parse(fs.readFileSync(path.join(ds, 'thèmes.json'), 'utf-8'));
     const noÉquipe = parseInt(req.params.noEquipe);
     const noJoueur = parseInt(req.params.noJoueur);
 
-    const joueur = joueurs.find(j => j.noÉquipe === noÉquipe && j.noJoueur === noJoueur);
+    const joueur = joueursDs.find(j => j.noÉquipe === noÉquipe && j.noJoueur === noJoueur);
     if (!joueur) return res.status(404).json({ erreur: 'Joueur introuvable' });
 
-    const équipe = équipes.find(e => e.noÉquipe === noÉquipe);
+    const équipe = équipesDs.find(e => e.noÉquipe === noÉquipe);
 
     let répondants = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'répondants.json'), 'utf-8').trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) { répondants = []; }
 
     let alignements = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'alignements.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'alignements.json'), 'utf-8').trim();
       alignements = contenu ? JSON.parse(contenu) : [];
     } catch (e) { alignements = []; }
 
@@ -1204,7 +1327,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
     let alignFiltés = alignements;
     if (phase && phase !== 'tous') {
       const noPartiesFiltées = new Set(
-        parties.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+        partiesDs.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
       );
       répFiltrés = répondants.filter(r => noPartiesFiltées.has(r.noPartie));
       alignFiltés = alignements.filter(a => noPartiesFiltées.has(a.noPartie));
@@ -1219,7 +1342,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
     const ptsParPartie = {};
     répJoueur.forEach(r => {
       if (!ptsParPartie[r.noPartie]) ptsParPartie[r.noPartie] = 0;
-      const série = séries.find(s => s.noSérie === r.noSérie);
+      const série = sr.find(s => s.noSérie === r.noSérie);
       const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
       const pts = r.pointsSecondaires ? (question ? question.pointsSecondaires : 5) : (question ? question.points : 10);
       ptsParPartie[r.noPartie] += pts;
@@ -1232,7 +1355,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
     répFiltrés.forEach(r => {
       if (!scoresParPartie[r.noPartie]) scoresParPartie[r.noPartie] = {};
       if (!scoresParPartie[r.noPartie][r.noÉquipe]) scoresParPartie[r.noPartie][r.noÉquipe] = 0;
-      const série = séries.find(s => s.noSérie === r.noSérie);
+      const série = sr.find(s => s.noSérie === r.noSérie);
       const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
       const pts = r.pointsSecondaires ? (question ? question.pointsSecondaires : 5) : (question ? question.points : 10);
       scoresParPartie[r.noPartie][r.noÉquipe] += pts;
@@ -1241,9 +1364,9 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
     // Liste des parties
     const partiesJoueur = Object.entries(ptsParPartie).map(([noPartieStr, ptsJoueur]) => {
       const noPartie = parseInt(noPartieStr);
-      const p = parties.find(p => p.noPartie === noPartie);
+      const p = partiesDs.find(p => p.noPartie === noPartie);
       const noAdv = p?.noÉquipeA === noÉquipe ? p?.noÉquipeB : p?.noÉquipeA;
-      const équipeAdv = équipes.find(e => e.noÉquipe === noAdv);
+      const équipeAdv = équipesDs.find(e => e.noÉquipe === noAdv);
       const scores = scoresParPartie[noPartie] || {};
       const scoreÉquipe = scores[noÉquipe] || 0;
       const scoreAdv = scores[noAdv] || 0;
@@ -1266,7 +1389,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
     // Questionnaires protégés : au moins une partie non jouée avec ce questionnaire
     const partiesJouées = new Set(répondants.map(r => r.noPartie));
     const partiesParQuestionnaire = {};
-    parties.forEach(p => {
+    partiesDs.forEach(p => {
       if (!partiesParQuestionnaire[p.noQuestionnaire]) partiesParQuestionnaire[p.noQuestionnaire] = [];
       partiesParQuestionnaire[p.noQuestionnaire].push(p.noPartie);
     });
@@ -1278,7 +1401,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
     // Lookup questions (texte + réponse)
     let questionsData = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'questions.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'questions.json'), 'utf-8').trim();
       questionsData = contenu ? JSON.parse(contenu) : [];
     } catch (e) { questionsData = []; }
     const questionsLookup = {};
@@ -1292,9 +1415,9 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
 
     // Stats par thème
     const questParPartie = {};
-    parties.forEach(p => { questParPartie[p.noPartie] = p.noQuestionnaire; });
+    partiesDs.forEach(p => { questParPartie[p.noPartie] = p.noQuestionnaire; });
     const thèmeLookup = {};
-    thèmes.forEach(t => {
+    thèmesDs.forEach(t => {
       thèmeLookup[t.noQuestionnaire] = {};
       t.séries.forEach(s => { thèmeLookup[t.noQuestionnaire][s.noSérie] = s.thème; });
     });
@@ -1303,7 +1426,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
       const noQ = questParPartie[r.noPartie];
       const thème = noQ && thèmeLookup[noQ] ? thèmeLookup[noQ][r.noSérie] : null;
       if (!thème) return;
-      const série = séries.find(s => s.noSérie === r.noSérie);
+      const série = sr.find(s => s.noSérie === r.noSérie);
       const question = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
       const pts = r.pointsSecondaires ? (question ? question.pointsSecondaires : 5) : (question ? question.points : 10);
       ptsParThème[thème] = (ptsParThème[thème] || 0) + pts;
@@ -1327,14 +1450,14 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
       questions: répJoueur.map(r => {
         const noQ = questParPartie[r.noPartie];
         const thème = noQ && thèmeLookup[noQ] ? thèmeLookup[noQ][r.noSérie] : null;
-        const série = séries.find(s => s.noSérie === r.noSérie);
+        const série = sr.find(s => s.noSérie === r.noSérie);
         const qSérie = série ? série.questions.find(q => q.noQuestion === r.noQuestion) : null;
         const pts = r.pointsSecondaires ? (qSérie ? qSérie.pointsSecondaires : 5) : (qSérie ? qSérie.points : 10);
         const protégé = noQ ? questionnairesProtégés.has(noQ) : false;
         const qTexte = !protégé && noQ ? questionsLookup[noQ]?.[r.noSérie]?.[r.noQuestion] : null;
-        const p = parties.find(p => p.noPartie === r.noPartie);
+        const p = partiesDs.find(p => p.noPartie === r.noPartie);
         const noAdv = p?.noÉquipeA === noÉquipe ? p?.noÉquipeB : p?.noÉquipeA;
-        const équipeAdv = équipes.find(e => e.noÉquipe === noAdv);
+        const équipeAdv = équipesDs.find(e => e.noÉquipe === noAdv);
         return {
           noPartie: r.noPartie,
           date: p?.date || '',
@@ -1357,27 +1480,32 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
 
 app.get('/api/stats/equipe/:noEquipe', (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
+    const équipesDs = ds === dossierSaison ? équipes : JSON.parse(fs.readFileSync(path.join(ds, 'équipes.json'), 'utf-8'));
+    const joueursDs = ds === dossierSaison ? joueurs : JSON.parse(fs.readFileSync(path.join(ds, 'joueurs.json'), 'utf-8'));
+    const partiesDs = ds === dossierSaison ? parties : JSON.parse(fs.readFileSync(path.join(ds, 'parties.json'), 'utf-8'));
     const noÉquipe = parseInt(req.params.noEquipe);
-    const équipe = équipes.find(e => e.noÉquipe === noÉquipe);
+    const équipe = équipesDs.find(e => e.noÉquipe === noÉquipe);
     if (!équipe) return res.status(404).json({ erreur: 'Équipe introuvable' });
 
     let répondants = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'répondants.json'), 'utf-8').trim();
       répondants = contenu ? JSON.parse(contenu) : [];
     } catch (e) { répondants = []; }
 
     let alignements = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'alignements.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'alignements.json'), 'utf-8').trim();
       alignements = contenu ? JSON.parse(contenu) : [];
     } catch (e) { alignements = []; }
 
-    const membresÉquipe = joueurs.filter(j => j.noÉquipe === noÉquipe);
+    const membresÉquipe = joueursDs.filter(j => j.noÉquipe === noÉquipe);
 
     // Calcul des points par partie et par joueur
     const calcPts = (r) => {
-      const série = séries.find(s => s.noSérie === r.noSérie);
+      const série = sr.find(s => s.noSérie === r.noSérie);
       const q = série?.questions.find(q => q.noQuestion === r.noQuestion);
       return r.pointsSecondaires ? (q?.pointsSecondaires ?? 5) : (q?.points ?? 10);
     };
@@ -1394,10 +1522,10 @@ app.get('/api/stats/equipe/:noEquipe', (req, res) => {
     const noPartiesÉquipe = [...new Set(alignements.filter(a => a.noÉquipe === noÉquipe).map(a => a.noPartie))];
 
     const partiesÉquipe = noPartiesÉquipe.map(noPartie => {
-      const p = parties.find(p => p.noPartie === noPartie);
+      const p = partiesDs.find(p => p.noPartie === noPartie);
       if (!p) return null;
       const noAdv = p.noÉquipeA === noÉquipe ? p.noÉquipeB : p.noÉquipeA;
-      const adversaire = équipes.find(e => e.noÉquipe === noAdv);
+      const adversaire = équipesDs.find(e => e.noÉquipe === noAdv);
       const scores = scoresParPartie[noPartie] || {};
       const scoreÉquipe = scores[noÉquipe] || 0;
       const scoreAdv = scores[noAdv] || 0;
@@ -1467,10 +1595,12 @@ app.get('/api/stats/equipe/:noEquipe', (req, res) => {
 
 app.get('/api/stats/partie/:noPartie', (req, res) => {
     try {
+        const ds = getDossierStats(req);
+        const sr = getSériesStats(ds);
         const noPartie = parseInt(req.params.noPartie);
         const cheminPartie = path.join(
-            dossierSaison, 'parties', `répondants-${noPartie}.json`);
-        
+            ds, 'parties', `répondants-${noPartie}.json`);
+
         let répondants = [];
         try {
             const contenu = fs.readFileSync(cheminPartie, 'utf-8').trim();
@@ -1482,7 +1612,7 @@ app.get('/api/stats/partie/:noPartie', (req, res) => {
         répondants.forEach(r => {
             const clé = `${r.noÉquipe}-${r.noJoueur}`;
             if (!ptsJoueur[clé]) ptsJoueur[clé] = { noÉquipe: r.noÉquipe, noJoueur: r.noJoueur, points: 0 };
-            const série = séries.find(s => s.noSérie === r.noSérie);
+            const série = sr.find(s => s.noSérie === r.noSérie);
             const question = série
                 ? série.questions.find(q => q.noQuestion === r.noQuestion)
                 : null;
@@ -1503,23 +1633,29 @@ app.get('/api/stats/partie/:noPartie', (req, res) => {
 // ============================================================
 app.get('/api/stats/match/:noPartie', (req, res) => {
   try {
+    const ds = getDossierStats(req);
+    const sr = getSériesStats(ds);
+    const partiesDs = ds === dossierSaison ? parties : JSON.parse(fs.readFileSync(path.join(ds, 'parties.json'), 'utf-8'));
+    const équipesDs = ds === dossierSaison ? équipes : JSON.parse(fs.readFileSync(path.join(ds, 'équipes.json'), 'utf-8'));
+    const joueursDs = ds === dossierSaison ? joueurs : JSON.parse(fs.readFileSync(path.join(ds, 'joueurs.json'), 'utf-8'));
+    const thèmesDs = ds === dossierSaison ? thèmes : JSON.parse(fs.readFileSync(path.join(ds, 'thèmes.json'), 'utf-8'));
     const noPartie = parseInt(req.params.noPartie);
-    const partie = parties.find(p => p.noPartie === noPartie);
+    const partie = partiesDs.find(p => p.noPartie === noPartie);
     if (!partie) return res.status(404).json({ erreur: 'Partie introuvable' });
 
     // Protection : bloquer si une autre partie avec le même questionnaire n'a pas encore de répondants
-    const autresPartiesMêmeQ = parties.filter(p =>
+    const autresPartiesMêmeQ = partiesDs.filter(p =>
       p.noPartie !== noPartie && p.noQuestionnaire === partie.noQuestionnaire
     );
     const aDesRépondants = (noP) => {
       try {
-        const tous = JSON.parse(fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim() || '[]');
+        const tous = JSON.parse(fs.readFileSync(path.join(ds, 'répondants.json'), 'utf-8').trim() || '[]');
         return tous.some(r => r.noPartie === noP);
       } catch (e) { return false; }
     };
     const partieNonJouée = autresPartiesMêmeQ.find(p => !aDesRépondants(p.noPartie));
     if (partieNonJouée) {
-      const équipeQ = équipes.find(e => e.noÉquipe === partieNonJouée.noÉquipeQuestionnaire);
+      const équipeQ = équipesDs.find(e => e.noÉquipe === partieNonJouée.noÉquipeQuestionnaire);
       const nomÉquipeQ = équipeQ ? équipeQ.nomÉquipe : partieNonJouée.noÉquipeQuestionnaire ? `Équipe ${partieNonJouée.noÉquipeQuestionnaire}` : null;
       return res.status(403).json({
         erreur: 'protégé',
@@ -1533,19 +1669,19 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
     // Répondants de la partie — depuis répondants.json, sinon fallback sur répondants-{N}.json
     let répondants = [];
     try {
-      const contenu = fs.readFileSync(path.join(dossierSaison, 'répondants.json'), 'utf-8').trim();
+      const contenu = fs.readFileSync(path.join(ds, 'répondants.json'), 'utf-8').trim();
       const tous = contenu ? JSON.parse(contenu) : [];
       répondants = tous.filter(r => r.noPartie === noPartie);
     } catch (e) { répondants = []; }
     if (répondants.length === 0) {
       try {
-        const contenu = fs.readFileSync(path.join(dossierSaison, 'parties', `répondants-${noPartie}.json`), 'utf-8').trim();
+        const contenu = fs.readFileSync(path.join(ds, 'parties', `répondants-${noPartie}.json`), 'utf-8').trim();
         répondants = contenu ? JSON.parse(contenu) : [];
       } catch (e) { répondants = []; }
     }
 
     // Questions
-    const cheminQuestions = path.join(dossierSaison, 'questions.json');
+    const cheminQuestions = path.join(ds, 'questions.json');
     let questionsData = [];
     try {
       const contenu = fs.readFileSync(cheminQuestions, 'utf-8').trim();
@@ -1553,17 +1689,17 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
     } catch (e) { questionsData = []; }
 
     const questionnaireQ = questionsData.find(q => q.noQuestionnaire === partie.noQuestionnaire);
-    const questionnaireT = thèmes.find(t => t.noQuestionnaire === partie.noQuestionnaire);
+    const questionnaireT = thèmesDs.find(t => t.noQuestionnaire === partie.noQuestionnaire);
 
-    const équipeA = équipes.find(e => e.noÉquipe === partie.noÉquipeA);
-    const équipeB = équipes.find(e => e.noÉquipe === partie.noÉquipeB);
-    const équipeQ = équipes.find(e => e.noÉquipe === partie.noÉquipeQuestionnaire);
+    const équipeA = équipesDs.find(e => e.noÉquipe === partie.noÉquipeA);
+    const équipeB = équipesDs.find(e => e.noÉquipe === partie.noÉquipeB);
+    const équipeQ = équipesDs.find(e => e.noÉquipe === partie.noÉquipeQuestionnaire);
 
     // Scores
     const scores = {};
     répondants.forEach(r => {
       if (!scores[r.noÉquipe]) scores[r.noÉquipe] = 0;
-      const sérieInfo = séries.find(s => s.noSérie === r.noSérie);
+      const sérieInfo = sr.find(s => s.noSérie === r.noSérie);
       const qInfo = sérieInfo?.questions.find(q => q.noQuestion === r.noQuestion);
       const pts = r.pointsSecondaires ? (qInfo?.pointsSecondaires ?? 0) : (qInfo?.points ?? 0);
       scores[r.noÉquipe] += pts;
@@ -1571,7 +1707,7 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
 
     // Séries avec questions et répondants
     const sériesMatch = (questionnaireQ?.séries || []).map(sérieQ => {
-      const sérieInfo = séries.find(s => s.noSérie === sérieQ.noSérie);
+      const sérieInfo = sr.find(s => s.noSérie === sérieQ.noSérie);
       const thèmeSérie = questionnaireT?.séries.find(t => t.noSérie === sérieQ.noSérie);
 
       const questions = sérieQ.questions.map(q => {
@@ -1580,10 +1716,10 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
 
         let répondantInfo = null;
         if (répondant) {
-          const nomÉq = équipes.find(e => e.noÉquipe === répondant.noÉquipe)?.nomÉquipe || `Équipe ${répondant.noÉquipe}`;
+          const nomÉq = équipesDs.find(e => e.noÉquipe === répondant.noÉquipe)?.nomÉquipe || `Équipe ${répondant.noÉquipe}`;
           const alias = répondant.noJoueur === 99
             ? '👥 ' + nomÉq
-            : joueurs.find(j => j.noÉquipe === répondant.noÉquipe && j.noJoueur === répondant.noJoueur)?.alias || `Joueur ${répondant.noJoueur}`;
+            : joueursDs.find(j => j.noÉquipe === répondant.noÉquipe && j.noJoueur === répondant.noJoueur)?.alias || `Joueur ${répondant.noJoueur}`;
           const pts = répondant.pointsSecondaires ? (qInfo?.pointsSecondaires ?? 0) : (qInfo?.points ?? 0);
           répondantInfo = { noÉquipe: répondant.noÉquipe, alias, nomÉquipe: nomÉq, points: pts, estSecondaire: répondant.pointsSecondaires };
         }

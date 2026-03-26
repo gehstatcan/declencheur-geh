@@ -311,6 +311,7 @@
             <a href="#administration">⚙️ Administration</a>
             <a href="#repondants">📝 Répondants</a>
             <a href="#developpeurs">💻 Développeurs</a>
+            <a href="#nouvelle-saison">🗓️ Nouvelle saison</a>
         </nav>
     </aside>
 
@@ -493,6 +494,39 @@ railway run node init-volume.js --force</pre>
 3. Télécharger le JSON → remplacer data/saisons/AAAA/séries.json en local
 4. git push → mis à jour dans git pour la prochaine saison</pre>
         </div>
+
+    <section id="nouvelle-saison" data-section="nouvelle-saison" style="scroll-margin-top:80px">
+      <div class="carte">
+        <h2>🗓️ Démarrer une nouvelle saison</h2>
+
+        <div class="carte" style="margin-bottom:16px">
+          <h3>Étapes à suivre</h3>
+          <ol>
+            <li><strong>Créer la nouvelle saison</strong> dans la page Administration → section <em>Gestion des saisons</em>. Entrer le format <code>AAAA-AAAA</code> (ex: <code>2026-2027</code>) et cliquer <strong>Créer</strong>.</li>
+            <li><strong>Activer la nouvelle saison</strong> : sélectionner la saison dans le menu déroulant et cliquer <strong>Activer</strong>. Toutes les parties suivantes utiliseront cette saison.</li>
+            <li><strong>Configurer les équipes et joueurs</strong> dans la section <em>Équipes &amp; Joueurs</em> de la page Administration.</li>
+            <li><strong>Importer le calendrier</strong> (fichier <code>parties.json</code>) dans la section <em>Calendrier</em>.</li>
+            <li><strong>Configurer la structure des séries</strong> dans la section <em>Séries</em> de la page Administration (types de séries, nombre de questions, points, etc.).</li>
+            <li><strong>Importer les questionnaires au fur et à mesure des parties</strong> : avant chaque partie, importer le fichier <code>questions.xlsx</code> correspondant dans la section <em>Questionnaire</em>.</li>
+          </ol>
+        </div>
+
+        <div class="carte" style="margin-bottom:16px">
+          <h3>Notes importantes</h3>
+          <ul>
+            <li>Chaque saison est isolée dans son propre dossier (<code>data/saisons/AAAA-AAAA/</code>). Les données de saisons précédentes ne sont pas affectées.</li>
+            <li>Les statistiques des saisons passées restent consultables en sélectionnant la saison dans le menu déroulant des pages de statistiques.</li>
+            <li>Si la saison est déployée sur Railway, les fichiers sont stockés sur le Volume. La saison active est persistée dans <code>data/saison-active.txt</code> sur le Volume — elle survit aux redémarrages.</li>
+            <li>Pour revenir à une saison précédente (ex: corriger des données), changer la saison active dans Administration puis revenir à la saison courante quand terminé.</li>
+          </ul>
+        </div>
+
+        <div class="carte">
+          <h3>Sur Railway (production)</h3>
+          <p>La variable d'environnement <code>SAISON_ACTIVE</code> est un fallback — elle n'est lue qu'au démarrage si <code>data/saison-active.txt</code> est absent. En utilisant l'interface Administration, <code>saison-active.txt</code> est mis à jour automatiquement et aucun redéploiement n'est nécessaire.</p>
+        </div>
+      </div>
+    </section>
 
     </div><!-- fin contenu -->
     </div><!-- fin mise-en-page -->

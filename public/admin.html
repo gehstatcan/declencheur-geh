@@ -517,6 +517,7 @@
             <a href="#questionnaire">📥 Questionnaire</a>
             <a href="#series">📋 Séries</a>
             <a href="#equipes">👥 Équipes</a>
+            <a href="#saisons">🗓️ Saisons</a>
         </nav>
     </aside>
 
@@ -597,6 +598,32 @@
         <div id="résultat-equipes"></div>
         <div class="info">ℹ️ Les numéros d'équipe et de joueur ne sont pas modifiables (clés utilisées dans toutes les parties). La sauvegarde applique les changements directement sur le serveur.</div>
     </div>
+
+    <section id="saisons" data-section="saisons" style="margin-bottom:24px">
+      <div class="carte carte-large">
+        <h2>Gestion des saisons</h2>
+
+        <div class="carte" style="margin-bottom:16px">
+          <h3>Saison active</h3>
+          <p class="info">La saison active est utilisée pour toutes les parties et les statistiques par défaut.</p>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
+            <select id="sel-saison-active" class="champ" style="min-width:160px"></select>
+            <button class="bouton bouton-vert" style="width:auto" onclick="changerSaison()">✅ Activer</button>
+          </div>
+          <div id="msg-saison" style="margin-top:12px"></div>
+        </div>
+
+        <div class="carte">
+          <h3>Créer une nouvelle saison</h3>
+          <p class="info">Initialise un nouveau dossier de saison vide (équipes, parties, répondants, etc.).</p>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
+            <input type="text" id="nouvelle-saison" class="champ" placeholder="ex: 2026-2027" style="width:160px" pattern="\d{4}-\d{4}">
+            <button class="bouton bouton-upload" style="width:auto" onclick="créerSaison()">➕ Créer</button>
+          </div>
+          <div id="msg-nouvelle-saison" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </section>
 
     </div><!-- fin contenu-principal -->
     </div><!-- fin mise-en-page -->
@@ -1147,6 +1174,67 @@
                 document.getElementById('liste-equipes').textContent = `❌ Impossible de charger : ${e.message}`;
             }
         })();
+
+        // ============================================================
+        // Gestion des saisons
+        // ============================================================
+        async function chargerSaisons() {
+          const [saisonsRes, activeRes] = await Promise.all([
+            fetch("/api/saisons"), fetch("/api/saison-active")
+          ]);
+          const saisons = await saisonsRes.json();
+          const { saison: active } = await activeRes.json();
+          const sel = document.getElementById("sel-saison-active");
+          sel.innerHTML = saisons.map(s =>
+            `<option value="${s}" ${s === active ? "selected" : ""}>${s}${s === active ? " (active)" : ""}</option>`
+          ).join("");
+        }
+
+        async function changerSaison() {
+          const saison = document.getElementById("sel-saison-active").value;
+          const msg = document.getElementById("msg-saison");
+          try {
+            const r = await fetch("/api/admin/saison-active", {
+              method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ saison })
+            });
+            const d = await r.json();
+            if (d.succès) {
+              msg.style.color = "var(--vert)";
+              msg.textContent = `✅ Saison ${saison} activée`;
+              chargerSaisons();
+            } else {
+              msg.style.color = "var(--orange)";
+              msg.textContent = "❌ " + (d.erreur || "Erreur");
+            }
+          } catch { msg.style.color = "var(--orange)"; msg.textContent = "❌ Erreur réseau"; }
+        }
+
+        async function créerSaison() {
+          const saison = document.getElementById("nouvelle-saison").value.trim();
+          const msg = document.getElementById("msg-nouvelle-saison");
+          if (!/^\d{4}-\d{4}$/.test(saison)) {
+            msg.style.color = "var(--orange)";
+            msg.textContent = "❌ Format invalide (ex: 2026-2027)";
+            return;
+          }
+          try {
+            const r = await fetch("/api/admin/nouvelle-saison", {
+              method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ saison })
+            });
+            const d = await r.json();
+            if (d.succès) {
+              msg.style.color = "var(--vert)";
+              msg.textContent = `✅ Saison ${saison} créée`;
+              document.getElementById("nouvelle-saison").value = "";
+              chargerSaisons();
+            } else {
+              msg.style.color = "var(--orange)";
+              msg.textContent = "❌ " + (d.erreur || "Erreur");
+            }
+          } catch { msg.style.color = "var(--orange)"; msg.textContent = "❌ Erreur réseau"; }
+        }
+
+        chargerSaisons();
 
         // Scroll spy — surligne la section active dans l'index
         const observer = new IntersectionObserver((entries) => {

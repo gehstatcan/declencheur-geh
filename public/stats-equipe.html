@@ -84,6 +84,10 @@
         </div>
     </nav>
 
+    <div id="sel-saison-wrap" style="text-align:center;margin-bottom:16px">
+      <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
+    </div>
+
     <h2 id="titreÉquipe">Chargement...</h2>
 
     <div class="section">
@@ -125,6 +129,25 @@
     <script>
         const params = new URLSearchParams(location.search);
         const noÉquipe = parseInt(params.get('noEquipe'));
+        let saisonStats = params.get("saison") || null;
+
+        async function chargerSélécteurSaison() {
+          const [saisonsRes, activeRes] = await Promise.all([
+            fetch("/api/saisons"), fetch("/api/saison-active")
+          ]);
+          const saisons = await saisonsRes.json();
+          const { saison: active } = await activeRes.json();
+          if (!saisonStats) saisonStats = active;
+          const sel = document.getElementById("sel-saison");
+          sel.innerHTML = saisons.map(s =>
+            `<option value="${s}" ${s === saisonStats ? "selected" : ""}>${s}</option>`
+          ).join("");
+        }
+
+        function changerSaisonStats() {
+          saisonStats = document.getElementById("sel-saison").value;
+          charger();
+        }
 
         async function charger() {
             if (!noÉquipe) {
@@ -132,7 +155,7 @@
                 return;
             }
 
-            const data = await fetch(`/api/stats/equipe/${noÉquipe}`).then(r => r.json());
+            const data = await fetch(`/api/stats/equipe/${noÉquipe}?saison=${saisonStats}`).then(r => r.json());
             if (data.erreur) {
                 document.getElementById('titreÉquipe').textContent = data.erreur;
                 return;
@@ -213,7 +236,7 @@
         fetch('/api/stats/phase').then(r => r.json()).then(d => {
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         });
-        charger();
+        chargerSélécteurSaison().then(() => charger());
         function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
         document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
     </script>
