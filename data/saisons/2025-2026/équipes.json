@@ -1,9 +1,9 @@
 [
-  { "noÉquipe": 1, "nomÉquipe": "Les Génies de la traduction", "prioritéÉgalité": null, "son": "ding_dong" },
-  { "noÉquipe": 2, "nomÉquipe": "Les Bons Perdants", "prioritéÉgalité": null, "son": "bip_grave" },
-  { "noÉquipe": 3, "nomÉquipe": "Les érudits en gerbe", "prioritéÉgalité": null, "son": "alarme_montante" },
-  { "noÉquipe": 4, "nomÉquipe": "Les Herbizarres", "prioritéÉgalité": null, "son": "gong" },
-  { "noÉquipe": 5, "nomÉquipe": "Les Méthos précieux", "prioritéÉgalité": null, "son": "cloche" },
-  { "noÉquipe": 6, "nomÉquipe": "Les 12e meilleurs", "prioritéÉgalité": null, "son": "descente_rapide" },
-  { "noÉquipe": 7, "nomÉquipe": "Les Faciles à cuire", "prioritéÉgalité": null, "son": "double_bip" }
+  {"noÉquipe":1,"nomÉquipe":"Les Génies de la traduction","prioritéÉgalité":null,"son":"ding_dong"},
+  {"noÉquipe":2,"nomÉquipe":"Les Bons Perdants","prioritéÉgalité":null,"son":"bip_grave"},
+  {"noÉquipe":3,"nomÉquipe":"Les érudits en gerbe","prioritéÉgalité":null,"son":"alarme_montante"},
+  {"noÉquipe":4,"nomÉquipe":"Les Herbizarres","prioritéÉgalité":null,"son":"gong"},
+  {"noÉquipe":5,"nomÉquipe":"Les Méthos précieux","prioritéÉgalité":null,"son":"cloche"},
+  {"noÉquipe":6,"nomÉquipe":"Les 12e meilleurs","prioritéÉgalité":null,"son":"descente_rapide"},
+  {"noÉquipe":7,"nomÉquipe":"Les Faciles à cuire","prioritéÉgalité":null,"son":"alarme_montante"}
 ]

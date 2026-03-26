@@ -480,6 +480,10 @@
 
         @media (max-width: 700px) { .index-sidebar { display: none; } }
 
+        #résultat-equipes { display: none; margin-top: 12px; padding: 12px 16px; border-radius: var(--rayon); font-size: 0.95em; }
+        #résultat-equipes.succès { background: #dcfce7; color: #15803d; }
+        #résultat-equipes.erreur { background: #fdecea; color: #c0392b; }
+
         .nav-animateur { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
         .nav-animateur a { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; text-decoration: none; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); transition: all 0.2s; }
         .nav-animateur a:hover { background: var(--fond-champ); color: var(--texte); }
@@ -512,6 +516,7 @@
             <a href="#calendrier">📅 Calendrier</a>
             <a href="#questionnaire">📥 Questionnaire</a>
             <a href="#series">📋 Séries</a>
+            <a href="#equipes">👥 Équipes</a>
         </nav>
     </aside>
 
@@ -579,6 +584,18 @@
         </div>
         <div id="résultat-séries"></div>
         <div class="info">ℹ️ Les modifications sont sauvegardées directement sur le serveur. Téléchargez le JSON pour mettre à jour votre copie locale.</div>
+    </div>
+
+    <!-- Équipes & Joueurs -->
+    <div class="carte carte-large" id="equipes" data-section>
+        <h2>👥 Équipes &amp; Joueurs</h2>
+        <div id="liste-equipes">⏳ Chargement...</div>
+        <div class="série-actions-bas">
+            <button class="bouton bouton-vert" style="width:auto" onclick="ajouterÉquipe()">+ Ajouter une équipe</button>
+            <button class="bouton bouton-upload" style="width:auto" onclick="sauvegarderÉquipesJoueurs()">💾 Sauvegarder</button>
+        </div>
+        <div id="résultat-equipes"></div>
+        <div class="info">ℹ️ Les numéros d'équipe et de joueur ne sont pas modifiables (clés utilisées dans toutes les parties). La sauvegarde applique les changements directement sur le serveur.</div>
     </div>
 
     </div><!-- fin contenu-principal -->
@@ -960,6 +977,174 @@
                 afficherStatutVerrou(statut);
             } catch (e) {
                 document.getElementById('liste-séries').textContent = `❌ Impossible de charger les séries : ${e.message}`;
+            }
+        })();
+
+        // ============================================================
+        // Éditeur équipes & joueurs
+        // ============================================================
+        const audioCtxAdmin = new (window.AudioContext || window.webkitAudioContext)();
+
+        function bipAdmin(type, freq, vol, début, durée, freqFin) {
+            const osc = audioCtxAdmin.createOscillator();
+            const gain = audioCtxAdmin.createGain();
+            osc.connect(gain); gain.connect(audioCtxAdmin.destination);
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, début);
+            if (freqFin !== undefined) osc.frequency.linearRampToValueAtTime(freqFin, début + durée);
+            gain.gain.setValueAtTime(vol, début);
+            gain.gain.exponentialRampToValueAtTime(0.001, début + durée);
+            osc.start(début); osc.stop(début + durée);
+        }
+
+        const SONS = [
+            { id: 'buzzer_tv',        nom: '1 — Buzzer TV',        jouer: (t) => bipAdmin('sawtooth', 200, 0.4, t, 0.4, 80) },
+            { id: 'ding_dong',        nom: '2 — Ding-dong',        jouer: (t) => { bipAdmin('sine', 880, 0.5, t, 0.25); bipAdmin('sine', 660, 0.5, t + 0.25, 0.25); } },
+            { id: 'bip_grave',        nom: '3 — Bip grave',        jouer: (t) => bipAdmin('square', 150, 0.3, t, 0.5) },
+            { id: 'alarme_montante',  nom: '4 — Alarme montante',  jouer: (t) => bipAdmin('sawtooth', 300, 0.4, t, 0.4, 650) },
+            { id: 'triple_bip',       nom: '5 — Triple bip',       jouer: (t) => { bipAdmin('sine', 880, 0.5, t, 0.12); bipAdmin('sine', 880, 0.5, t + 0.16, 0.12); bipAdmin('sine', 880, 0.5, t + 0.32, 0.12); } },
+            { id: 'cloche',           nom: '6 — Cloche',           jouer: (t) => bipAdmin('triangle', 1046, 0.6, t, 0.9) },
+            { id: 'klaxon',           nom: '7 — Klaxon',           jouer: (t) => { bipAdmin('sawtooth', 220, 0.2, t, 0.5); bipAdmin('sawtooth', 440, 0.2, t, 0.5); } },
+            { id: 'bip_aigu',         nom: '8 — Bip aigu',         jouer: (t) => bipAdmin('sine', 1320, 0.4, t, 0.3) },
+            { id: 'descente_rapide',  nom: '9 — Descente rapide',  jouer: (t) => bipAdmin('sine', 800, 0.5, t, 0.35, 200) },
+            { id: 'double_bip',       nom: '10 — Double bip',      jouer: (t) => { bipAdmin('sine', 660, 0.5, t, 0.15); bipAdmin('sine', 660, 0.5, t + 0.2, 0.15); } },
+            { id: 'montee_douce',     nom: '11 — Montée douce',    jouer: (t) => bipAdmin('sine', 440, 0.45, t, 0.4, 880) },
+            { id: 'gong',             nom: '12 — Gong',            jouer: (t) => bipAdmin('triangle', 220, 0.7, t, 1.2) },
+        ];
+
+        function jouerSon(id) {
+            const son = SONS.find(s => s.id === id);
+            if (son) audioCtxAdmin.resume().then(() => son.jouer(audioCtxAdmin.currentTime));
+        }
+
+        let équipesData = [];
+        let joueursData = [];
+
+        function rendreÉquipes() {
+            const container = document.getElementById('liste-equipes');
+            if (!équipesData.length) { container.innerHTML = '<p style="color:var(--gris)">Aucune équipe.</p>'; return; }
+            container.innerHTML = équipesData.map((eq, idx) => rendreÉquipeHTML(eq, idx)).join('');
+        }
+
+        function rendreÉquipeHTML(eq, idx) {
+            const détailId = `détail-eq-${idx}`;
+            const joueursDeLÉquipe = joueursData.filter(j => j.noÉquipe === eq.noÉquipe);
+            const sonsOptions = SONS.map(s => `<option value="${s.id}" ${eq.son === s.id ? 'selected' : ''}>${s.nom}</option>`).join('');
+            const joueursHTML = joueursDeLÉquipe.map(j => `<tr>
+                <td style="color:var(--gris);text-align:center">${j.noJoueur}</td>
+                <td><input class="input-type-série" style="width:100%;min-width:80px" type="text" value="${j.alias}" oninput="màjJoueur(${eq.noÉquipe},${j.noJoueur},'alias',this.value)"></td>
+                <td><input class="input-type-série" style="width:100%;min-width:80px" type="text" value="${j.prénom || ''}" oninput="màjJoueur(${eq.noÉquipe},${j.noJoueur},'prénom',this.value)"></td>
+                <td><input class="input-type-série" style="width:100%;min-width:80px" type="text" value="${j.nom || ''}" oninput="màjJoueur(${eq.noÉquipe},${j.noJoueur},'nom',this.value)"></td>
+                <td><button class="btn-suppr-q" title="Supprimer" onclick="supprimerJoueur(${eq.noÉquipe},${j.noJoueur})">✕</button></td>
+            </tr>`).join('');
+            return `<div class="série-item">
+                <div class="série-header">
+                    <span class="badge-série">${eq.noÉquipe}</span>
+                    <input class="input-type-série" type="text" value="${eq.nomÉquipe}" oninput="màjÉquipe(${idx},'nomÉquipe',this.value)" placeholder="Nom de l'équipe">
+                    <select class="select-equipe-q" id="son-eq-${idx}" onchange="màjÉquipe(${idx},'son',this.value)">${sonsOptions}</select>
+                    <button class="btn-petit btn-détail" onclick="jouerSon(document.getElementById('son-eq-${idx}').value)" title="Écouter le son">▶</button>
+                    <input class="input-pts" type="number" min="1" value="${eq.prioritéÉgalité ?? ''}" placeholder="Priorité" title="Priorité d'égalité" style="width:72px" oninput="màjÉquipe(${idx},'prioritéÉgalité',this.value?+this.value:null)">
+                    <span class="résumé-pts">${joueursDeLÉquipe.length} joueur(s)</span>
+                    <button class="btn-petit btn-détail" onclick="toggleDétail('${détailId}',this)">▼ Joueurs</button>
+                    <button class="btn-petit btn-suppr-série" onclick="supprimerÉquipe(${idx})">✕</button>
+                </div>
+                <div class="série-détail" id="${détailId}" style="display:none">
+                    <table class="questions-table">
+                        <thead><tr>
+                            <th style="text-align:center;width:32px">No</th>
+                            <th>Alias</th>
+                            <th>Prénom</th>
+                            <th>Nom</th>
+                            <th></th>
+                        </tr></thead>
+                        <tbody>${joueursHTML}</tbody>
+                    </table>
+                    <button class="btn-ajouter-q" onclick="ajouterJoueur(${eq.noÉquipe})">+ Joueur</button>
+                </div>
+            </div>`;
+        }
+
+        function màjÉquipe(idx, champ, valeur) {
+            équipesData[idx][champ] = valeur;
+        }
+
+        function màjJoueur(noÉquipe, noJoueur, champ, valeur) {
+            const j = joueursData.find(j => j.noÉquipe === noÉquipe && j.noJoueur === noJoueur);
+            if (j) j[champ] = valeur;
+        }
+
+        function ajouterÉquipe() {
+            const maxNo = équipesData.reduce((m, e) => Math.max(m, e.noÉquipe), 0);
+            équipesData.push({ noÉquipe: maxNo + 1, nomÉquipe: 'Nouvelle équipe', prioritéÉgalité: null, son: 'ding_dong' });
+            rendreÉquipes();
+        }
+
+        function supprimerÉquipe(idx) {
+            const eq = équipesData[idx];
+            const nb = joueursData.filter(j => j.noÉquipe === eq.noÉquipe).length;
+            if (!confirm(`Supprimer l'équipe "${eq.nomÉquipe}" et ses ${nb} joueur(s) ?`)) return;
+            joueursData = joueursData.filter(j => j.noÉquipe !== eq.noÉquipe);
+            équipesData.splice(idx, 1);
+            rendreÉquipes();
+        }
+
+        function ajouterJoueur(noÉquipe) {
+            const joueursÉq = joueursData.filter(j => j.noÉquipe === noÉquipe);
+            const maxNo = joueursÉq.reduce((m, j) => Math.max(m, j.noJoueur), 0);
+            joueursData.push({ noÉquipe, noJoueur: maxNo + 1, alias: 'Nouveau', prénom: '', nom: '' });
+            rendreÉquipes();
+            const idx = équipesData.findIndex(e => e.noÉquipe === noÉquipe);
+            if (idx >= 0) {
+                const el = document.getElementById(`détail-eq-${idx}`);
+                if (el) {
+                    el.style.display = 'block';
+                    const btn = el.closest('.série-item').querySelector('.btn-détail');
+                    if (btn) btn.textContent = '▲ Fermer';
+                }
+            }
+        }
+
+        function supprimerJoueur(noÉquipe, noJoueur) {
+            joueursData = joueursData.filter(j => !(j.noÉquipe === noÉquipe && j.noJoueur === noJoueur));
+            rendreÉquipes();
+        }
+
+        async function sauvegarderÉquipesJoueurs() {
+            const div = document.getElementById('résultat-equipes');
+            try {
+                const resp = await fetch('/api/admin/equipes-joueurs', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ équipesData, joueursData })
+                });
+                const résultat = await resp.json();
+                div.style.display = 'block';
+                if (résultat.succès) {
+                    div.className = 'succès';
+                    div.textContent = `✅ ${résultat.nbÉquipes} équipes et ${résultat.nbJoueurs} joueurs sauvegardés.`;
+                } else {
+                    div.className = 'erreur';
+                    div.textContent = `❌ ${résultat.erreur}`;
+                }
+            } catch (e) {
+                div.style.display = 'block';
+                div.className = 'erreur';
+                div.textContent = `❌ Erreur : ${e.message}`;
+            }
+        }
+
+        // Charger équipes et joueurs au démarrage
+        (async () => {
+            try {
+                const [respEq, respJ] = await Promise.all([
+                    fetch('/api/admin/equipes'),
+                    fetch('/api/admin/joueurs')
+                ]);
+                équipesData = await respEq.json();
+                joueursData = await respJ.json();
+                rendreÉquipes();
+            } catch (e) {
+                document.getElementById('liste-equipes').textContent = `❌ Impossible de charger : ${e.message}`;
             }
         })();
 

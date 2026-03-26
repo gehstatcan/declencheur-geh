@@ -468,12 +468,14 @@ function saisonADémarré() {
 
 app.get("/api/admin/series/statut", (_req, res) => {
   const verrouillé = saisonADémarré();
-  const dossierParties = path.join(dossierSaison, "parties");
   let nbParties = 0;
   if (verrouillé) {
-    nbParties = fs.readdirSync(dossierParties).filter(
-      (f) => f.startsWith("répondants-") && f.endsWith(".json")
-    ).length;
+    try {
+      const contenu = fs.readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8").trim();
+      const rép = JSON.parse(contenu || "[]");
+      const partiesJouées = new Set(rép.filter((r) => r.noPartie).map((r) => r.noPartie));
+      nbParties = partiesJouées.size;
+    } catch (_) {}
   }
   res.json({ verrouillé, nbParties });
 });
@@ -492,6 +494,50 @@ app.put("/api/admin/series", (req, res) => {
   fs.writeFileSync(chemin, JSON.stringify(nouvelles, null, 2), "utf-8");
   séries.splice(0, séries.length, ...nouvelles);
   res.json({ succès: true, nbSéries: nouvelles.length });
+});
+
+// ============================================================
+// Admin équipes & joueurs
+// ============================================================
+app.get("/api/admin/equipes", (_req, res) => {
+  res.json(équipes);
+});
+
+app.get("/api/admin/joueurs", (_req, res) => {
+  res.json(joueurs.filter((j) => !j.estÉquipe));
+});
+
+app.put("/api/admin/equipes-joueurs", (req, res) => {
+  const { équipesData, joueursData } = req.body;
+  if (!Array.isArray(équipesData) || !Array.isArray(joueursData))
+    return res.status(400).json({ erreur: "Format invalide" });
+  for (const e of équipesData) {
+    if (!e.noÉquipe || !e.nomÉquipe)
+      return res
+        .status(400)
+        .json({ erreur: `Équipe ${e.noÉquipe || "?"} : données incomplètes` });
+  }
+  // Reconstruire joueurs.json : joueurs réels + entrées estÉquipe:true auto
+  const tousJoueurs = [...joueursData];
+  for (const eq of équipesData) {
+    tousJoueurs.push({
+      noÉquipe: eq.noÉquipe,
+      noJoueur: 99,
+      alias: eq.nomÉquipe,
+      estÉquipe: true,
+    });
+  }
+  tousJoueurs.sort((a, b) => a.noÉquipe - b.noÉquipe || a.noJoueur - b.noJoueur);
+  const jsonLignes = (arr) => "[\n" + arr.map((o) => "  " + JSON.stringify(o)).join(",\n") + "\n]";
+  fs.writeFileSync(path.join(dossierSaison, "équipes.json"), jsonLignes(équipesData), "utf-8");
+  fs.writeFileSync(path.join(dossierSaison, "joueurs.json"), jsonLignes(tousJoueurs), "utf-8");
+  équipes.splice(0, équipes.length, ...équipesData);
+  joueurs.splice(0, joueurs.length, ...tousJoueurs);
+  res.json({
+    succès: true,
+    nbÉquipes: équipesData.length,
+    nbJoueurs: joueursData.length,
+  });
 });
 
 // ============================================================
