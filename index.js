@@ -728,6 +728,9 @@ app.get("/api/stats/calendrier", (req, res) => {
 
       const équipeA = équipes.find((e) => e.noÉquipe === partie.noÉquipeA);
       const équipeB = équipes.find((e) => e.noÉquipe === partie.noÉquipeB);
+      const équipeQ = partie.noÉquipeQuestionnaire
+        ? équipes.find((e) => e.noÉquipe === partie.noÉquipeQuestionnaire)
+        : null;
       const scoreA = scores[partie.noÉquipeA] || null;
       const scoreB = scores[partie.noÉquipeB] || null;
       const terminée = rép.length > 0;
@@ -739,6 +742,7 @@ app.get("/api/stats/calendrier", (req, res) => {
         noÉquipeB: partie.noÉquipeB,
         nomÉquipeA: équipeA ? équipeA.nomÉquipe : "",
         nomÉquipeB: équipeB ? équipeB.nomÉquipe : "",
+        nomÉquipeQuestionnaire: équipeQ ? équipeQ.nomÉquipe : null,
         scoreA,
         scoreB,
         terminée,
@@ -1749,6 +1753,9 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
       };
     });
 
+    const saisonRequête = (req.query.saison && /^\d{4}-\d{4}$/.test(req.query.saison)) ? req.query.saison : saisonActive;
+    const donnéesSynthétiques = saisonRequête === '2025-2026' && noPartie <= 35;
+
     res.json({
       noPartie,
       date: partie.date,
@@ -1761,6 +1768,7 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
       nomÉquipeQuestionnaire: équipeQ?.nomÉquipe || null,
       scoreA: scores[partie.noÉquipeA] || 0,
       scoreB: scores[partie.noÉquipeB] || 0,
+      donnéesSynthétiques,
       séries: sériesMatch
     });
   } catch (e) {

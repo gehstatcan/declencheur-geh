@@ -587,11 +587,19 @@
         }
 
         async function chargerThèmes(phase = phaseActive) {
+            const sidebar = document.getElementById('sidebarThèmes');
+            const div = document.getElementById('contenuThemes');
+
+            if (saisonStats === '2025-2026') {
+                donnéesThèmes = [];
+                sidebar.innerHTML = '';
+                div.innerHTML = '<div style="text-align:center;color:var(--gris);padding:40px;font-style:italic;">Non disponible — points attribués de façon arbitraire pour les saison régulière 2025-2026</div>';
+                return;
+            }
+
             const params = new URLSearchParams({ saison: saisonStats });
             if (phase !== 'tous') params.set('phase', phase);
             donnéesThèmes = await fetch(`/api/stats/themes?${params}`).then(r => r.json());
-            const sidebar = document.getElementById('sidebarThèmes');
-            const div = document.getElementById('contenuThemes');
 
             if (!donnéesThèmes.length) {
                 sidebar.innerHTML = '';

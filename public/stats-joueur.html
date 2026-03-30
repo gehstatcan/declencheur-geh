@@ -26,6 +26,13 @@
         nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
         nav a { padding: 6px 14px; border-radius: 20px; background: var(--fond-carte); color: var(--texte); text-decoration: none; font-size: 0.9em; font-weight: 600; border: 1px solid var(--fond-champ); }
         nav a:hover { background: var(--fond-champ); }
+        .dropdown { position: relative; }
+        .dropdown-btn { font-size: 0.9em; padding: 6px 14px; border-radius: 20px; color: var(--texte); background: var(--fond-carte); border: 1px solid var(--fond-champ); cursor: pointer; transition: all 0.2s; font-family: inherit; font-weight: 600; }
+        .dropdown-btn:hover { background: var(--fond-champ); }
+        .dropdown-menu { display: none; position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--fond-carte); border: 1px solid var(--fond-champ); border-radius: 12px; padding: 6px; min-width: 200px; z-index: 100; flex-direction: column; gap: 4px; }
+        .dropdown-menu.ouvert { display: flex; }
+        .dropdown-menu a { font-size: 0.9em; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: var(--gris); background: transparent; border: none; transition: all 0.2s; white-space: nowrap; }
+        .dropdown-menu a:hover { background: var(--fond-champ); color: var(--texte); }
         .section { width: 100%; max-width: 860px; background: var(--fond-carte); border-radius: var(--rayon); padding: 20px; margin-bottom: 24px; }
         h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8em; letter-spacing: 1px; color: var(--accent); margin-bottom: 4px; text-align: center; }
         .sous-titre { text-align: center; color: var(--gris); font-size: 0.9em; margin-bottom: 20px; }
@@ -272,6 +279,10 @@
 
         function afficherQuestions(questions) {
             const tbody = document.getElementById('tbodyQuestions');
+            if (saisonStats === '2025-2026') {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gris);padding:20px;font-style:italic;">Non disponible — questions attribuées de façon arbitraire pour les saison régulière 2025-2026</td></tr>';
+                return;
+            }
             if (!questions.length) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Aucune question</td></tr>';
                 return;
@@ -295,6 +306,10 @@
 
         function afficherThèmes(themes) {
             const tbody = document.getElementById('tbodyThèmes');
+            if (saisonStats === '2025-2026') {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:20px;font-style:italic;">Non disponible — points attribués de façon arbitraire pour les saison régulière 2025-2026</td></tr>';
+                return;
+            }
             if (!themes.length) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Aucune donnée</td></tr>';
                 return;
@@ -364,7 +379,9 @@
             }
 
             // — Radar par thème —
-            if (themes.length >= 3) {
+            if (saisonStats === '2025-2026') {
+                document.getElementById('graphThemes').closest('.graphique-carte').style.display = 'none';
+            } else if (themes.length >= 3) {
                 const max = themes[0].pts;
                 new Chart(document.getElementById('graphThemes'), {
                     type: 'radar',

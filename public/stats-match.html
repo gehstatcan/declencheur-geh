@@ -339,6 +339,12 @@
                 </div>
             </div>`;
 
+            if (d.donnéesSynthétiques) {
+                html += `<div style="background:#fff8e1;border:1px solid #f5c04a;border-radius:8px;padding:10px 16px;margin:12px 0;font-size:0.9em;color:#7a5800;text-align:center;">
+                    📦 Données agrégées — détails par joueur non disponibles pour cette partie.
+                </div>`;
+            }
+
             if (d.séries.length === 0) {
                 html += `<div id="msg" style="background:white;padding:30px;border:1px solid var(--fond-champ)">
                     Questions non disponibles pour le questionnaire #${d.noQuestionnaire}.</div>`;
@@ -365,39 +371,41 @@
                     const qA = s.questions.slice(0, mi);
                     const qB = s.questions.slice(mi);
                     html += `<div class="équipe-entête badge-équipe-a">▶ Équipe A — ${d.nomÉquipeA}</div>`;
-                    html += tableauQuestions(qA, d.noÉquipeA, d.noÉquipeB);
+                    html += tableauQuestions(qA, d.noÉquipeA, d.noÉquipeB, d.donnéesSynthétiques);
                     html += `<div class="équipe-entête badge-équipe-b">▶ Équipe B — ${d.nomÉquipeB}</div>`;
-                    html += tableauQuestions(qB, d.noÉquipeA, d.noÉquipeB);
+                    html += tableauQuestions(qB, d.noÉquipeA, d.noÉquipeB, d.donnéesSynthétiques);
                 } else if (s.questionGroupe1) {
                     // Série avec groupes (ex. série 13 Choix d'associations) : split en deux groupes
                     const mi = Math.ceil(s.questions.length / 2);
                     const q1 = s.questions.slice(0, mi);
                     const q2 = s.questions.slice(mi);
                     html += `<div class="équipe-entête" style="background:var(--fond-champ);color:var(--accent);">${escHtml(s.questionGroupe1)}</div>`;
-                    html += tableauQuestions(q1, d.noÉquipeA, d.noÉquipeB);
+                    html += tableauQuestions(q1, d.noÉquipeA, d.noÉquipeB, d.donnéesSynthétiques);
                     if (s.questionGroupe2) {
                         html += `<div class="équipe-entête" style="background:var(--fond-champ);color:var(--accent);">${escHtml(s.questionGroupe2)}</div>`;
                     }
-                    html += tableauQuestions(q2, d.noÉquipeA, d.noÉquipeB);
+                    html += tableauQuestions(q2, d.noÉquipeA, d.noÉquipeB, d.donnéesSynthétiques);
                 } else {
-                    html += tableauQuestions(s.questions, d.noÉquipeA, d.noÉquipeB);
+                    html += tableauQuestions(s.questions, d.noÉquipeA, d.noÉquipeB, d.donnéesSynthétiques);
                 }
 
                 // Totaux par équipe pour cette série
-                const totA = totalÉquipe(s.questions, d.noÉquipeA);
-                const totB = totalÉquipe(s.questions, d.noÉquipeB);
-                cumA += totA; cumB += totB;
-                if (totA > 0 || totB > 0) {
-                    html += `<div class="total-série">
-                        Série — ${d.nomÉquipeA} : <span>${totA}</span>
-                        &nbsp;·&nbsp;
-                        ${d.nomÉquipeB} : <span>${totB}</span>
-                    </div>
-                    <div class="cumulatif-série">
-                        Cumulatif — ${d.nomÉquipeA} : <span>${cumA}</span>
-                        &nbsp;·&nbsp;
-                        ${d.nomÉquipeB} : <span>${cumB}</span>
-                    </div>`;
+                if (!d.donnéesSynthétiques) {
+                    const totA = totalÉquipe(s.questions, d.noÉquipeA);
+                    const totB = totalÉquipe(s.questions, d.noÉquipeB);
+                    cumA += totA; cumB += totB;
+                    if (totA > 0 || totB > 0) {
+                        html += `<div class="total-série">
+                            Série — ${d.nomÉquipeA} : <span>${totA}</span>
+                            &nbsp;·&nbsp;
+                            ${d.nomÉquipeB} : <span>${totB}</span>
+                        </div>
+                        <div class="cumulatif-série">
+                            Cumulatif — ${d.nomÉquipeA} : <span>${cumA}</span>
+                            &nbsp;·&nbsp;
+                            ${d.nomÉquipeB} : <span>${cumB}</span>
+                        </div>`;
+                    }
                 }
 
                 html += `</div></div>`;
@@ -406,15 +414,13 @@
             return html;
         }
 
-        function tableauQuestions(questions, noÉquipeA, noÉquipeB) {
+        function tableauQuestions(questions, noÉquipeA, noÉquipeB, synthétiques) {
             let html = `<table>
                 <thead><tr>
                     <th class="col-no">#</th>
                     <th class="col-question">Question</th>
                     <th class="col-réponse">Réponse</th>
-                    <th class="col-joueur">Joueur</th>
-                    <th class="col-équipe">Équipe</th>
-                    <th class="col-pts">Pts</th>
+                    ${synthétiques ? '' : '<th class="col-joueur">Joueur</th><th class="col-équipe">Équipe</th><th class="col-pts">Pts</th>'}
                 </tr></thead><tbody>`;
 
             questions.forEach(q => {
@@ -434,9 +440,7 @@
                     <td class="col-no">${q.noQuestion}</td>
                     <td class="col-question">${escHtml(q.texte || '')}</td>
                     <td class="col-réponse">${escHtml(q.réponse || '')}</td>
-                    <td class="col-joueur">${joueur}</td>
-                    <td class="col-équipe">${équipe}</td>
-                    <td class="col-pts">${pts}</td>
+                    ${synthétiques ? '' : `<td class="col-joueur">${joueur}</td><td class="col-équipe">${équipe}</td><td class="col-pts">${pts}</td>`}
                 </tr>`;
             });
 
