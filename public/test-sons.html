@@ -131,7 +131,6 @@
         <a href="marqueur.html">🎮 Marqueur</a>
         <a href="test-sons.html" class="actif">🔊 Test sons</a>
         <a href="guide-animateur.html">📖 Guide</a>
-        <button onclick="déconnexion()">🔒 Déconnexion</button>
     </nav>
 
     <div class="page-titre">🔊 Test des sons de buzzer</div>
@@ -140,11 +139,6 @@
     <div class="grille" id="grille"></div>
 
     <script>
-        async function déconnexion() {
-            await fetch('/api/auth/logout', { method: 'POST' });
-            window.location.href = '/login.html';
-        }
-
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function bip(type, freq, vol, début, durée, freqFin) {

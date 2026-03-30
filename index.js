@@ -30,7 +30,7 @@ app.use(express.json());
 const crypto = require("crypto");
 const sessions = new Set();
 const MOT_DE_PASSE_ADMIN = process.env.MOT_DE_PASSE_ADMIN || "Fellegi";
-const PAGES_PROTÉGÉES = ["/admin.html", "/marqueur.html", "/test-sons.html", "/guide-animateur.html"];
+const PAGES_PROTÉGÉES = ["/admin.html"];
 
 function getCookie(req, name) {
   const cookies = req.headers.cookie || "";

@@ -296,7 +296,6 @@
         <a href="marqueur.html">🎮 Marqueur</a>
         <a href="test-sons.html">🔊 Test sons</a>
         <a href="guide-animateur.html" class="actif">📖 Guide</a>
-        <button class="bouton-deconnexion" onclick="déconnexion()">🔒 Déconnexion</button>
     </nav>
 
     <div class="page-titre">📖 Guide animateur</div>
@@ -567,11 +566,6 @@ git push</pre>
     </div><!-- fin mise-en-page -->
 
     <script>
-        async function déconnexion() {
-            await fetch('/api/auth/logout', { method: 'POST' });
-            window.location.href = '/login.html';
-        }
-
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(e => {
                 if (e.isIntersecting) {

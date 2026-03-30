@@ -451,7 +451,6 @@
         <a href="marqueur.html" class="actif">🎮 Marqueur</a>
         <a href="test-sons.html">🔊 Test sons</a>
         <a href="guide-animateur.html">📖 Guide</a>
-        <button onclick="déconnexion()">🔒 Déconnexion</button>
     </nav>
 
     <div id="modePartie" class="initialisation">🔧 Initialisation</div>
@@ -578,11 +577,6 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        async function déconnexion() {
-            await fetch('/api/auth/logout', { method: 'POST' });
-            window.location.href = '/login.html';
-        }
-
         const socket = io();
 
         let toutesÉquipes = [];
