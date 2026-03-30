@@ -1,0 +1,1362 @@
+[
+  {
+    "noQuestionnaire": 1,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 6,
+        "thème": "Arts et littérature",
+        "sousThème": "Couleurs"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Actualité",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 2,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Mots à syllabes répétées"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1995"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Musique",
+        "sousThème": "Groupes québécois"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Acutalité",
+        "sousThème": "Année 2024"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 3,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Mots arabes couramment utilisés en français"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "Réponse à la 1ère question (année)"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "Nommez le groupe canadien ou québécois à partir des chansons"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Émissions d'affaires publiques québécoises"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 4,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1987"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "1996"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Mythologie romaine"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 5,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Série de marde"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1948"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "Séries de bande dessinée"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": "Homme à tout faire"
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Anagrammes"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 6,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Onomatopées"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "2012"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Films de Steven Spielberg"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 7,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1963"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Cinéma et télévision",
+        "sousThème": "et radio …"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 8,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Mots anglais couramment utilisés en français"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "Réponse à la 1ère question"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "Nommez la position associée aux joueurs de hockey actifs de la LNH"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 9,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Animaux dans les proverbes et expressions"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1946"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Arts et littérature",
+        "sousThème": "Afrique"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 10,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "L'année est la première réponse"
+      },
+      {
+        "noSérie": 6,
+        "thème": "Sports et loisirs",
+        "sousThème": "Jeux olympiques d’hiver"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Arts et littérature",
+        "sousThème": "Littérature"
+      },
+      {
+        "noSérie": 10,
+        "thème": "Musique",
+        "sousThème": "Groupes populaires québécois"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 11,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": "Commence par W"
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1964"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "Fruits et légumes"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": "Divers"
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Paroles de chansons de l'année"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": "Le chiffre 3"
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 12,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Passe-Partout"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1978"
+      },
+      {
+        "noSérie": 6,
+        "thème": "",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 13,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "Frères dans la LNH"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Œuvres artistiques et littéraires"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": "Présidents de l'Europe de l'Est au nom typique ou porte-parole, publicité automobile francophone"
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 14,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Homophones"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1880-1889"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "Élémentéquation"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": "Compagnie"
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Animaux célèbres"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 15,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1988"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Nommez l'organe affecté par les maladies suivantes."
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 16,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Scrabble à 6 lettres"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "Ier siècle (ap J.-C.)"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": "Scrabble à 6 lettres - Deuxième partie"
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  },
+  {
+    "noQuestionnaire": 17,
+    "séries": [
+      {
+        "noSérie": 1,
+        "thème": "Langue",
+        "sousThème": "Remplacer un mot pour corriger l'erreur dans les perronismes (Animateur: le gras et la majuscule identifient le mot à corriger, lire normalement)"
+      },
+      {
+        "noSérie": 2,
+        "thème": "Géographie",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 3,
+        "thème": "Cinéma et télévision",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 4,
+        "thème": "Histoire et société",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 5,
+        "thème": "Une année, décennie ou siècle",
+        "sousThème": "1964"
+      },
+      {
+        "noSérie": 6,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 7,
+        "thème": "Arts et littérature",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 8,
+        "thème": "Sports et loisirs",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 9,
+        "thème": "0",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 10,
+        "thème": "0",
+        "sousThème": "Villes canadiennes avec un nom d'animal"
+      },
+      {
+        "noSérie": 11,
+        "thème": "Musique",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 12,
+        "thème": "Sciences",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 13,
+        "thème": "Libre",
+        "sousThème": "Choix entre \"Animal et géogaphie\" ou \"Sport et politique\""
+      },
+      {
+        "noSérie": 14,
+        "thème": "Divers",
+        "sousThème": ""
+      },
+      {
+        "noSérie": 15,
+        "thème": "Actualité",
+        "sousThème": ""
+      }
+    ]
+  }
+]
