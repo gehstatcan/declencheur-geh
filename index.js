@@ -119,10 +119,23 @@ function initialiserVolume() {
     console.log(`📄 ${fichier} mis à jour sur le Volume`);
   });
 
+  // Toujours écraser — fichiers générés (questionnaires), mis à jour à chaque déploiement
+  const fichiersGénérés = [
+    "questions.json",
+    "thèmes.json",
+  ];
+  fichiersGénérés.forEach((fichier) => {
+    const destination = path.join(dossierSaison, fichier);
+    const source = path.join(__dirname, "data", "saisons", saisonActive, fichier);
+    if (fs.existsSync(source)) {
+      fs.copyFileSync(source, destination);
+      console.log(`📄 ${fichier} synchronisé sur le Volume`);
+    }
+  });
+
   // Copier seulement si absent — fichiers pouvant être modifiés via admin
   const fichiersAdmin = [
     "parties.json",
-    "thèmes.json",
     "séries.json",
   ];
   fichiersAdmin.forEach((fichier) => {
@@ -136,7 +149,6 @@ function initialiserVolume() {
 
   // Copier si absent — fichiers de données de jeu (ne jamais écraser)
   const fichiersJeu = [
-    "questions.json",
     "répondants.json",
     "alignements.json",
   ];

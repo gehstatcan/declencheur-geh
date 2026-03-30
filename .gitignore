@@ -5,8 +5,6 @@
 # Données de jeu — gérées par Railway Volume, ne pas committer
 data/saisons/*/parties/
 data/saisons/*/parties.json
-data/saisons/*/questions.json
-data/saisons/*/thèmes.json
 data/saisons/2025-2026/parties - test.json
 
 # Logs
