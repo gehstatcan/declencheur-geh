@@ -309,6 +309,7 @@
             <a href="#volume">🔊 Volume buzzers</a>
             <a href="#administration">⚙️ Administration</a>
             <a href="#repondants">📝 Répondants</a>
+            <a href="#sauvegarde">💾 Sauvegarde ZIP</a>
             <a href="#developpeurs">💻 Développeurs</a>
             <a href="#nouvelle-saison">🗓️ Nouvelle saison</a>
             <a href="#import-historique">📤 Import historique</a>
@@ -334,13 +335,13 @@
                 <tbody>
                     <tr>
                         <td><code>équipes.json</code></td>
-                        <td><span class="badge-toujours">Toujours écrasé</span></td>
-                        <td>Noms, couleurs, priorité d'égalité</td>
+                        <td><span class="badge-absent">Copié si absent</span></td>
+                        <td>Noms, couleurs, priorité d'égalité — éditable via admin.html</td>
                     </tr>
                     <tr>
                         <td><code>joueurs.json</code></td>
-                        <td><span class="badge-toujours">Toujours écrasé</span></td>
-                        <td>Liste des joueurs par équipe</td>
+                        <td><span class="badge-absent">Copié si absent</span></td>
+                        <td>Liste des joueurs par équipe — éditable via admin.html</td>
                     </tr>
                     <tr>
                         <td><code>séries.json</code></td>
@@ -354,13 +355,13 @@
                     </tr>
                     <tr>
                         <td><code>thèmes.json</code></td>
-                        <td><span class="badge-absent">Copié si absent</span></td>
-                        <td>Thèmes et sous-thèmes par questionnaire</td>
+                        <td><span class="badge-jamais">Jamais touché</span></td>
+                        <td>Thèmes et sous-thèmes — géré via import questionnaire (admin.html)</td>
                     </tr>
                     <tr>
                         <td><code>questions.json</code></td>
                         <td><span class="badge-jamais">Jamais touché</span></td>
-                        <td>Textes et réponses des questions</td>
+                        <td>Textes et réponses des questions — géré via import questionnaire (admin.html)</td>
                     </tr>
                     <tr>
                         <td><code>répondants.json</code></td>
@@ -458,6 +459,20 @@
             </table>
         </div>
 
+        <!-- Sauvegarde ZIP -->
+        <div class="carte" id="sauvegarde" data-section>
+            <h2>Sauvegarde ZIP</h2>
+            <p>Le système offre deux façons de télécharger une sauvegarde complète de tous les fichiers JSON de la saison active (équipes, joueurs, parties, séries, questions, thèmes, répondants, alignements).</p>
+
+            <h3>Depuis le marqueur (après une partie)</h3>
+            <p>Une bannière apparaît automatiquement à la fin de chaque partie avec un bouton <strong>Télécharger la sauvegarde ZIP</strong>. L'animateur peut ainsi conserver une copie locale sans avoir accès à l'administration.</p>
+
+            <h3>Depuis l'administration</h3>
+            <p>La section <em>Gestion des saisons</em> dans admin.html offre le même bouton de téléchargement, accessible à tout moment.</p>
+
+            <div class="note"><strong>Usage développement :</strong> télécharger le ZIP de Railway et extraire les fichiers dans <code>data/saisons/2025-2026/</code> en local permet de reproduire exactement l'environnement de production.</div>
+        </div>
+
         <!-- Pour développeurs -->
         <div class="carte" id="developpeurs" data-section>
             <h2>Pour développeurs</h2>
@@ -547,7 +562,14 @@ railway run node init-volume.js --force</pre>
               <pre>git update-index --no-skip-worktree "data/saisons/AAAA-AAAA/répondants.json"
 git update-index --no-skip-worktree "data/saisons/AAAA-AAAA/alignements.json"</pre>
             </li>
-            <li>Ajouter temporairement ces fichiers dans <code>fichiersGit</code> (section <code>initialiserVolume</code> dans <code>index.js</code>) pour qu'ils soient copiés sur le Volume au démarrage</li>
+            <li>Dans <code>initialiserVolume()</code> de <code>index.js</code>, ajouter temporairement une section d'écrasement forcé pour ces deux fichiers :
+              <pre>// TEMPORAIRE — retirer après déploiement
+["répondants.json", "alignements.json"].forEach((f) => {
+  const src = path.join(__dirname, "data", "saisons", saisonActive, f);
+  const dst = path.join(dossierSaison, f);
+  if (fs.existsSync(src)) fs.copyFileSync(src, dst);
+});</pre>
+            </li>
             <li>Commit + push → Railway redéploie et copie les fichiers sur le Volume</li>
             <li><strong>Dès que Railway confirme le déploiement</strong>, revert immédiatement :
               <pre>git revert HEAD --no-edit
@@ -558,7 +580,7 @@ git push</pre>
           </ol>
         </div>
 
-        <div class="note"><strong>Important :</strong> ne pas laisser ces fichiers dans <code>fichiersGit</code> plus longtemps que nécessaire — chaque redéploiement écraserait le Volume avec la version git, effaçant toutes les nouvelles parties jouées.</div>
+        <div class="note"><strong>Important :</strong> ne pas laisser le bloc d'écrasement forcé plus longtemps que nécessaire — chaque redéploiement écraserait le Volume avec la version git, effaçant toutes les nouvelles parties jouées.</div>
       </div>
     </section>
 

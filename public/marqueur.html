@@ -469,10 +469,15 @@
     </div>
 
     <!-- Zone initialisation -->
-    <div id="zoneInitialisation" style="margin-top:16px;">
+    <div id="zoneInitialisation" style="margin-top:16px; text-align:center;">
         <button class="bouton bouton-bonne" onclick="démarrerPartie()">
             ▶️ Démarrer la partie
         </button>
+        <div id="bannièreSauvegarde" style="display:none; margin-top:16px; background:#1a5276; color:white; border-radius:12px; padding:16px 20px; text-align:center;">
+            <div style="font-size:1.1em; font-weight:600; margin-bottom:8px;">✅ Partie terminée</div>
+            <div style="font-size:0.9em; margin-bottom:12px; opacity:0.9;">Pensez à sauvegarder vos données.</div>
+            <a href="/api/sauvegarde-zip" class="bouton" style="background:white; color:#1a5276; display:inline-block; text-decoration:none;">⬇️ Télécharger la sauvegarde ZIP</a>
+        </div>
     </div>
 
     <!-- Layout 3 colonnes : équipe A | question | équipe B -->
@@ -571,6 +576,7 @@
             💾 Télécharger cumulatif
         </button>
     </div>
+
 
     <!-- Équipes et joueurs -->
     <div id="équipes"></div>
@@ -703,7 +709,7 @@
         socket.on('joueursConnectés', async (joueursConnectés) => {
             tousJoueurs = await fetch('/api/joueurs').then(r => r.json());
             derniersJoueursConnectés = joueursConnectés; // Mettre à jour la liste des joueurs connectés, Arrivée d'un retardataire ou déconnexion d'un joueur
-            if (partieActuelle) afficherÉquipes(partieActuelle, joueursConnectés, derniersScores);
+            if (partieActuelle && modeActuel === 'jeu') afficherÉquipes(partieActuelle, joueursConnectés, derniersScores);
         });
 
         socket.on('buzz', (joueur) => {
@@ -907,6 +913,8 @@
                 zone3colonnes.style.justifyContent = '';
                 zone3colonnes.style.gap = '';
                 zoneTéléchargement.style.display = 'block';
+                document.getElementById('bannièreSauvegarde').style.display = 'none';
+                document.getElementById('équipes').style.display = 'block';
             } else {
                 badge.textContent = '🔧 Initialisation';
                 badge.className = 'initialisation';
@@ -1163,6 +1171,10 @@
         }
         socket.on('partieTerminée', ({ noPartie, scores }) => {
             console.log(`Partie ${noPartie} terminée !`, scores);
+            modeActuel = 'initialisation';
+            mettreÀJourMode('initialisation');
+            document.getElementById('bannièreSauvegarde').style.display = 'block';
+            document.getElementById('équipes').style.display = 'none';
         });
 
     </script>

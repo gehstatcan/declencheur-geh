@@ -18,6 +18,7 @@ const path = require("path");
 
 const multer = require("multer");
 const XLSX = require("xlsx");
+const archiver = require("archiver");
 
 // Configuration multer — stockage en mémoire (pas sur disque)
 const upload = multer({ storage: multer.memoryStorage() });
@@ -107,41 +108,19 @@ function initialiserVolume() {
     console.log("📁 Dossier parties créé sur le Volume");
   }
 
-  // Toujours écraser — fichiers gérés via git uniquement (données de référence)
-  const fichiersGit = [
-    "équipes.json",
-    "joueurs.json",
-  ];
-  fichiersGit.forEach((fichier) => {
-    const destination = path.join(dossierSaison, fichier);
-    const source = path.join(__dirname, "data", "saisons", saisonActive, fichier);
-    fs.copyFileSync(source, destination);
-    console.log(`📄 ${fichier} mis à jour sur le Volume`);
-  });
-
-  // Toujours écraser — fichiers générés (questionnaires), mis à jour à chaque déploiement
-  const fichiersGénérés = [
-    "questions.json",
-    "thèmes.json",
-  ];
-  fichiersGénérés.forEach((fichier) => {
-    const destination = path.join(dossierSaison, fichier);
-    const source = path.join(__dirname, "data", "saisons", saisonActive, fichier);
-    if (fs.existsSync(source)) {
-      fs.copyFileSync(source, destination);
-      console.log(`📄 ${fichier} synchronisé sur le Volume`);
-    }
-  });
-
   // Copier seulement si absent — fichiers pouvant être modifiés via admin
   const fichiersAdmin = [
+    "équipes.json",
+    "joueurs.json",
     "parties.json",
     "séries.json",
+    "questions.json",
+    "thèmes.json",
   ];
   fichiersAdmin.forEach((fichier) => {
     const destination = path.join(dossierSaison, fichier);
     const source = path.join(__dirname, "data", "saisons", saisonActive, fichier);
-    if (!fs.existsSync(destination)) {
+    if (!fs.existsSync(destination) && fs.existsSync(source)) {
       fs.copyFileSync(source, destination);
       console.log(`📄 ${fichier} copié sur le Volume`);
     }
@@ -655,6 +634,47 @@ app.post("/api/admin/nouvelle-saison", (req, res) => {
     fs.writeFileSync(path.join(dossierNouveau, nom), contenu, "utf-8");
   }
   res.json({ succès: true, saison });
+});
+
+// ============================================================
+// Export ZIP — sauvegarde de tous les fichiers JSON de la saison active
+// ============================================================
+function exporterZip(res) {
+  const date = new Date().toISOString().slice(0, 10);
+  const nomFichier = `geh-sauvegarde-${saisonActive}-${date}.zip`;
+
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader("Content-Disposition", `attachment; filename="${nomFichier}"`);
+
+  const archive = archiver("zip", { zlib: { level: 6 } });
+  archive.on("error", (err) => { throw err; });
+  archive.pipe(res);
+
+  const fichiersRacine = [
+    "équipes.json", "joueurs.json", "questions.json", "thèmes.json",
+    "parties.json", "séries.json", "répondants.json", "alignements.json",
+  ];
+  fichiersRacine.forEach((fichier) => {
+    const chemin = path.join(dossierSaison, fichier);
+    if (fs.existsSync(chemin)) archive.file(chemin, { name: fichier });
+  });
+
+  const dossierParties = path.join(dossierSaison, "parties");
+  if (fs.existsSync(dossierParties)) archive.directory(dossierParties, "parties");
+
+  archive.finalize();
+}
+
+// Accessible aux admins connectés (via admin.html)
+app.get("/api/admin/export-zip", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  exporterZip(res);
+});
+
+// Accessible sans authentification (via marqueur.html — animateurs sans mot de passe admin)
+app.get("/api/sauvegarde-zip", (_req, res) => {
+  exporterZip(res);
 });
 
 app.get("/api/alignements", (req, res) => {

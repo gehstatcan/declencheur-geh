@@ -6,6 +6,8 @@
 data/saisons/*/parties/
 data/saisons/*/parties.json
 data/saisons/2025-2026/parties - test.json
+data/saisons/*/questions.json
+data/saisons/*/thèmes.json
 
 # Logs
 logs
