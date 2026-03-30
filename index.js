@@ -1013,6 +1013,8 @@ app.get('/api/stats/eliminations', (req, res) => {
         nomGagnant: nomÉquipe(gagnant),
         date: partie.date || null,
         lienRéunion: partie.lienRéunion || null,
+        nomÉquipeQuestionnaire: nomÉquipe(partie.noÉquipeQuestionnaire) || null,
+        animateur: partie.animateur || null,
       };
     });
 

@@ -219,6 +219,7 @@
             flex-wrap: wrap;
         }
 
+        .matchup-infos { display: flex; flex-direction: column; gap: 2px; }
         .matchup-liens { display: flex; gap: 4px; }
 
         .lien-bouton {
@@ -337,6 +338,11 @@
                 if (m.terminée) liens += `<a href="stats-match.html?noPartie=${m.noPartie}" class="lien-bouton lien-match">📋 Feuille</a>`;
             }
 
+            const infoMeta = m ? [
+                m.nomÉquipeQuestionnaire ? `<span title="Équipe questionnaire">📋 ${m.nomÉquipeQuestionnaire}</span>` : '',
+                m.animateur ? `<span title="Animateur">🎙️ ${m.animateur}</span>` : '',
+            ].filter(Boolean).join('') : '';
+
             return `
             <div class="matchup${estFinale ? ' finale' : ''}">
                 <div class="matchup-label">${label}${m ? ` — P${m.noPartie}` : ''}${date ? ` · ${date}` : ''}</div>
@@ -348,7 +354,7 @@
                     <span class="équipe-nom ${classeB}">${nomB || 'À déterminer'}</span>
                     <span class="équipe-score ${classeScoreB}">${scoreB !== null && scoreB !== undefined ? scoreB : ''}</span>
                 </div>
-                ${m && liens ? `<div class="matchup-meta"><div class="matchup-liens">${liens}</div></div>` : ''}
+                ${m && (infoMeta || liens) ? `<div class="matchup-meta"><div class="matchup-infos">${infoMeta}</div><div class="matchup-liens">${liens}</div></div>` : ''}
             </div>`;
         }
 
