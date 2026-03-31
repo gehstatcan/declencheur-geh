@@ -184,7 +184,7 @@ Chaque `git push` vers GitHub déclenche automatiquement un redéploiement sur R
 ```
 LOCAL (PC)               GITHUB                    RAILWAY
 ─────────────────        ──────────────            ──────────────────────
-c:\GIT\declencheur       gehstatcan/               declencheur-geh.up
+c:\GIT\declencheur       gehstatcan/               gehstatcan.up
                          declencheur-geh           .railway.app
 
       │                        │                          │

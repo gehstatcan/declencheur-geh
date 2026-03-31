@@ -541,9 +541,15 @@
         <div id="résultatParties"></div>
 
         <div class="info">
-            ℹ️ Le fichier doit contenir les colonnes : <strong>NoPartie, Date, Salle, NomAnimateur,
-            NoQuestionnaire, NoÉquipeA, NoÉquipeB, NoÉquipeQuestionnaire, LienReunion</strong>.<br>
-            Les colonnes LienConsole et LienBouton sont ignorées. Le fichier <strong>remplace</strong>
+            ℹ️ Les colonnes sont reconnues <strong>par leur entête</strong> — l'ordre n'a pas d'importance.<br><br>
+            <strong>Colonnes obligatoires :</strong> NoPartie, Date, Salle, NomAnimateur, NoQuestionnaire<br><br>
+            <strong>Colonnes optionnelles</strong> (laisser vide ou mettre <code>NA</code> si inconnu) :<br>
+            • <strong>NoÉquipeA, NoÉquipeB</strong> — équipes qui s'affrontent<br>
+            • <strong>NoÉquipeQuestionnaire</strong> — équipe qui fournit le questionnaire<br>
+            • <strong>LienReunion</strong> — lien Zoom/Teams<br>
+            • <strong>Phase</strong> — <code>saison</code> (défaut) ou <code>eliminations</code><br>
+            • <strong>Matchup</strong> — identifiant de la série éliminatoire (ex. : <code>Q1</code>, <code>Q2</code>, <code>D1</code>, <code>F</code>)<br><br>
+            Les autres colonnes ex: (LienConsole et LienBouton) sont ignorées. Le fichier <strong>remplace</strong>
             entièrement le calendrier existant.
         </div>
     </div>
