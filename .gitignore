@@ -2,6 +2,9 @@
 # Config locale Claude Code — permissions accordées en session
 .claude/settings.local.json
 
+# Fichiers d'import temporaires
+public/ressources/parties-import.csv
+
 # Données de jeu — gérées par Railway Volume, ne pas committer
 data/saisons/*/parties/
 data/saisons/*/parties.json

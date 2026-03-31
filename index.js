@@ -179,6 +179,14 @@ console.log(`✅ ${thèmes.length} thèmes chargés`);
 app.get("/api/equipes", (req, res) => res.json(équipes));
 app.get("/api/joueurs", (req, res) => res.json(joueurs));
 app.get("/api/parties", (req, res) => res.json(parties));
+app.get("/api/parties/jouees", (req, res) => {
+  try {
+    const contenu = fs.readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8").trim();
+    const rép = contenu ? JSON.parse(contenu) : [];
+    const jouées = [...new Set(rép.map(r => r.noPartie))];
+    res.json(jouées);
+  } catch { res.json([]); }
+});
 app.get("/api/series", (req, res) => res.json(séries));
 app.get("/api/themes", (req, res) => res.json(thèmes));
 // ============================================================

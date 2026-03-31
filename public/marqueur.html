@@ -1107,15 +1107,16 @@
             toutesPartiesData = await fetch('/api/parties').then(r => r.json());
             toutesLésSéries = await fetch('/api/series').then(r => r.json());
             tousthèmes = await fetch('/api/themes').then(r => r.json());
+            const partiesJouées = await fetch('/api/parties/jouees').then(r => r.json());
+            const jouéesSet = new Set(partiesJouées);
 
-            const aujourdhui = new Date();
-            const dateAvant = new Date(aujourdhui);
-            const dateAprès = new Date(aujourdhui);
-            dateAvant.setDate(aujourdhui.getDate() - 5); // Il y a x jours
-            dateAprès.setDate(aujourdhui.getDate() + 7); // 7 jours dans le futur
+            const dans6Jours = new Date();
+            dans6Jours.setDate(dans6Jours.getDate() + 6);
+            const dateLimite = dans6Jours.toISOString().split('T')[0];
+
+            // Parties non jouées : toutes celles dans le passé + celles dans les 6 prochains jours
             partiesFiltrées = toutesPartiesData.filter(p =>
-                p.date >= dateAvant.toISOString().split('T')[0] &&
-                p.date <= dateAprès.toISOString().split('T')[0]
+                !jouéesSet.has(p.noPartie) && p.date <= dateLimite
             );
 
             remplirSélecteur(partiesFiltrées);
