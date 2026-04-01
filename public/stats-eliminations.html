@@ -347,11 +347,11 @@
             <div class="matchup${estFinale ? ' finale' : ''}">
                 <div class="matchup-label">${label}${m ? ` — P${m.noPartie}` : ''}${date ? ` · ${date}` : ''}</div>
                 <div class="équipe-ligne">
-                    <span class="équipe-nom ${classeA}">${nomA || 'À déterminer'}</span>
+                    ${nomA && m?.noÉquipeA ? `<a href="stats-equipe.html?noEquipe=${m.noÉquipeA}&saison=${saisonStats}" class="équipe-nom ${classeA}" style="text-decoration:none;color:inherit;">${nomA}</a>` : `<span class="équipe-nom ${classeA}">${nomA || 'À déterminer'}</span>`}
                     <span class="équipe-score ${classeScoreA}">${scoreA !== null && scoreA !== undefined ? scoreA : ''}</span>
                 </div>
                 <div class="équipe-ligne">
-                    <span class="équipe-nom ${classeB}">${nomB || 'À déterminer'}</span>
+                    ${nomB && m?.noÉquipeB ? `<a href="stats-equipe.html?noEquipe=${m.noÉquipeB}&saison=${saisonStats}" class="équipe-nom ${classeB}" style="text-decoration:none;color:inherit;">${nomB}</a>` : `<span class="équipe-nom ${classeB}">${nomB || 'À déterminer'}</span>`}
                     <span class="équipe-score ${classeScoreB}">${scoreB !== null && scoreB !== undefined ? scoreB : ''}</span>
                 </div>
                 ${m && (infoMeta || liens) ? `<div class="matchup-meta"><div class="matchup-infos">${infoMeta}</div><div class="matchup-liens">${liens}</div></div>` : ''}
