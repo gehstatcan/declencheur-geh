@@ -709,7 +709,8 @@
         socket.on('joueursConnectés', async (joueursConnectés) => {
             tousJoueurs = await fetch('/api/joueurs').then(r => r.json());
             derniersJoueursConnectés = joueursConnectés; // Mettre à jour la liste des joueurs connectés, Arrivée d'un retardataire ou déconnexion d'un joueur
-            if (partieActuelle && modeActuel === 'jeu') afficherÉquipes(partieActuelle, joueursConnectés, derniersScores);
+            if (partieActuelle && (modeActuel === 'jeu' || modeActuel === 'initialisation'))
+                afficherÉquipes(partieActuelle, joueursConnectés, derniersScores);
         });
 
         socket.on('buzz', (joueur) => {
@@ -1173,6 +1174,7 @@
         socket.on('partieTerminée', ({ noPartie, scores }) => {
             console.log(`Partie ${noPartie} terminée !`, scores);
             modeActuel = 'initialisation';
+            partieActuelle = null;
             mettreÀJourMode('initialisation');
             document.getElementById('bannièreSauvegarde').style.display = 'block';
             document.getElementById('équipes').style.display = 'none';
