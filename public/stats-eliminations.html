@@ -156,11 +156,16 @@
 
         .matchup-label {
             background: var(--fond-champ);
-            font-size: 0.72em;
+            font-size: 0.85em;
             font-weight: 600;
             color: var(--gris);
-            padding: 4px 10px;
+            padding: 5px 10px;
             letter-spacing: 0.5px;
+        }
+
+        .matchup-date {
+            color: var(--texte);
+            font-weight: 400;
         }
 
         .équipe-ligne {
@@ -345,7 +350,7 @@
 
             return `
             <div class="matchup${estFinale ? ' finale' : ''}">
-                <div class="matchup-label">${label}${m ? ` — P${m.noPartie}` : ''}${date ? ` · ${date}` : ''}</div>
+                <div class="matchup-label">${label}${m ? ` — P${m.noPartie}` : ''}${date ? `<span class="matchup-date"> · ${date}</span>` : ''}</div>
                 <div class="équipe-ligne">
                     ${nomA && m?.noÉquipeA ? `<a href="stats-equipe.html?noEquipe=${m.noÉquipeA}&saison=${saisonStats}" class="équipe-nom ${classeA}" style="text-decoration:none;color:inherit;">${nomA}</a>` : `<span class="équipe-nom ${classeA}">${nomA || 'À déterminer'}</span>`}
                     <span class="équipe-score ${classeScoreA}">${scoreA !== null && scoreA !== undefined ? scoreA : ''}</span>
