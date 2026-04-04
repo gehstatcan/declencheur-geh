@@ -705,6 +705,10 @@ app.get("/api/alignements", (req, res) => {
 // Routes API — Statistiques
 // ============================================================
 
+// Parties synthétiques — exclues des stats de thèmes et détail de questions
+const SAISON_SYNTHÉTIQUE = '2025-2026';
+const NO_PARTIE_SYNTHÉTIQUE_MAX = 35;
+
 // Helper — dossier à utiliser pour les routes stats (respecte ?saison= si valide)
 function getDossierStats(req) {
   const s = req.query && req.query.saison;
@@ -719,6 +723,24 @@ function getSériesStats(dossier) {
   try {
     return JSON.parse(fs.readFileSync(path.join(dossier, "séries.json"), "utf-8"));
   } catch { return séries; }
+}
+
+// Helper — lit un fichier JSON ou retourne la valeur par défaut
+function lireJSON(filePath, défaut) {
+  try {
+    const c = fs.readFileSync(filePath, "utf-8").trim();
+    return c ? JSON.parse(c) : défaut;
+  } catch { return défaut; }
+}
+
+// Helper — liste tous les dossiers de saisons
+function listerDossiersSaisons() {
+  const dossierSaisons = path.join(dossierBase, "saisons");
+  if (!fs.existsSync(dossierSaisons)) return [];
+  return fs.readdirSync(dossierSaisons)
+    .filter(f => /^\d{4}-\d{4}$/.test(f) && fs.statSync(path.join(dossierSaisons, f)).isDirectory())
+    .sort()
+    .map(f => ({ nom: f, chemin: path.join(dossierSaisons, f) }));
 }
 
 // Calendrier — parties avec scores calculés
@@ -1056,6 +1078,64 @@ app.get('/api/stats/eliminations', (req, res) => {
 // Stats par thème
 app.get('/api/stats/themes', (req, res) => {
   try {
+    if (req.query.saison === 'cumulatif') {
+      const saisons = listerDossiersSaisons();
+      const statsParThème = {};
+      const phase = req.query.phase;
+
+      for (const { nom, chemin } of saisons) {
+        let rép = lireJSON(path.join(chemin, 'répondants.json'), []);
+        const sér = lireJSON(path.join(chemin, 'séries.json'), []);
+        const thèmesD = lireJSON(path.join(chemin, 'thèmes.json'), []);
+        const partiesD = lireJSON(path.join(chemin, 'parties.json'), []);
+
+        // Exclure parties synthétiques
+        if (nom === SAISON_SYNTHÉTIQUE)
+          rép = rép.filter(r => r.noPartie > NO_PARTIE_SYNTHÉTIQUE_MAX);
+
+        // Filtrer par phase
+        if (phase && phase !== 'tous') {
+          const noPartiesFiltées = new Set(
+            partiesD.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+          );
+          rép = rép.filter(r => noPartiesFiltées.has(r.noPartie));
+        }
+
+        const questParPartie = {};
+        partiesD.forEach(p => { questParPartie[p.noPartie] = p.noQuestionnaire; });
+        const thèmeLookup = {};
+        thèmesD.forEach(t => {
+          thèmeLookup[t.noQuestionnaire] = {};
+          t.séries.forEach(s => { thèmeLookup[t.noQuestionnaire][s.noSérie] = s.thème; });
+        });
+
+        rép.forEach(r => {
+          if (r.noJoueur === 99) return;
+          const noQ = questParPartie[r.noPartie];
+          if (!noQ) return;
+          const thème = thèmeLookup[noQ]?.[r.noSérie];
+          if (!thème) return;
+          if (!statsParThème[thème]) statsParThème[thème] = {};
+          const joueurClé = `${r.noÉquipe}-${r.noJoueur}`;
+          if (!statsParThème[thème][joueurClé]) statsParThème[thème][joueurClé] = { noÉquipe: r.noÉquipe, noJoueur: r.noJoueur, pts: 0 };
+          const série = sér.find(s => s.noSérie === r.noSérie);
+          const q = série?.questions.find(q => q.noQuestion === r.noQuestion);
+          const pts = r.pointsSecondaires ? (q?.pointsSecondaires ?? 5) : (q?.points ?? 10);
+          statsParThème[thème][joueurClé].pts += pts;
+        });
+      }
+
+      const résultat = Object.entries(statsParThème).map(([thème, joueursMap]) => {
+        const joueursList = Object.values(joueursMap).map(j => {
+          const joueur = joueurs.find(jj => jj.noÉquipe === j.noÉquipe && jj.noJoueur === j.noJoueur);
+          const équipe = équipes.find(e => e.noÉquipe === j.noÉquipe);
+          return { noJoueur: j.noJoueur, alias: joueur?.alias || `J${j.noJoueur}`, nom: joueur?.nom || '', nomÉquipe: équipe?.nomÉquipe || '', noÉquipe: j.noÉquipe, pts: j.pts };
+        }).sort((a, b) => b.pts - a.pts);
+        return { thème, joueurs: joueursList };
+      }).sort((a, b) => a.thème.localeCompare(b.thème, 'fr'));
+      return res.json(résultat);
+    }
+
     const ds = getDossierStats(req);
     const sr = getSériesStats(ds);
     const partiesDs = ds === dossierSaison ? parties : JSON.parse(fs.readFileSync(path.join(ds, 'parties.json'), 'utf-8'));
@@ -1075,6 +1155,10 @@ app.get('/api/stats/themes', (req, res) => {
       );
       répondants = répondants.filter(r => noPartiesFiltées.has(r.noPartie));
     }
+
+    // Exclure parties synthétiques
+    if (req.query.saison === SAISON_SYNTHÉTIQUE || ds === dossierSaison && saisonActive === SAISON_SYNTHÉTIQUE)
+      répondants = répondants.filter(r => r.noPartie > NO_PARTIE_SYNTHÉTIQUE_MAX);
 
     // Lookup noPartie → noQuestionnaire
     const questParPartie = {};
@@ -1124,6 +1208,60 @@ app.get('/api/stats/themes', (req, res) => {
 // ============================================================
 app.get("/api/stats/compteurs", (req, res) => {
   try {
+    if (req.query.saison === 'cumulatif') {
+      const saisons = listerDossiersSaisons();
+      const ptsJoueur = {};
+      const partiesJoueurSet = {};
+      const pjParÉquipe = {};
+      const phase = req.query.phase;
+
+      for (const { nom, chemin } of saisons) {
+        let rép = lireJSON(path.join(chemin, 'répondants.json'), []);
+        const sér = lireJSON(path.join(chemin, 'séries.json'), []);
+        let alig = lireJSON(path.join(chemin, 'alignements.json'), []);
+        const partiesD = lireJSON(path.join(chemin, 'parties.json'), []);
+
+        if (phase && phase !== 'tous') {
+          const noPartiesFiltées = new Set(
+            partiesD.filter(p => (p.phase || 'saison') === phase).map(p => p.noPartie)
+          );
+          rép = rép.filter(r => noPartiesFiltées.has(r.noPartie));
+          alig = alig.filter(a => noPartiesFiltées.has(a.noPartie));
+        }
+
+        rép.forEach(r => {
+          const clé = `${r.noÉquipe}-${r.noJoueur}`;
+          if (!ptsJoueur[clé]) ptsJoueur[clé] = 0;
+          const série = sér.find(s => s.noSérie === r.noSérie);
+          const q = série?.questions.find(q => q.noQuestion === r.noQuestion);
+          const pts = r.pointsSecondaires ? (q?.pointsSecondaires ?? 5) : (q?.points ?? 10);
+          ptsJoueur[clé] += pts;
+          if (!partiesJoueurSet[clé]) partiesJoueurSet[clé] = new Set();
+          partiesJoueurSet[clé].add(`${nom}-${r.noPartie}`);
+        });
+
+        alig.forEach(a => {
+          if (!pjParÉquipe[a.noÉquipe]) pjParÉquipe[a.noÉquipe] = new Set();
+          pjParÉquipe[a.noÉquipe].add(`${nom}-${a.noPartie}`);
+        });
+      }
+
+      const résultat = équipes.map(é => {
+        const pjÉquipe = pjParÉquipe[é.noÉquipe]?.size || 0;
+        const membresÉquipe = joueurs.filter(j => j.noÉquipe === é.noÉquipe && !j.estÉquipe);
+        const joueursStats = membresÉquipe.map(j => {
+          const clé = `${j.noÉquipe}-${j.noJoueur}`;
+          const pts = ptsJoueur[clé] || 0;
+          const pj = partiesJoueurSet[clé]?.size || 0;
+          return { noJoueur: j.noJoueur, noÉquipe: j.noÉquipe, alias: j.alias, prénom: j.prénom, nom: j.nom, points: pts, pj, ptsPJ: pj > 0 ? Math.round(pts / pj * 100) / 100 : 0 };
+        }).sort((a, b) => b.points - a.points);
+        const ptsÉquipe = ptsJoueur[`${é.noÉquipe}-99`] || 0;
+        const totalÉquipe = joueursStats.reduce((s, j) => s + j.points, 0) + ptsÉquipe;
+        return { noÉquipe: é.noÉquipe, nomÉquipe: é.nomÉquipe, totalÉquipe, pjÉquipe, ptsPJÉquipe: pjÉquipe > 0 ? Math.round(totalÉquipe / pjÉquipe * 100) / 100 : 0, ptsÉquipeCollectif: ptsÉquipe, joueurs: joueursStats };
+      }).sort((a, b) => b.totalÉquipe - a.totalÉquipe);
+      return res.json(résultat);
+    }
+
     const ds = getDossierStats(req);
     const sr = getSériesStats(ds);
     const équipes = JSON.parse(

@@ -439,9 +439,9 @@
       <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
     </div>
 
-    <h2>📊 Compteurs 2025-2026</h2>
+    <h2 id="titre-compteurs">📊 Compteurs</h2>
 
-    <div class="toggle-phase">
+    <div id="toggle-phase" class="toggle-phase">
         <button id="btn-tous" class="actif" onclick="setPhase('tous')">Tout</button>
         <button id="btn-saison" onclick="setPhase('saison')">Saison rég.</button>
         <button id="btn-eliminations" onclick="setPhase('eliminations')">Éliminatoires</button>
@@ -525,7 +525,7 @@
     </div>
 
     <div class="note-bas">
-        Calculé automatiquement depuis les parties terminées
+        Calculé automatiquement à partir des parties terminées
     </div>
 
     <script>
@@ -569,13 +569,15 @@
           const sel = document.getElementById("sel-saison");
           sel.innerHTML = saisons.map(s =>
             `<option value="${s}" ${s === saisonStats ? "selected" : ""}>${s}</option>`
-          ).join("");
+          ).join("") + `<option value="cumulatif" ${saisonStats === 'cumulatif' ? 'selected' : ''}>Cumulatif — toutes saisons</option>`;
         }
 
         function changerSaisonStats() {
           saisonStats = document.getElementById("sel-saison").value;
           donnéesThèmes = null;
-          chargerCompteurs();
+          const cumulatif = saisonStats === 'cumulatif';
+          document.getElementById('titre-compteurs').textContent = cumulatif ? '📊 Compteurs — toutes saisons' : `📊 Compteurs ${saisonStats}`;
+          chargerCompteurs(phaseActive);
         }
 
         async function chargerCompteurs(phase = 'tous') {
@@ -590,12 +592,6 @@
             const sidebar = document.getElementById('sidebarThèmes');
             const div = document.getElementById('contenuThemes');
 
-            if (saisonStats === '2025-2026') {
-                donnéesThèmes = [];
-                sidebar.innerHTML = '';
-                div.innerHTML = '<div style="text-align:center;color:var(--gris);padding:40px;font-style:italic;">Non disponible — points attribués de façon arbitraire pour les saison régulière 2025-2026</div>';
-                return;
-            }
 
             const params = new URLSearchParams({ saison: saisonStats });
             if (phase !== 'tous') params.set('phase', phase);
@@ -614,13 +610,16 @@
             const toutBtn = `<button class="btn-tout-afficher" onclick="toutAfficher(this)">Tout afficher</button>`;
 
             div.innerHTML = toutBtn + donnéesThèmes.map((t, i) => {
-                const joueursHtml = t.joueurs.map((j, idx) => `
+                let rangThème = 1;
+                const joueursHtml = t.joueurs.map((j, idx) => {
+                    if (idx > 0 && j.pts !== t.joueurs[idx - 1].pts) rangThème = idx + 1;
+                    return `
                     <div class="thème-joueur${idx >= 5 ? ' caché' : ''}" data-theme="${i}">
-                        <span class="thème-rang">${idx + 1}</span>
+                        <span class="thème-rang">${rangThème}</span>
                         <span class="thème-alias"><a href="stats-joueur.html?noEquipe=${j.noÉquipe}&noJoueur=${j.noJoueur}" style="color:inherit;text-decoration:none;">${j.alias}</a>${j.nom ? `<span class="thème-nom">${j.nom}</span>` : ''}</span>
                         <span class="thème-equipe"><a href="stats-equipe.html?noEquipe=${j.noÉquipe}">${j.nomÉquipe}</a></span>
                         <span class="thème-pts">${j.pts}</span>
-                    </div>`).join('');
+                    </div>`; }).join('');
 
                 const voirToutBtn = t.joueurs.length > 5
                     ? `<button class="btn-voir-tout" onclick="voirTout(${i}, this)">Voir tout (${t.joueurs.length})</button>`
@@ -736,6 +735,13 @@
                 return;
             }
 
+            // Rang partagé si même valeur sur la colonne de tri
+            let rangCourant = 1;
+            const rangs = tousJoueurs.map((j, i) => {
+                if (i > 0 && j[col] !== tousJoueurs[i - 1][col]) rangCourant = i + 1;
+                return rangCourant;
+            });
+
             tbody.innerHTML = tousJoueurs.map((j, i) => {
                 const ptsPJ = j.pj > 0
                     ? (j.points / j.pj).toFixed(2)
@@ -743,7 +749,7 @@
 
                 return `
                     <tr class="ligne-joueur">
-                        <td class="rang">${i + 1}</td>
+                        <td class="rang">${rangs[i]}</td>
                         <td class="gauche"><a href="stats-joueur.html?noEquipe=${j.noÉquipe}&noJoueur=${j.noJoueur}" style="color:inherit;text-decoration:none;">${j.alias}${j.nom ? ` <span style="font-weight:400;color:var(--gris);">${j.nom}</span>` : ''}</a></td>
                         <td class="gauche"><a href="stats-equipe.html?noEquipe=${j.noÉquipe}" style="color:var(--accent);text-decoration:none;font-weight:600;">${j.nomÉquipe}</a></td>
                         <td>${j.pj || '—'}</td>
@@ -823,7 +829,10 @@
         fetch('/api/stats/phase').then(r => r.json()).then(d => {
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         });
-        chargerSélécteurSaison().then(() => chargerCompteurs());
+        chargerSélécteurSaison().then(() => {
+          document.getElementById('titre-compteurs').textContent = saisonStats === 'cumulatif' ? '📊 Compteurs — toutes saisons' : `📊 Compteurs ${saisonStats}`;
+          chargerCompteurs();
+        });
         function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
         document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
     </script>
