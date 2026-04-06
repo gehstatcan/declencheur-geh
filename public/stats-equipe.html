@@ -90,6 +90,21 @@
 
     <h2 id="titreÉquipe">Chargement...</h2>
 
+    <div id="résumé-classement" style="display:none; background:var(--fond-carte); border-radius:12px; padding:14px 18px; margin-bottom:16px; align-items:center; gap:20px; flex-wrap:wrap; font-size:0.9em;">
+        <span id="cl-position" style="font-size:1.3em; font-weight:700; color:var(--accent); min-width:40px;"></span>
+        <span style="color:var(--gris); font-size:0.85em;">|</span>
+        <span><strong id="cl-mj"></strong> <span style="color:var(--gris);">MJ</span></span>
+        <span><strong id="cl-g"></strong> <span style="color:var(--gris);">G</span></span>
+        <span><strong id="cl-gp"></strong> <span style="color:var(--gris);">GP</span></span>
+        <span><strong id="cl-pn"></strong> <span style="color:var(--gris);">PN</span></span>
+        <span><strong id="cl-pp"></strong> <span style="color:var(--gris);">PP</span></span>
+        <span><strong id="cl-p"></strong> <span style="color:var(--gris);">P</span></span>
+        <span style="color:var(--gris); font-size:0.85em;">|</span>
+        <span><strong id="cl-pts"></strong> <span style="color:var(--gris);">pts</span></span>
+        <span style="color:var(--gris);"><strong id="cl-pct"></strong></span>
+        <a href="stats-classement.html" id="cl-lien" style="margin-left:auto; color:var(--accent); font-size:0.85em; text-decoration:none;">Voir classement →</a>
+    </div>
+
     <div class="section">
         <h3>Parties</h3>
         <table>
@@ -155,7 +170,10 @@
                 return;
             }
 
-            const data = await fetch(`/api/stats/equipe/${noÉquipe}?saison=${saisonStats}`).then(r => r.json());
+            const [data, classement] = await Promise.all([
+                fetch(`/api/stats/equipe/${noÉquipe}?saison=${saisonStats}`).then(r => r.json()),
+                fetch(`/api/stats/classement?saison=${saisonStats}`).then(r => r.json()),
+            ]);
             if (data.erreur) {
                 document.getElementById('titreÉquipe').textContent = data.erreur;
                 return;
@@ -163,6 +181,28 @@
 
             document.title = `${data.équipe.nomÉquipe} — GEH Statcan`;
             document.getElementById('titreÉquipe').textContent = data.équipe.nomÉquipe;
+
+            // Résumé classement
+            const c = classement.find(e => e.noÉquipe === noÉquipe);
+            if (c) {
+                let rang = 1;
+                const rangs = classement.map((e, i) => {
+                    if (i > 0 && e.pct !== classement[i - 1].pct) rang = i + 1;
+                    return rang;
+                });
+                const pos = rangs[classement.indexOf(c)];
+                document.getElementById('cl-position').textContent = `${pos}e`;
+                document.getElementById('cl-mj').textContent = c.MJ;
+                document.getElementById('cl-g').textContent = c.G;
+                document.getElementById('cl-gp').textContent = c.GP;
+                document.getElementById('cl-pn').textContent = c.PN;
+                document.getElementById('cl-pp').textContent = c.PP;
+                document.getElementById('cl-p').textContent = c.P;
+                document.getElementById('cl-pts').textContent = c.pts;
+                document.getElementById('cl-pct').textContent = `(${c.pct}%)`;
+                document.getElementById('cl-lien').href = `stats-classement.html?saison=${saisonStats}`;
+                document.getElementById('résumé-classement').style.display = 'flex';
+            }
 
             afficherParties(data.parties);
             afficherJoueurs(data.joueurs);
