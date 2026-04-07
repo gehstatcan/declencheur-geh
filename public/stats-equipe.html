@@ -35,8 +35,15 @@
         .dropdown-menu.ouvert { display: flex; }
         .dropdown-menu a { font-size: 0.9em; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: var(--gris); background: transparent; border: none; transition: all 0.2s; white-space: nowrap; }
         .dropdown-menu a:hover { background: var(--fond-champ); color: var(--texte); }
-)        h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8em; letter-spacing: 1px; color: var(--accent); margin-bottom: 16px; text-align: center; }
+        tbody tr.ligne-partie { border-bottom: 1px solid var(--fond-champ); transition: background 0.15s; }
+        tbody tr.ligne-partie:hover { background: var(--fond); }
+        h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8em; letter-spacing: 1px; color: var(--accent); margin-bottom: 16px; text-align: center; }
         h3 { font-size: 1em; font-weight: 600; color: var(--accent); margin-bottom: 12px; border-bottom: 2px solid var(--fond-champ); padding-bottom: 6px; }
+        .lien-bouton { display: inline-block; font-size: 0.78em; padding: 3px 10px; border-radius: 12px; text-decoration: none; font-weight: 600; transition: background 0.2s; }
+        .lien-teams { background: #4b6cb7; color: white; }
+        .lien-teams:hover { background: #3a5498; }
+        .lien-rejoindre { background: var(--vert); color: white; }
+        .lien-rejoindre:hover { background: #219a52; }
         .section { width: 100%; max-width: 860px; background: var(--fond-carte); border-radius: var(--rayon); padding: 20px; margin-bottom: 24px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.92em; }
         thead th { background: var(--fond-champ); color: var(--texte); padding: 8px 12px; font-weight: 600; text-align: center; }
@@ -54,14 +61,24 @@
         .score { font-weight: 700; }
         .score-gagnant { color: var(--vert); }
         .score-perdant { color: var(--rouge); }
-        .btn-expand { background: var(--fond-champ); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: 700; font-size: 0.85em; line-height: 22px; color: var(--accent); }
+        td.date { color: var(--gris); font-size: 0.88em; white-space: nowrap; }
+        td.équipe { font-weight: 600; color: var(--texte); }
+        td.score { font-family: 'Bebas Neue', sans-serif; font-size: 1.4em; letter-spacing: 1px; text-align: center; white-space: nowrap; width: 110px; }
+        td.liens { text-align: center; white-space: nowrap; }
+        .score-avenir { color: var(--gris); font-size: 0.55em; font-family: 'Inter', sans-serif; }
+        .btn-expand { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--accent); background: transparent; color: var(--accent); font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; line-height: 1; }
+        .btn-expand:hover { background: var(--accent); color: white; }
         .btn-expand.ouvert { background: var(--accent); color: white; }
-        .ligne-expand { display: none; }
+        .ligne-expand { display: none; background: var(--fond); }
         .ligne-expand.visible { display: table-row; }
-        .zone-détail { padding: 10px 16px; background: var(--fond); border-top: 1px solid var(--fond-champ); }
-        .détail-joueurs { display: flex; flex-wrap: wrap; gap: 8px; }
-        .badge-joueur { background: var(--fond-carte); border-radius: 8px; padding: 4px 10px; font-size: 0.88em; }
-        .badge-joueur .pts-badge { font-weight: 700; color: var(--accent); margin-left: 6px; }
+        .zone-joueurs { padding: 12px 16px 16px 52px; background: var(--fond); border-top: 1px solid var(--fond-champ); }
+        .grille-joueurs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 40px; }
+        .colonne-équipe h4 { font-size: 0.85em; color: var(--accent); font-weight: 600; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--fond-champ); }
+        .joueur-ligne { display: flex; justify-content: space-between; font-size: 0.88em; padding: 3px 0; color: var(--texte); }
+        .joueur-ligne .pts { font-weight: 600; color: var(--accent); margin-left: 8px; }
+        .joueur-ligne .pts-zero { color: var(--gris); font-weight: normal; }
+        .lien-match { background: var(--fond-champ); color: var(--texte); border: 1px solid #ccc; }
+        .lien-match:hover { background: var(--accent); color: white; border-color: var(--accent); }
         #msg { text-align: center; color: var(--gris); padding: 40px; }
     </style>
 </head>
@@ -111,14 +128,16 @@
             <thead>
                 <tr>
                     <th style="width:32px;"></th>
+                    <th style="width:36px; color:var(--gris);">#</th>
                     <th class="gauche">Date</th>
-                    <th class="gauche">Adversaire</th>
-                    <th>Résultat</th>
-                    <th>Score</th>
+                    <th class="équipe" style="text-align:right;">Équipe A</th>
+                    <th class="score">Score</th>
+                    <th class="équipe" style="text-align:left;">Équipe B</th>
+                    <th class="liens"></th>
                 </tr>
             </thead>
             <tbody id="tbodyParties">
-                <tr><td colspan="5" id="msg">Chargement...</td></tr>
+                <tr><td colspan="7" id="msg" style="text-align:center;color:var(--gris);padding:30px;">Chargement...</td></tr>
             </tbody>
         </table>
     </div>
@@ -145,6 +164,7 @@
         const params = new URLSearchParams(location.search);
         const noÉquipe = parseInt(params.get('noEquipe'));
         let saisonStats = params.get("saison") || null;
+        let donnéesParties = [];
 
         async function chargerSélécteurSaison() {
           const [saisonsRes, activeRes] = await Promise.all([
@@ -204,47 +224,66 @@
                 document.getElementById('résumé-classement').style.display = 'flex';
             }
 
-            afficherParties(data.parties);
+            // Combine upcoming + played, sorted by noPartie ascending
+            donnéesParties = [...(data.partiesÀVenir || []), ...(data.parties || [])]
+                .sort((a, b) => a.noPartie - b.noPartie);
+            afficherParties(donnéesParties);
             afficherJoueurs(data.joueurs);
         }
 
         function afficherParties(parties) {
             const tbody = document.getElementById('tbodyParties');
             if (parties.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gris);padding:30px;">Aucune partie jouée</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gris);padding:30px;">Aucune partie</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = parties.map((p, i) => {
-                const date = new Date(p.date + 'T00:00:00').toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
-                const classeR = `résultat-${p.résultat}`;
-                const classeScore = p.résultat === 'V' ? 'score-gagnant' : p.résultat === 'D' ? 'score-perdant' : '';
-                const idLigne = `partie-${p.noPartie}`;
+            tbody.innerHTML = parties.map(p => {
+                const estTerminée = p.terminée;
 
-                const joueursSorted = [...p.joueurs].sort((a, b) => b.pts - a.pts);
-                const joueursHtml = joueursSorted.length > 0
-                    ? `<table style="width:100%;border-collapse:collapse;font-size:0.9em;">
-                        ${joueursSorted.map(j => `
-                        <tr style="border-bottom:1px solid var(--fond-champ);">
-                            <td style="padding:5px 12px;text-align:left;${j.estCollectif ? 'color:var(--gris);font-style:italic;' : ''}">${j.alias}</td>
-                            <td style="padding:5px 12px;text-align:right;font-weight:700;color:var(--accent);">${j.pts}</td>
-                        </tr>`).join('')}
-                      </table>`
-                    : '<span style="color:var(--gris);padding:8px 12px;display:block;">Aucune donnée</span>';
+                // Score
+                let scoreHtml = '';
+                if (estTerminée && p.scoreA !== null && p.scoreB !== null) {
+                    const aGagne = p.scoreA > p.scoreB;
+                    const bGagne = p.scoreB > p.scoreA;
+                    scoreHtml = `<span class="${aGagne ? 'score-gagnant' : 'score-perdant'}">${p.scoreA}</span>
+                        <span style="color:var(--gris);font-size:0.5em;font-family:'Inter',sans-serif;"> — </span>
+                        <span class="${bGagne ? 'score-gagnant' : 'score-perdant'}">${p.scoreB}</span>`;
+                } else {
+                    scoreHtml = `<span class="score-avenir">à venir</span>`;
+                }
 
-                const lienAdv = `<a href="stats-equipe.html?noEquipe=${p.noAdversaire}" style="color:inherit;text-decoration:none;font-weight:600;">${p.nomAdversaire}</a>`;
+                // Liens
+                let liensHtml = '';
+                if (p.lienRéunion && !estTerminée) {
+                    liensHtml += `<a href="${p.lienRéunion}" target="_blank" class="lien-bouton lien-teams">📹 Teams</a>`;
+                }
+                if (!estTerminée) {
+                    liensHtml += `<a href="joueur.html?noPartie=${p.noPartie}" class="lien-bouton lien-rejoindre">▶ Rejoindre</a>`;
+                }
+                if (estTerminée) {
+                    liensHtml += `<a href="stats-match.html?noPartie=${p.noPartie}" class="lien-bouton lien-match">📋 Feuille</a>`;
+                }
+
+                const lienÉquipeA = `<a href="stats-equipe.html?noEquipe=${p.noÉquipeA}&saison=${saisonStats}" style="color:inherit;text-decoration:none;">${p.nomÉquipeA}</a>`;
+                const lienÉquipeB = `<a href="stats-equipe.html?noEquipe=${p.noÉquipeB}&saison=${saisonStats}" style="color:inherit;text-decoration:none;">${p.nomÉquipeB}</a>`;
 
                 return `
-                    <tr>
-                        <td><button class="btn-expand" id="btn-${idLigne}" onclick="toggleExpand('${idLigne}')">+</button></td>
-                        <td class="gauche">${date}</td>
-                        <td class="gauche">${lienAdv}</td>
-                        <td class="${classeR}">${p.résultat}</td>
-                        <td class="score ${classeScore}">${p.scoreÉquipe} — ${p.scoreAdv}</td>
+                    <tr class="ligne-partie">
+                        <td style="width:40px;padding:8px;">
+                            <button class="btn-expand" id="btn-${p.noPartie}" onclick="toggleExpand(${p.noPartie})"
+                                ${!estTerminée ? 'style="visibility:hidden"' : ''}>+</button>
+                        </td>
+                        <td style="color:var(--gris);font-size:0.85em;">${p.noPartie}</td>
+                        <td class="date">${formaterDate(p.date)}</td>
+                        <td class="équipe" style="text-align:right;">${lienÉquipeA}</td>
+                        <td class="score">${scoreHtml}</td>
+                        <td class="équipe">${lienÉquipeB}</td>
+                        <td class="liens">${liensHtml}</td>
                     </tr>
-                    <tr class="ligne-expand" id="expand-${idLigne}">
-                        <td colspan="5" style="padding:0;">
-                            <div class="zone-détail">${joueursHtml}</div>
+                    <tr class="ligne-expand" id="expand-${p.noPartie}">
+                        <td colspan="7" style="padding:0;">
+                            <div class="zone-joueurs" id="joueurs-${p.noPartie}">Chargement...</div>
                         </td>
                     </tr>`;
             }).join('');
@@ -264,13 +303,63 @@
             }).join('');
         }
 
-        function toggleExpand(id) {
-            const ligne = document.getElementById(`expand-${id}`);
-            const btn = document.getElementById(`btn-${id}`);
-            const ouvert = ligne.classList.contains('visible');
-            ligne.classList.toggle('visible', !ouvert);
-            btn.classList.toggle('ouvert', !ouvert);
-            btn.textContent = ouvert ? '+' : '−';
+        function toggleExpand(noPartie) {
+            const ligne = document.getElementById(`expand-${noPartie}`);
+            const btn = document.getElementById(`btn-${noPartie}`);
+            const estOuvert = ligne.classList.contains('visible');
+            if (estOuvert) {
+                ligne.classList.remove('visible');
+                btn.classList.remove('ouvert');
+                btn.textContent = '+';
+            } else {
+                ligne.classList.add('visible');
+                btn.classList.add('ouvert');
+                btn.textContent = '−';
+                chargerJoueursPartie(noPartie);
+            }
+        }
+
+        async function chargerJoueursPartie(noPartie) {
+            const partie = donnéesParties.find(p => p.noPartie === noPartie);
+            if (!partie) return;
+            const div = document.getElementById(`joueurs-${noPartie}`);
+            const data = await fetch(`/api/stats/partie/${noPartie}/joueurs`).then(r => r.json());
+
+            const rendreListe = (équipeData) => {
+                if (!équipeData || équipeData.joueurs.length === 0)
+                    return '<em style="color:var(--gris)">Aucun joueur</em>';
+                return équipeData.joueurs.map(j => `
+                    <div class="joueur-ligne">
+                        <a href="stats-joueur.html?noEquipe=${équipeData.noÉquipe}&noJoueur=${j.noJoueur}" style="color:inherit;text-decoration:none;">
+                            ${j.alias}${j.nom ? ` <span style="opacity:0.7;font-size:0.9em;">${j.nom}</span>` : ''}
+                        </a>
+                        <span class="pts ${j.points === 0 ? 'pts-zero' : ''}">${j.points} pts</span>
+                    </div>`).join('');
+            };
+
+            const [équipeA, équipeB] = data;
+            const titreÉquipe = (nom, éq) => {
+                const col = éq?.pointsCollectifs > 0
+                    ? `<span class="pts" style="float:right">${éq.pointsCollectifs} pts</span>`
+                    : '';
+                return `${nom}${col}`;
+            };
+            div.innerHTML = `
+                <div class="grille-joueurs">
+                    <div class="colonne-équipe">
+                        <h4>${titreÉquipe(partie.nomÉquipeA, équipeA)}</h4>
+                        ${rendreListe(équipeA)}
+                    </div>
+                    <div class="colonne-équipe">
+                        <h4>${titreÉquipe(partie.nomÉquipeB, équipeB)}</h4>
+                        ${rendreListe(équipeB)}
+                    </div>
+                </div>`;
+        }
+
+        function formaterDate(dateStr) {
+            const d = new Date(dateStr + 'T12:00:00');
+            return d.toLocaleDateString('fr-CA', { weekday: 'short', month: 'short', day: 'numeric' });
         }
 
         fetch('/api/stats/phase').then(r => r.json()).then(d => {

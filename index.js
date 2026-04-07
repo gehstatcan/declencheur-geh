@@ -1688,7 +1688,7 @@ app.get('/api/stats/equipe/:noEquipe', (req, res) => {
       alignements = contenu ? JSON.parse(contenu) : [];
     } catch (e) { alignements = []; }
 
-    const membresÉquipe = joueursDs.filter(j => j.noÉquipe === noÉquipe);
+    const membresÉquipe = joueursDs.filter(j => j.noÉquipe === noÉquipe && j.noJoueur !== 99);
 
     // Calcul des points par partie et par joueur
     const calcPts = (r) => {
@@ -1712,35 +1712,20 @@ app.get('/api/stats/equipe/:noEquipe', (req, res) => {
       const p = partiesDs.find(p => p.noPartie === noPartie);
       if (!p) return null;
       const noAdv = p.noÉquipeA === noÉquipe ? p.noÉquipeB : p.noÉquipeA;
-      const adversaire = équipesDs.find(e => e.noÉquipe === noAdv);
       const scores = scoresParPartie[noPartie] || {};
       const scoreÉquipe = scores[noÉquipe] || 0;
       const scoreAdv = scores[noAdv] || 0;
-      const résultat = scoreÉquipe > scoreAdv ? 'V' : scoreÉquipe < scoreAdv ? 'D' : 'N';
 
-      // Contribution par joueur dans cette partie
-      const répPartie = répondants.filter(r => r.noPartie === noPartie && r.noÉquipe === noÉquipe);
-      const ptsParJoueur = {};
-      répPartie.forEach(r => {
-        const clé = r.noJoueur;
-        if (!ptsParJoueur[clé]) ptsParJoueur[clé] = 0;
-        ptsParJoueur[clé] += calcPts(r);
-      });
-
-      // Tous les joueurs alignés, même ceux à 0 pts
-      const alignPartie = alignements.find(a => a.noPartie === noPartie && a.noÉquipe === noÉquipe);
-      const tousNoJoueurs = [...new Set([
-        ...Object.keys(ptsParJoueur).map(Number),
-        ...(alignPartie?.joueurs || [])
-      ])];
-
-      const joueursPartie = tousNoJoueurs.map(nJ => {
-        if (nJ === 99) return { alias: 'Collectif', pts: ptsParJoueur[99] || 0, estCollectif: true };
-        const j = membresÉquipe.find(j => j.noJoueur === nJ);
-        return { alias: j?.alias || `Joueur ${nJ}`, pts: ptsParJoueur[nJ] || 0, estCollectif: false };
-      }).sort((a, b) => b.pts - a.pts);
-
-      return { noPartie, date: p.date, noAdversaire: noAdv, nomAdversaire: adversaire?.nomÉquipe || `Équipe ${noAdv}`, scoreÉquipe, scoreAdv, résultat, joueurs: joueursPartie };
+      const éqQ = équipesDs.find(e => e.noÉquipe === p.noÉquipeQuestionnaire);
+      return {
+        noPartie, date: p.date, terminée: true,
+        noÉquipeA: p.noÉquipeA, nomÉquipeA: équipesDs.find(e => e.noÉquipe === p.noÉquipeA)?.nomÉquipe || '',
+        noÉquipeB: p.noÉquipeB, nomÉquipeB: équipesDs.find(e => e.noÉquipe === p.noÉquipeB)?.nomÉquipe || '',
+        scoreA: p.noÉquipeA === noÉquipe ? scoreÉquipe : scoreAdv,
+        scoreB: p.noÉquipeB === noÉquipe ? scoreÉquipe : scoreAdv,
+        noQuestionnaire: p.noQuestionnaire, nomÉquipeQuestionnaire: éqQ?.nomÉquipe || null,
+        lienRéunion: p.lienRéunion || null, animateur: p.animateur || '',
+      };
     }).filter(Boolean).sort((a, b) => a.date.localeCompare(b.date));
 
     // Compteurs joueurs (tous les membres, même 0 pts)
@@ -1773,7 +1758,28 @@ app.get('/api/stats/equipe/:noEquipe', (req, res) => {
       return { noJoueur: j.noJoueur, alias: j.alias, prénom: j.prénom, nom: j.nom, pts, pj, ptsPJ: pj > 0 ? Math.round(pts / pj * 100) / 100 : 0 };
     }).sort((a, b) => b.pts - a.pts);
 
-    res.json({ équipe, parties: partiesÉquipe, joueurs: joueursStats });
+    // Parties non jouées de cette équipe
+    const partiesJouéesSet = new Set(répondants.map(r => r.noPartie));
+    const partiesÀVenir = partiesDs
+      .filter(p => (p.noÉquipeA === noÉquipe || p.noÉquipeB === noÉquipe) && !partiesJouéesSet.has(p.noPartie))
+      .map(p => {
+        return {
+          noPartie: p.noPartie,
+          date: p.date,
+          terminée: false,
+          noÉquipeA: p.noÉquipeA,
+          nomÉquipeA: équipesDs.find(e => e.noÉquipe === p.noÉquipeA)?.nomÉquipe || '',
+          noÉquipeB: p.noÉquipeB,
+          nomÉquipeB: équipesDs.find(e => e.noÉquipe === p.noÉquipeB)?.nomÉquipe || '',
+          lienRéunion: p.lienRéunion || null,
+          animateur: p.animateur || '',
+          noQuestionnaire: p.noQuestionnaire || null,
+          nomÉquipeQuestionnaire: équipesDs.find(e => e.noÉquipe === p.noÉquipeQuestionnaire)?.nomÉquipe || null,
+        };
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({ équipe, parties: partiesÉquipe, partiesÀVenir, joueurs: joueursStats });
   } catch (e) {
     console.error('Erreur stats équipe:', e);
     res.status(500).json({ erreur: e.message });
