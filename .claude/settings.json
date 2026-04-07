@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const j=require\\('/tmp/equipe.json'\\); console.log\\('parties:', j.parties.length, '| partiesÀVenir:', j.partiesÀVenir.length\\); if\\(j.partiesÀVenir[0]\\) console.log\\('sample àVenir:', JSON.stringify\\(j.partiesÀVenir[0]\\)\\);\")"
+    ]
+  }
+}

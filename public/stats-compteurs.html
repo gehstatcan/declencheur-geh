@@ -701,13 +701,20 @@
                 return;
             }
 
+            let rangÉq = 1;
             tbody.innerHTML = équipes.map((é, i) => {
                 const pj = é.pjÉquipe || '—';
                 const pts = é.ptsÉquipeCollectif || 0;
                 const ptsPJ = é.pjÉquipe > 0 ? (pts / é.pjÉquipe).toFixed(2) : '—';
+                if (i > 0) {
+                    const prev = équipes[i - 1];
+                    const prevPts = prev.ptsÉquipeCollectif || 0;
+                    const prevPtsPJ = prev.pjÉquipe > 0 ? (prevPts / prev.pjÉquipe).toFixed(2) : '—';
+                    if (pts !== prevPts || ptsPJ !== prevPtsPJ) rangÉq = i + 1;
+                }
 
                 return `<tr>
-                    <td class="rang">${i + 1}</td>
+                    <td class="rang">${rangÉq}</td>
                     <td class="gauche"><a href="stats-equipe.html?noEquipe=${é.noÉquipe}" style="color:inherit;text-decoration:none;font-weight:600;">${é.nomÉquipe}</a></td>
                     <td>${pj}</td>
                     <td class="pts">${pts}</td>
@@ -718,14 +725,33 @@
 
         function afficherJoueurs() {
             const tbody = document.getElementById('tbodyJoueurs');
+
+            // col : colonne de tri active (ex: 'points', 'ptsPJ', 'alias')
+            // dir : direction du tri — 1 = croissant, -1 = décroissant
+            // Ces valeurs sont mises à jour par les clics sur les en-têtes de colonnes (voir triÉtat)
             const { col, dir } = triÉtat.joueurs;
-            const tousJoueurs = trierPar(
-                donnéesCompteurs.flatMap(é => é.joueurs
-                    .filter(j => j.noJoueur !== 99 && j.points > 0)
-                    .map(j => ({ ...j, nomÉquipe: é.nomÉquipe, ptsPJ: j.pj > 0 ? j.points / j.pj : 0 }))
-                ),
-                col, dir
-            );
+
+            // Aplatir toutes les équipes en une liste de joueurs
+            // - Exclure noJoueur === 99 (joueur collectif/équipe, pas un vrai joueur)
+            // - Exclure les joueurs à 0 pts (pas encore joué ou aucun point)
+            // - Ajouter nomÉquipe et ptsPJ calculé pour faciliter le tri et l'affichage
+            const tousJoueurs = donnéesCompteurs.flatMap(é => é.joueurs
+                .filter(j => j.noJoueur !== 99 && j.points > 0)
+                .map(j => ({ ...j, nomÉquipe: é.nomÉquipe, ptsPJ: j.pj > 0 ? j.points / j.pj : 0 }))
+            ).sort((a, b) => {
+                const va = a[col] ?? '';
+                const vb = b[col] ?? '';
+                // Tri alphabétique pour les colonnes texte (alias, nomÉquipe)
+                if (typeof va === 'string') return dir * va.localeCompare(vb, 'fr');
+                // Tri principal sur la colonne active
+                if (va !== vb) return dir * (va - vb);
+                // Départage en cas d'égalité sur la colonne principale :
+                //   - égalité sur pts/pj → départager par pts total (desc)
+                //   - égalité sur pts    → départager par pts/pj (desc)
+                if (col === 'ptsPJ') return b.points - a.points;
+                if (col === 'points') return b.ptsPJ - a.ptsPJ;
+                return 0;
+            });
 
             if (tousJoueurs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6"
@@ -735,14 +761,21 @@
                 return;
             }
 
-            // Rang partagé si même valeur sur la colonne de tri
+            // Calcul des rangs partagés (ex æquo)
+            // Deux joueurs ont le même rang seulement si pts ET pts/pj sont tous les deux identiques.
+            // Autrement, le rang avance à i+1 (position réelle dans le tableau trié).
             let rangCourant = 1;
             const rangs = tousJoueurs.map((j, i) => {
-                if (i > 0 && j[col] !== tousJoueurs[i - 1][col]) rangCourant = i + 1;
+                if (i > 0) {
+                    const prev = tousJoueurs[i - 1];
+                    if (j.points !== prev.points || j.ptsPJ !== prev.ptsPJ) rangCourant = i + 1;
+                }
                 return rangCourant;
             });
 
             tbody.innerHTML = tousJoueurs.map((j, i) => {
+                // Affichage de pts/pj arrondi à 2 décimales (calculé ici pour l'affichage seulement ;
+                // la valeur exacte dans j.ptsPJ sert au tri et à la comparaison des rangs)
                 const ptsPJ = j.pj > 0
                     ? (j.points / j.pj).toFixed(2)
                     : '—';
