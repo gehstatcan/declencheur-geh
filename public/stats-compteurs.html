@@ -493,8 +493,8 @@
                         <th class="gauche th-tri" data-table="joueurs" data-col="alias">Joueur</th>
                         <th class="gauche th-tri" data-table="joueurs" data-col="nomÉquipe">Équipe</th>
                         <th class="th-tri" data-table="joueurs" data-col="pj">PJ</th>
-                        <th class="th-tri actif" data-table="joueurs" data-col="points">Pts ▼</th>
-                        <th class="th-tri" data-table="joueurs" data-col="ptsPJ">Pts/PJ</th>
+                        <th class="th-tri" data-table="joueurs" data-col="points">Pts</th>
+                        <th class="th-tri actif" data-table="joueurs" data-col="ptsPJ">Pts/PJ ▼</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyJoueurs">
@@ -534,7 +534,7 @@
         let donnéesThèmes = null;
         const triÉtat = {
             équipes: { col: 'ptsÉquipeCollectif', dir: -1 },
-            joueurs: { col: 'points', dir: -1 }
+            joueurs: { col: 'ptsPJ', dir: -1 }
         };
 
         function afficherOnglet(id, btn) {
