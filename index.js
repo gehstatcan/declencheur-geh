@@ -914,8 +914,9 @@ app.get("/api/stats/classement", (req, res) => {
       };
     });
 
-    // Calculer les scores par partie
+    // Calculer les scores par partie (saison régulière seulement — exclure éliminatoires)
     const partiesTerminées = parties.filter((p) =>
+      (p.phase || 'saison') !== 'eliminations' &&
       répondants.some((r) => r.noPartie === p.noPartie),
     );
 
@@ -1522,6 +1523,12 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
 
     const répJoueur = répFiltrés.filter(r => r.noÉquipe === noÉquipe && r.noJoueur === noJoueur);
 
+    // Version filtrée pour thèmes/questions : exclure P1-35 de la saison synthétique
+    const saisonDemandée = req.query.saison || saisonActive;
+    const répJoueurRéel = saisonDemandée === SAISON_SYNTHÉTIQUE
+      ? répJoueur.filter(r => r.noPartie > NO_PARTIE_SYNTHÉTIQUE_MAX)
+      : répJoueur;
+
     // PJ depuis alignements
     const pj = alignFiltés.filter(a => a.noÉquipe === noÉquipe && (a.joueurs || []).includes(noJoueur)).length;
 
@@ -1609,7 +1616,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
       t.séries.forEach(s => { thèmeLookup[t.noQuestionnaire][s.noSérie] = s.thème; });
     });
     const ptsParThème = {};
-    répJoueur.forEach(r => {
+    répJoueurRéel.forEach(r => {
       const noQ = questParPartie[r.noPartie];
       const thème = noQ && thèmeLookup[noQ] ? thèmeLookup[noQ][r.noSérie] : null;
       if (!thème) return;
@@ -1634,7 +1641,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
       },
       parties: partiesJoueur,
       themes: themesResult,
-      questions: répJoueur.map(r => {
+      questions: répJoueurRéel.map(r => {
         const noQ = questParPartie[r.noPartie];
         const thème = noQ && thèmeLookup[noQ] ? thèmeLookup[noQ][r.noSérie] : null;
         const série = sr.find(s => s.noSérie === r.noSérie);

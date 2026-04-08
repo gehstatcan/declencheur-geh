@@ -279,10 +279,6 @@
 
         function afficherQuestions(questions) {
             const tbody = document.getElementById('tbodyQuestions');
-            if (saisonStats === '2025-2026') {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gris);padding:20px;font-style:italic;">Non disponible — questions attribuées de façon arbitraire pour les saison régulière 2025-2026</td></tr>';
-                return;
-            }
             if (!questions.length) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Aucune question</td></tr>';
                 return;
@@ -306,10 +302,6 @@
 
         function afficherThèmes(themes) {
             const tbody = document.getElementById('tbodyThèmes');
-            if (saisonStats === '2025-2026') {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:20px;font-style:italic;">Non disponible — points attribués de façon arbitraire pour les saison régulière 2025-2026</td></tr>';
-                return;
-            }
             if (!themes.length) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Aucune donnée</td></tr>';
                 return;
@@ -379,9 +371,7 @@
             }
 
             // — Radar par thème —
-            if (saisonStats === '2025-2026') {
-                document.getElementById('graphThemes').closest('.graphique-carte').style.display = 'none';
-            } else if (themes.length >= 3) {
+            if (themes.length >= 3) {
                 const max = themes[0].pts;
                 new Chart(document.getElementById('graphThemes'), {
                     type: 'radar',
