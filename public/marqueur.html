@@ -517,6 +517,9 @@
             <button class="bouton bouton-mauvaise" id="btnMauvaise" onclick="mauvaiseRéponse()">
                 ❌ Mauvaise
             </button>
+            <button class="bouton" style="background:#7f8c8d;" onclick="resetBuzz()">
+                🔄 Reset
+            </button>
         </div>
 
         <!-- Bouton annuler -->
@@ -553,6 +556,17 @@
             <button id="btnPtsJoueurs" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 16px;" onclick="togglePtsJoueurs()">
                 📊 Afficher pts/joueur
             </button>
+        </div>
+
+        <!-- Timer auto-reset -->
+        <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:0.9em; cursor:pointer;">
+                <input type="checkbox" id="timerActif" onchange="toggleTimer()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+                ⏱️ Reset auto après
+            </label>
+            <input type="number" id="timerSecondes" value="5" min="1" max="30" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; text-align:center;">
+            <span style="font-size:0.9em; color:var(--gris);">sec</span>
+            <span id="timerAffichage" style="font-size:0.9em; color:var(--accent); font-weight:700; min-width:24px;"></span>
         </div>
 
         <!-- Volume et test des sons -->
@@ -600,6 +614,8 @@
         // Conserver la liste des joueurs connectés entre les événements socket
         // Évite de passer [] par erreur lors des appels à afficherÉquipes()
         let derniersJoueursConnectés = [];
+        let timerReset = null;
+        let timerInterval = null;
 
         // Web Audio pour les sons
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -644,6 +660,8 @@
                 case 'double_bip':     bip('sine', 660, 0.5, t, 0.15); bip('sine', 660, 0.5, t + 0.2, 0.15); break;
                 case 'montee_douce':   bip('sine', 440, 0.45, t, 0.4, 880); break;
                 case 'gong':           bip('triangle', 220, 0.7, t, 1.2); break;
+                case 'avance_question': bip('sine', 520, 0.12, t, 0.08); bip('sine', 380, 0.08, t + 0.09, 0.1); break;
+                case 'falldown': bip('sine', 600, 0.25, t, 0.15, 150); bip('sine', 400, 0.18, t + 0.15, 0.2, 80); break;
                 default:               bip('sine', 440, 0.5, t, 0.8);
             }
         }
@@ -725,6 +743,8 @@
 
             afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
 
+            démarrerTimer();
+
             // Afficher les boutons de points
             const { série, question } = obtenirQuestionCourante();
 
@@ -784,6 +804,7 @@
 
         socket.on('réplique', (noÉquipe) => {
             joueurAyantBuzzé = null;
+            afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
             const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
             const buzzer = document.getElementById('buzzer');
             buzzer.textContent = `↩️ Droit de réplique — ${équipe ? équipe.nomÉquipe : ''}`;
@@ -799,7 +820,10 @@
         });
 
         socket.on('questionMisÀJour', (info) => {
-            if (info) afficherInfoQuestion(info);
+            if (info) {
+                if (modeActuel === 'jeu') jouerSonParId('avance_question');
+                afficherInfoQuestion(info);
+            }
         });
 
         // Actions animateur
@@ -835,6 +859,7 @@
 
         function bonneRéponse(points, estSecondaire = false) {
             if (!joueurAyantBuzzé) return;
+            annulerTimer();
             socket.emit('attribuerPoints', {
                 noPartie: partieActuelle,
                 noÉquipe: joueurAyantBuzzé.noÉquipe,
@@ -866,10 +891,49 @@
 
         function mauvaiseRéponse() {
             if (!joueurAyantBuzzé) return;
+            annulerTimer();
             socket.emit('mauvaiseRéponse', {
                 noPartie: partieActuelle,
                 noÉquipe: joueurAyantBuzzé.noÉquipe
             });
+        }
+
+        function resetBuzz() {
+            annulerTimer();
+            socket.emit('resetBuzz', partieActuelle);
+        }
+
+        function toggleTimer() {
+            if (!document.getElementById('timerActif').checked) annulerTimer();
+        }
+
+        function démarrerTimer() {
+            if (!document.getElementById('timerActif').checked) return;
+            annulerTimer();
+            let secondes = parseInt(document.getElementById('timerSecondes').value) || 5;
+            const affichage = document.getElementById('timerAffichage');
+            affichage.textContent = secondes;
+            timerInterval = setInterval(() => {
+                secondes--;
+                affichage.textContent = secondes > 0 ? secondes : '';
+                if (secondes <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }, 1000);
+            timerReset = setTimeout(() => {
+                jouerSonParId('falldown');
+                annulerTimer();
+                resetBuzz();
+            }, (parseInt(document.getElementById('timerSecondes').value) || 5) * 1000);
+        }
+
+        function annulerTimer() {
+            clearTimeout(timerReset);
+            clearInterval(timerInterval);
+            timerReset = null;
+            timerInterval = null;
+            document.getElementById('timerAffichage').textContent = '';
         }
 
         // Navigation
@@ -1090,10 +1154,15 @@
 
                     }).join('');
 
+                    const ptsCollectifs = afficherPtsJoueurs ? (derniersScoresJoueurs[`${noÉquipe}_99`] || 0) : 0;
+                    const collectifHTML = afficherPtsJoueurs && ptsCollectifs > 0
+                        ? `<div class="joueur" style="display:flex;justify-content:space-between;align-items:center;font-style:italic;color:var(--gris);">Équipe <span style="font-weight:700;color:var(--accent);margin-left:6px;">${ptsCollectifs}</span></div>`
+                        : '';
+
                     div.innerHTML = `
                     <h2>${équipe ? équipe.nomÉquipe : ''}</h2>
                     <div class="score-valeur">${score}</div>
-                    ${joueursHTML}`;
+                    ${joueursHTML}${collectifHTML}`;
                 });
             });
         }

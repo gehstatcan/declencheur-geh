@@ -618,7 +618,7 @@
             membres.forEach(j => {
                 const option = document.createElement("option");
                 option.value = j.noJoueur;
-                option.textContent = j.alias;
+                option.textContent = [j.prénom, j.nom].filter(Boolean).join(' ') || j.alias;
                 selectJoueurs.appendChild(option);
             });
 

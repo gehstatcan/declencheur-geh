@@ -812,6 +812,7 @@ app.get("/api/stats/calendrier", (req, res) => {
         noQuestionnaire: partie.noQuestionnaire,
         phase: partie.phase || 'saison',
         matchup: partie.matchup || null,
+        animateur: partie.animateur || null,
       };
     });
 
@@ -2223,6 +2224,7 @@ io.on("connection", (socket) => {
         if (répondants.length > 0) {
           // Remettre les scores à zéro avant de recalculer
           état.scores = {};
+          état.scoresJoueurs = {};
 
           // Recalculer les scores à partir des répondants existants
           répondants.forEach((r) => {
@@ -2508,16 +2510,17 @@ io.on("connection", (socket) => {
     const état = obtenirÉtat(noPartie);
     const { série } = questionCourante(état);
 
-    if (série.réplique) {
-      // Droit de réplique à l'équipe adverse
+    if (série.réplique && état.réplique === null) {
+      // Première mauvaise réponse — donner le droit de réplique à l'équipe adverse
       const partie = parties.find((p) => p.noPartie === noPartie);
       état.réplique =
         noÉquipe === partie.noÉquipeA ? partie.noÉquipeB : partie.noÉquipeA;
       état.buzzVerrou = false;
       io.to(`partie-${noPartie}`).emit("réplique", état.réplique);
     } else {
-      // Pas de réplique — question suivante
+      // Déjà en réplique (ou série sans réplique) — question suivante
       avancerQuestion(état);
+      état.réplique = null;
       état.buzzVerrou = false;
       io.to(`partie-${noPartie}`).emit(
         "questionMisÀJour",
@@ -2525,6 +2528,16 @@ io.on("connection", (socket) => {
       );
       io.to(`partie-${noPartie}`).emit("reset");
     }
+  });
+
+  // --------------------------------------------------------
+  // Reset buzzer — libère le verrou sans avancer la question
+  // --------------------------------------------------------
+  socket.on("resetBuzz", (noPartie) => {
+    const état = obtenirÉtat(noPartie);
+    état.buzzVerrou = false;
+    état.réplique = null;
+    io.to(`partie-${noPartie}`).emit("reset");
   });
 
   // --------------------------------------------------------
