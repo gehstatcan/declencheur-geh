@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== "production") {
 // Mode débogage — afficher le temps de réaction
 // Mettre à false en production pour éviter les disputes !
 // ============================================================
-const AFFICHER_TEMPS_RÉACTION = true;
+
 
 const express = require("express");
 const app = express();
@@ -683,6 +683,30 @@ app.get("/api/admin/export-zip", (req, res) => {
 // Accessible sans authentification (via marqueur.html — animateurs sans mot de passe admin)
 app.get("/api/sauvegarde-zip", (_req, res) => {
   exporterZip(res);
+});
+
+// ============================================================
+// Configuration globale — paramètres persistants (config.json)
+// ============================================================
+const cheminConfig = path.join(dossierBase, "config.json");
+
+function lireConfig() {
+  try {
+    if (fs.existsSync(cheminConfig)) return JSON.parse(fs.readFileSync(cheminConfig, "utf-8"));
+  } catch (e) { /* ignore */ }
+  return { timerDéfaut: 5 };
+}
+
+app.get("/api/config", (_req, res) => {
+  res.json(lireConfig());
+});
+
+app.post("/api/config", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  const config = { ...lireConfig(), ...req.body };
+  fs.writeFileSync(cheminConfig, JSON.stringify(config, null, 2), "utf-8");
+  res.json({ succès: true, config });
 });
 
 app.get("/api/alignements", (req, res) => {
@@ -1992,6 +2016,7 @@ function obtenirÉtat(noPartie) {
       noPartie,
       mode: estTerminée ? "terminée" : "initialisation",
       joueursConnectés: [],
+      positionsAléatoires: false,
       scores: {},
       scoresJoueurs: {},
       noSérieActuelle: 1,
@@ -2027,6 +2052,13 @@ function reculerQuestion(état) {
 // ============================================================
 // Avancer à la question suivante
 // ============================================================
+// Libère le verrou buzz et note l'heure côté serveur
+// pour calculer un temps de réaction fiable (même horloge)
+function libérerBuzz(état) {
+  état.buzzVerrou = false;
+  état.tempsDisponible = Date.now();
+}
+
 function avancerQuestion(état) {
   const sérieActuelle = séries.find((s) => s.noSérie === état.noSérieActuelle);
   const maxQuestions = sérieActuelle ? sérieActuelle.questions.length : 1;
@@ -2138,7 +2170,7 @@ function enregistrerRépondant(
   fs.writeFileSync(cheminPartie, JSON.stringify(répondants, null, 2), "utf-8");
 
   avancerQuestion(état);
-  état.buzzVerrou = false;
+  libérerBuzz(état);
 
   // Diffuser à tous les membres de la room de cette partie
   const room = `partie-${état.noPartie}`;
@@ -2174,24 +2206,73 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on("sEnregistrer", (joueur) => {
     const état = obtenirÉtat(joueur.noPartie);
-    // Retirer si déjà présent (reconnexion)
+
+    // Retirer si déjà présent (reconnexion) — conserver la position existante
+    const joueurExistant = état.joueursConnectés.find(
+      (j) => j.noÉquipe === joueur.noÉquipe && j.noJoueur === joueur.noJoueur
+    );
     état.joueursConnectés = état.joueursConnectés.filter(
       (j) =>
         !(j.noÉquipe === joueur.noÉquipe && j.noJoueur === joueur.noJoueur),
     );
+
+    if (état.positionsAléatoires) {
+      if (joueurExistant?.position !== undefined) {
+        // Reconnexion — réutiliser la position déjà assignée
+        joueur.position = joueurExistant.position;
+      } else {
+        // Nouvel arrivant — choisir un slot libre parmi 1..4
+        const positionsOccupées = état.joueursConnectés
+          .filter(j => j.noÉquipe === joueur.noÉquipe && j.position !== undefined)
+          .map(j => j.position);
+        const slotsLibres = [1, 2, 3, 4].filter(p => !positionsOccupées.includes(p));
+        joueur.position = slotsLibres[Math.floor(Math.random() * slotsLibres.length)];
+      }
+    }
+
     état.joueursConnectés.push(joueur);
     io.to(`partie-${joueur.noPartie}`).emit(
       "joueursConnectés",
       état.joueursConnectés,
     );
 
-    // Ajout pour trouver si un joueur se déconnecte et l'identifier
-    état.joueursConnectés.push(joueur);
     socket.joueur = joueur; // ← stocker l'identité du joueur dans le socket
 
     // Envoyer l'état actuel au joueur qui vient de s'enregistrer
     // Permet de détecter si la partie est déjà en cours
     socket.emit("état", état);
+  });
+
+  // --------------------------------------------------------
+  // Toggle positions aléatoires — réassigne ou efface les positions
+  // de tous les joueurs déjà connectés à la partie
+  // --------------------------------------------------------
+  socket.on("togglePositions", ({ noPartie, aléatoire }) => {
+    const état = obtenirÉtat(noPartie);
+    état.positionsAléatoires = aléatoire;
+
+    if (aléatoire) {
+      // Réassigner des positions aléatoires par équipe
+      const parÉquipe = {};
+      état.joueursConnectés.forEach(j => {
+        if (!parÉquipe[j.noÉquipe]) parÉquipe[j.noÉquipe] = [];
+        parÉquipe[j.noÉquipe].push(j);
+      });
+      Object.values(parÉquipe).forEach(joueurs => {
+        const slots = [1, 2, 3, 4].slice(0, joueurs.length);
+        // Mélanger les slots (Fisher-Yates)
+        for (let i = slots.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [slots[i], slots[j]] = [slots[j], slots[i]];
+        }
+        joueurs.forEach((j, i) => { j.position = slots[i]; });
+      });
+    } else {
+      // Effacer les positions
+      état.joueursConnectés.forEach(j => { delete j.position; });
+    }
+
+    io.to(`partie-${noPartie}`).emit("joueursConnectés", état.joueursConnectés);
   });
 
   // --------------------------------------------------------
@@ -2201,6 +2282,7 @@ io.on("connection", (socket) => {
     const état = obtenirÉtat(noPartie);
     état.noPartie = noPartie;
     état.joueursConnectés = [];
+    état.positionsAléatoires = false;
     état.scores = {};
     état.noSérieActuelle = 1;
     état.noQuestionActuelle = 1;
@@ -2372,9 +2454,10 @@ io.on("connection", (socket) => {
     if (état.réplique !== null && joueur.noÉquipe !== état.réplique) return;
     état.buzzVerrou = true;
 
-    // Calculer le temps de réaction si mode débogage activé
-    if (AFFICHER_TEMPS_RÉACTION && joueur.tempsClic) {
-      joueur.tempsRéaction = Date.now() - joueur.tempsClic;
+    // Calculer le temps de réaction — tout sur l'horloge serveur pour éviter
+    // les valeurs négatives dues au décalage d'horloge entre client et serveur
+    if (état.tempsDisponible != null) {
+      joueur.tempsRéaction = Date.now() - état.tempsDisponible;
     }
 
     io.to(`partie-${joueur.noPartie}`).emit("buzz", joueur);
@@ -2515,13 +2598,13 @@ io.on("connection", (socket) => {
       const partie = parties.find((p) => p.noPartie === noPartie);
       état.réplique =
         noÉquipe === partie.noÉquipeA ? partie.noÉquipeB : partie.noÉquipeA;
-      état.buzzVerrou = false;
+      libérerBuzz(état);
       io.to(`partie-${noPartie}`).emit("réplique", état.réplique);
     } else {
       // Déjà en réplique (ou série sans réplique) — question suivante
       avancerQuestion(état);
       état.réplique = null;
-      état.buzzVerrou = false;
+      libérerBuzz(état);
       io.to(`partie-${noPartie}`).emit(
         "questionMisÀJour",
         questionCourante(état),
@@ -2535,7 +2618,7 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on("resetBuzz", (noPartie) => {
     const état = obtenirÉtat(noPartie);
-    état.buzzVerrou = false;
+    libérerBuzz(état);
     état.réplique = null;
     io.to(`partie-${noPartie}`).emit("reset");
   });
@@ -2546,7 +2629,7 @@ io.on("connection", (socket) => {
   socket.on("questionSuivante", (noPartie) => {
     const état = obtenirÉtat(noPartie);
     avancerQuestion(état);
-    état.buzzVerrou = false;
+    libérerBuzz(état);
     io.to(`partie-${noPartie}`).emit(
       "questionMisÀJour",
       questionCourante(état),
@@ -2560,7 +2643,7 @@ io.on("connection", (socket) => {
   socket.on("questionPrécédente", (noPartie) => {
     const état = obtenirÉtat(noPartie);
     reculerQuestion(état);
-    état.buzzVerrou = false;
+    libérerBuzz(état);
     io.to(`partie-${noPartie}`).emit(
       "questionMisÀJour",
       questionCourante(état),
@@ -2574,7 +2657,7 @@ io.on("connection", (socket) => {
     if (état.noSérieActuelle > 1) {
       état.noSérieActuelle--;
       état.noQuestionActuelle = 1;
-      état.buzzVerrou = false;
+      libérerBuzz(état);
       const info = questionCourante(état);
       io.to(`partie-${noPartie}`).emit("questionMisÀJour", info);
       io.to(`partie-${noPartie}`).emit("reset");
@@ -2587,7 +2670,7 @@ io.on("connection", (socket) => {
     if (état.noSérieActuelle < séries.length) {
       état.noSérieActuelle++;
       état.noQuestionActuelle = 1;
-      état.buzzVerrou = false;
+      libérerBuzz(état);
       const info = questionCourante(état);
       io.to(`partie-${noPartie}`).emit("questionMisÀJour", info);
       io.to(`partie-${noPartie}`).emit("reset");
@@ -2657,7 +2740,7 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on("reset", (noPartie) => {
     const état = obtenirÉtat(noPartie);
-    état.buzzVerrou = false;
+    libérerBuzz(état);
     état.réplique = null;
     io.to(`partie-${noPartie}`).emit("reset");
   });

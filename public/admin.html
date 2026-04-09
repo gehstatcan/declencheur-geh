@@ -518,6 +518,7 @@
             <a href="#series">📋 Séries</a>
             <a href="#equipes">👥 Équipes</a>
             <a href="#saisons">🗓️ Saisons</a>
+            <a href="#parametres">⚙️ Paramètres</a>
         </nav>
     </aside>
 
@@ -639,6 +640,24 @@
       </div>
     </section>
 
+    <section id="parametres" data-section="parametres" style="margin-bottom:24px">
+      <div class="carte carte-large">
+        <h2>⚙️ Paramètres</h2>
+
+        <div class="carte">
+          <h3>⏱️ Timer auto-reset — délai par défaut</h3>
+          <p class="info">Durée (en secondes) pré-remplie dans le timer de la page Marqueur. L'animateur peut la modifier en cours de partie.</p>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
+            <input type="number" id="timerDéfaut" class="champ" min="1" max="60" value="5" style="width:80px;text-align:center;">
+            <span style="font-size:0.9em;color:var(--texte-gris);">secondes</span>
+            <button class="bouton bouton-vert" style="width:auto" onclick="sauvegarderConfig()">✅ Sauvegarder</button>
+          </div>
+          <div id="msg-config" style="margin-top:12px"></div>
+        </div>
+
+      </div>
+    </section>
+
     </div><!-- fin contenu-principal -->
     </div><!-- fin mise-en-page -->
 
@@ -646,6 +665,27 @@
         async function déconnexion() {
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = '/login.html';
+        }
+
+        async function chargerConfig() {
+            const config = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
+            if (config.timerDéfaut) document.getElementById('timerDéfaut').value = config.timerDéfaut;
+        }
+
+        async function sauvegarderConfig() {
+            const timerDéfaut = parseInt(document.getElementById('timerDéfaut').value) || 5;
+            const r = await fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ timerDéfaut })
+            });
+            const msg = document.getElementById('msg-config');
+            if (r.ok) {
+                msg.innerHTML = '<span style="color:green">✅ Sauvegardé.</span>';
+            } else {
+                msg.innerHTML = '<span style="color:red">❌ Erreur lors de la sauvegarde.</span>';
+            }
+            setTimeout(() => msg.innerHTML = '', 3000);
         }
 
         let fichierPartisSélectionné = null;
@@ -1249,6 +1289,7 @@
         }
 
         chargerSaisons();
+        chargerConfig();
 
         // Scroll spy — surligne la section active dans l'index
         const observer = new IntersectionObserver((entries) => {

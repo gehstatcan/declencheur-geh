@@ -473,6 +473,14 @@
         <button class="bouton bouton-bonne" onclick="démarrerPartie()">
             ▶️ Démarrer la partie
         </button>
+        <div style="margin-top:10px; display:flex; justify-content:center; gap:6px;">
+            <button id="btnPosAléatoire" class="bouton" style="font-size:0.85em; padding:6px 16px; background:var(--fond-champ); color:var(--gris);" onclick="togglePositions(true)">
+                🎲 Positions aléatoires
+            </button>
+            <button id="btnPosFixe" class="bouton" style="font-size:0.85em; padding:6px 16px; background:var(--accent); color:white;" onclick="togglePositions(false)">
+                🔢 Positions fixes
+            </button>
+        </div>
         <div id="bannièreSauvegarde" style="display:none; margin-top:16px; background:#1a5276; color:white; border-radius:12px; padding:16px 20px; text-align:center;">
             <div style="font-size:1.1em; font-weight:600; margin-bottom:8px;">✅ Partie terminée</div>
             <div style="font-size:0.9em; margin-bottom:12px; opacity:0.9;">Pensez à sauvegarder vos données.</div>
@@ -551,10 +559,13 @@
             </button>
         </div>
 
-        <!-- Toggle points par joueur -->
-        <div style="text-align:center; margin-top:8px;">
+        <!-- Toggles : pts/joueur et temps de réaction -->
+        <div style="text-align:center; margin-top:8px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
             <button id="btnPtsJoueurs" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 16px;" onclick="togglePtsJoueurs()">
                 📊 Afficher pts/joueur
+            </button>
+            <button id="btnTempsRéaction" class="bouton" style="background:var(--fond-champ); color:var(--gris); font-size:0.85em; padding:6px 16px;" onclick="toggleTempsRéaction()">
+                ⚡ Temps de réaction
             </button>
         </div>
 
@@ -616,6 +627,8 @@
         let derniersJoueursConnectés = [];
         let timerReset = null;
         let timerInterval = null;
+        let positionsAléatoires = false;
+        let afficherTempsRéaction = false;
 
         // Web Audio pour les sons
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -736,8 +749,7 @@
             jouerSon(joueur.noÉquipe);
             const buzzer = document.getElementById('buzzer');
 
-            const tempsTexte = joueur.tempsRéaction ? ` ⚡ ${joueur.tempsRéaction}ms` : ''; //Pour avoir le temps de réaction
-            //const tempsTexte = '' //Sans le temps de réaction
+            const tempsTexte = afficherTempsRéaction && joueur.tempsRéaction != null ? ` ⚡ ${joueur.tempsRéaction}ms` : '';
             buzzer.textContent = `🔔 ${joueur.alias} (${joueur.nomÉquipe}) a buzzé !${tempsTexte}`;
             buzzer.className = 'actif';
 
@@ -832,6 +844,7 @@
             if (!noPartie) return;
             socket.emit('rejoindrePartie', noPartie);
             socket.emit('choisirPartie', noPartie);
+            togglePositions(false); // Réinitialiser à "Positions fixes" par défaut
 
             // Mettre à jour les boutons de test de son
             const partie = toutesPartiesData.find(p => p.noPartie === noPartie);
@@ -852,6 +865,17 @@
         }
         function démarrerPartie() {
             socket.emit('démarrerPartie', partieActuelle);
+        }
+
+        function togglePositions(aléatoire) {
+            positionsAléatoires = aléatoire;
+            document.getElementById('btnPosAléatoire').style.background = aléatoire ? 'var(--vert)' : 'var(--fond-champ)';
+            document.getElementById('btnPosAléatoire').style.color = aléatoire ? 'white' : 'var(--gris)';
+            document.getElementById('btnPosFixe').style.background = aléatoire ? 'var(--fond-champ)' : 'var(--accent)';
+            document.getElementById('btnPosFixe').style.color = aléatoire ? 'var(--gris)' : 'white';
+            if (partieActuelle) {
+                socket.emit('togglePositions', { noPartie: partieActuelle, aléatoire });
+            }
         }
         function réinitialiser() {
             socket.emit('réinitialiser', partieActuelle);
@@ -1009,6 +1033,13 @@
             afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
         }
 
+        function toggleTempsRéaction() {
+            afficherTempsRéaction = !afficherTempsRéaction;
+            const btn = document.getElementById('btnTempsRéaction');
+            btn.style.background = afficherTempsRéaction ? 'var(--vert)' : 'var(--fond-champ)';
+            btn.style.color = afficherTempsRéaction ? 'white' : 'var(--gris)';
+        }
+
         function obtenirQuestionCourante() {
             // Utiliser les données reçues via socket.on('questionMisÀJour')
             if (questionCouranteInfo) {
@@ -1112,7 +1143,7 @@
                 [partie.noÉquipeA, partie.noÉquipeB].forEach((noÉquipe, idx) => {
                     const div = document.getElementById(idx === 0 ? 'blocÉquipeA' : 'blocÉquipeB');
                     const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
-                    const membres = tousJoueurs.filter(j => {
+                    let membres = tousJoueurs.filter(j => {
                         if (j.noÉquipe !== noÉquipe || j.estÉquipe) return false;
                         if (modeActuel === 'jeu') {
                             // En mode jeu — seulement les joueurs connectés à la partie
@@ -1121,6 +1152,17 @@
                         }
                         return true; // En initialisation — tous les joueurs
                     });
+
+                    // Trier par position aléatoire assignée au serveur (si disponible), sinon par noJoueur
+                    membres = membres.slice().sort((a, b) => {
+                        const posA = joueursConnectés.find(c => c.noÉquipe === a.noÉquipe && c.noJoueur === a.noJoueur)?.position;
+                        const posB = joueursConnectés.find(c => c.noÉquipe === b.noÉquipe && c.noJoueur === b.noJoueur)?.position;
+                        if (posA !== undefined && posB !== undefined) return posA - posB;
+                        if (posA !== undefined) return -1;
+                        if (posB !== undefined) return 1;
+                        return a.noJoueur - b.noJoueur;
+                    });
+
                     const score = scores ? (scores[noÉquipe] || 0) : 0;
 
                     const joueursHTML = membres.map(j => {
@@ -1177,6 +1219,11 @@
             toutesPartiesData = await fetch('/api/parties').then(r => r.json());
             toutesLésSéries = await fetch('/api/series').then(r => r.json());
             tousthèmes = await fetch('/api/themes').then(r => r.json());
+
+            // Lire le timer par défaut depuis la config
+            const config = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
+            if (config.timerDéfaut) document.getElementById('timerSecondes').value = config.timerDéfaut;
+
             const partiesJouées = await fetch('/api/parties/jouees').then(r => r.json());
             const jouéesSet = new Set(partiesJouées);
 

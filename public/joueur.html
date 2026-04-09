@@ -851,7 +851,6 @@
         function buzzer() {
             if (joueurActuel) {
                 // Noter l'heure du clic pour calculer le temps de réaction
-                joueurActuel.tempsClic = Date.now();
                 socket.emit("buzz", joueurActuel);
             }
         }
