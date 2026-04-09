@@ -1153,14 +1153,16 @@
                         return true; // En initialisation — tous les joueurs
                     });
 
-                    // Trier par position aléatoire assignée au serveur (si disponible), sinon par noJoueur
+                    // Trier par position aléatoire (serveur) si actif, sinon par position fixe du joueur, sinon par noJoueur
                     membres = membres.slice().sort((a, b) => {
                         const posA = joueursConnectés.find(c => c.noÉquipe === a.noÉquipe && c.noJoueur === a.noJoueur)?.position;
                         const posB = joueursConnectés.find(c => c.noÉquipe === b.noÉquipe && c.noJoueur === b.noJoueur)?.position;
                         if (posA !== undefined && posB !== undefined) return posA - posB;
                         if (posA !== undefined) return -1;
                         if (posB !== undefined) return 1;
-                        return a.noJoueur - b.noJoueur;
+                        const fixeA = a.position ?? a.noJoueur;
+                        const fixeB = b.position ?? b.noJoueur;
+                        return fixeA !== fixeB ? fixeA - fixeB : a.noJoueur - b.noJoueur;
                     });
 
                     const score = scores ? (scores[noÉquipe] || 0) : 0;
