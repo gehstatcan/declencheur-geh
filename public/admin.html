@@ -514,6 +514,7 @@
         <div class="index-titre">Sections</div>
         <nav id="index-nav">
             <a href="#calendrier">📅 Calendrier</a>
+            <a href="#parties">✏️ Modifier parties</a>
             <a href="#questionnaire">📥 Questionnaire</a>
             <a href="#series">📋 Séries</a>
             <a href="#equipes">👥 Équipes</a>
@@ -523,6 +524,22 @@
     </aside>
 
     <div class="contenu-principal">
+
+    <!-- Modifier les parties -->
+    <div class="carte carte-large" id="parties" data-section>
+        <h2>✏️ Modifier les parties</h2>
+        <p class="info">Date, animateur, salle et équipe questionnaire sont modifiables. Les équipes et le numéro de partie sont fixes.</p>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0;">
+            <label style="font-size:0.9em;">Afficher :</label>
+            <label style="font-size:0.9em;"><input type="radio" name="filtreParties" value="a-venir" checked onchange="filtrerPartiesAdmin()"> À venir</label>
+            <label style="font-size:0.9em;"><input type="radio" name="filtreParties" value="toutes" onchange="filtrerPartiesAdmin()"> Toutes</label>
+        </div>
+        <div id="tableParties" style="overflow-x:auto;"></div>
+        <div style="margin-top:12px;">
+            <button class="bouton bouton-vert" style="width:auto" onclick="sauvegarderParties()">💾 Sauvegarder les modifications</button>
+        </div>
+        <div id="résultat-parties" style="display:none;margin-top:8px;"></div>
+    </div>
 
     <!-- Upload parties -->
     <div class="carte" id="calendrier" data-section>
@@ -1312,6 +1329,89 @@
 
         chargerSaisons();
         chargerConfig();
+        chargerPartiesAdmin();
+
+        // ============================================================
+        // Modifier les parties
+        // ============================================================
+        let partiesAdmin = [];
+        let partiesJouéesSet = new Set();
+
+        async function chargerPartiesAdmin() {
+            const [parties, jouées, équipes] = await Promise.all([
+                fetch('/api/parties').then(r => r.json()),
+                fetch('/api/parties/jouees').then(r => r.json()),
+                fetch('/api/equipes').then(r => r.json()),
+            ]);
+            partiesAdmin = parties;
+            partiesJouéesSet = new Set(jouées);
+            window._équipesAdmin = équipes;
+            filtrerPartiesAdmin();
+        }
+
+        function filtrerPartiesAdmin() {
+            const filtre = document.querySelector('input[name="filtreParties"]:checked')?.value || 'a-venir';
+            const aujourd = new Date().toISOString().split('T')[0];
+            const liste = filtre === 'a-venir'
+                ? partiesAdmin.filter(p => !partiesJouéesSet.has(p.noPartie) && p.date >= aujourd)
+                : partiesAdmin;
+            rendreTableParties(liste);
+        }
+
+        function rendreTableParties(liste) {
+            const équipes = window._équipesAdmin || [];
+            const nomÉq = no => no == null ? 'À déterminer' : (équipes.find(e => e.noÉquipe === no)?.nomÉquipe || `Éq. ${no}`);
+
+            const lignes = liste.map(p => `
+                <tr>
+                    <td style="text-align:center;color:var(--gris);font-weight:600">${p.noPartie}</td>
+                    <td style="white-space:nowrap;color:var(--gris)">${nomÉq(p.noÉquipeA)} vs ${nomÉq(p.noÉquipeB)}</td>
+                    <td><input class="input-type-série" type="date" value="${p.date || ''}"
+                        oninput="màjPartieAdmin(${p.noPartie},'date',this.value)" style="width:140px"></td>
+                    <td><input class="input-type-série" type="text" value="${p.animateur || ''}"
+                        oninput="màjPartieAdmin(${p.noPartie},'animateur',this.value)" style="width:180px"></td>
+                    <td><select class="select-equipe-q" onchange="màjPartieAdmin(${p.noPartie},'noÉquipeQuestionnaire',+this.value)">
+                        ${équipes.filter(e => !e.estÉquipe).map(e =>
+                            `<option value="${e.noÉquipe}" ${e.noÉquipe === p.noÉquipeQuestionnaire ? 'selected' : ''}>${e.nomÉquipe}</option>`
+                        ).join('')}
+                    </select></td>
+                </tr>`).join('');
+
+            document.getElementById('tableParties').innerHTML = liste.length ? `
+                <table class="questions-table">
+                    <thead><tr>
+                        <th style="width:40px">#</th>
+                        <th>Équipes</th>
+                        <th>Date</th>
+                        <th>Animateur</th>
+                        <th>Questionnaire</th>
+                    </tr></thead>
+                    <tbody>${lignes}</tbody>
+                </table>` : '<p style="color:var(--gris);margin-top:8px">Aucune partie à afficher.</p>';
+        }
+
+        function màjPartieAdmin(noPartie, champ, valeur) {
+            const p = partiesAdmin.find(p => p.noPartie === noPartie);
+            if (p) p[champ] = valeur;
+        }
+
+        async function sauvegarderParties() {
+            const div = document.getElementById('résultat-parties');
+            const r = await fetch('/api/admin/parties', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(partiesAdmin)
+            });
+            div.style.display = 'block';
+            if (r.ok) {
+                div.className = 'succès';
+                div.textContent = '✅ Parties sauvegardées.';
+            } else {
+                div.className = 'erreur';
+                div.textContent = '❌ Erreur lors de la sauvegarde.';
+            }
+            setTimeout(() => div.style.display = 'none', 3000);
+        }
 
         // Scroll spy — surligne la section active dans l'index
         const observer = new IntersectionObserver((entries) => {

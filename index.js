@@ -467,6 +467,37 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
 });
 
 // ============================================================
+// Modifier les infos d'une ou plusieurs parties (date, animateur, salle,
+// noÉquipeQuestionnaire) — les équipes et le noPartie sont immuables
+// ============================================================
+app.put("/api/admin/parties", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+
+  try {
+    const mises = req.body; // tableau de { noPartie, date, animateur, salle, noÉquipeQuestionnaire }
+    if (!Array.isArray(mises)) return res.status(400).json({ erreur: "Format invalide" });
+
+    mises.forEach(({ noPartie, date, animateur, salle, noÉquipeQuestionnaire }) => {
+      const p = parties.find(p => p.noPartie === noPartie);
+      if (!p) return;
+      if (date !== undefined) p.date = date;
+      if (animateur !== undefined) p.animateur = animateur;
+      if (salle !== undefined) p.salle = salle;
+      if (noÉquipeQuestionnaire !== undefined) p.noÉquipeQuestionnaire = noÉquipeQuestionnaire;
+    });
+
+    const cheminParties = path.join(dossierSaison, "parties.json");
+    const contenu = '[\n' + parties.map(p => '  ' + JSON.stringify(p)).join(',\n') + '\n]';
+    fs.writeFileSync(cheminParties, contenu, "utf-8");
+
+    res.json({ succès: true });
+  } catch (e) {
+    res.status(500).json({ erreur: e.message });
+  }
+});
+
+// ============================================================
 // Sauvegarder la structure des séries (admin)
 // Verrouillé dès qu'au moins une partie a été jouée
 // ============================================================
