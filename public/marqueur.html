@@ -22,7 +22,8 @@
             --fond-champ: #e4e4f0;
             --accent: #c0303f;
             --buzz: #FFD700;
-            --buzz-texte: #000000;
+            --buzz-texte: #000000;  /* noir — uniquement sur fond jaune */
+            --texte-btn: #ffffff;   /* blanc — sur fond vert ou orange foncé */
             --vert: #1a7a42;
             --orange: #b85c00;
             --blanc: #1a1a2e;
@@ -86,12 +87,12 @@
 
         #modePartie.initialisation {
             background: var(--orange);
-            color: var(--buzz-texte);
+            color: var(--texte-btn);
         }
 
         #modePartie.jeu {
             background: var(--vert);
-            color: var(--buzz-texte);
+            color: var(--texte-btn);
         }
 
         /* ============================================================
@@ -190,12 +191,14 @@
 
         #infoQuestion .thème {
             font-size: 1em;
-            color: var(--gris);
+            font-weight: 600;
+            color: var(--blanc);
             margin-top: 6px;
         }
 
         #infoQuestion .question {
-            font-size: 1em;
+            font-size: 1.15em;
+            font-weight: 700;
             margin-top: 6px;
             color: var(--blanc);
         }
@@ -216,7 +219,7 @@
        ============================================================ */
         #buzzer {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 1em;
+            font-size: 1.6em;
             letter-spacing: 2px;
             margin: 16px auto;
             padding: 15px;
@@ -284,7 +287,7 @@
 
         .bouton-bonne {
             background: var(--vert);
-            color: var(--buzz-texte);
+            color: var(--texte-btn);
         }
 
         .bouton-bonne:hover {
@@ -293,7 +296,7 @@
 
         .bouton-secondaire {
             background: var(--orange);
-            color: var(--buzz-texte);
+            color: var(--texte-btn);
         }
 
         .bouton-secondaire:hover {
@@ -319,7 +322,7 @@
 
         .bouton-orange {
             background: var(--orange);
-            color: var(--buzz-texte);
+            color: var(--texte-btn);
         }
 
         .bouton-orange:hover {
@@ -413,8 +416,13 @@
 
         .joueur.connecté {
             background: var(--vert);
-            color: var(--buzz-texte);
+            color: var(--texte-btn);
             font-weight: bold;
+        }
+
+        /* Pts/joueur sur fond vert — forcer blanc pour lisibilité */
+        .joueur.connecté span {
+            color: white !important;
         }
 
         .joueur.cliquable {
@@ -474,10 +482,10 @@
             ▶️ Démarrer la partie
         </button>
         <div style="margin-top:10px; display:flex; justify-content:center; gap:6px;">
-            <button id="btnPosAléatoire" class="bouton" style="font-size:0.85em; padding:6px 16px; background:var(--fond-champ); color:var(--gris);" onclick="togglePositions(true)">
+            <button id="btnPosAléatoire" class="bouton" style="font-size:0.85em; font-weight:600; padding:6px 16px; background:var(--fond-champ); color:var(--blanc);" onclick="togglePositions(true)">
                 🎲 Positions aléatoires
             </button>
-            <button id="btnPosFixe" class="bouton" style="font-size:0.85em; padding:6px 16px; background:var(--accent); color:white;" onclick="togglePositions(false)">
+            <button id="btnPosFixe" class="bouton" style="font-size:0.85em; font-weight:600; padding:6px 16px; background:var(--accent); color:white;" onclick="togglePositions(false)">
                 🔢 Positions fixes
             </button>
         </div>
@@ -561,22 +569,22 @@
 
         <!-- Toggles : pts/joueur et temps de réaction -->
         <div style="text-align:center; margin-top:8px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
-            <button id="btnPtsJoueurs" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 16px;" onclick="togglePtsJoueurs()">
+            <button id="btnPtsJoueurs" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; font-weight:600; padding:6px 16px;" onclick="togglePtsJoueurs()">
                 📊 Afficher pts/joueur
             </button>
-            <button id="btnTempsRéaction" class="bouton" style="background:var(--fond-champ); color:var(--gris); font-size:0.85em; padding:6px 16px;" onclick="toggleTempsRéaction()">
+            <button id="btnTempsRéaction" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; font-weight:600; padding:6px 16px;" onclick="toggleTempsRéaction()">
                 ⚡ Temps de réaction
             </button>
         </div>
 
         <!-- Timer auto-reset -->
         <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
-            <label style="display:flex; align-items:center; gap:6px; font-size:0.9em; cursor:pointer;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:0.9em; font-weight:600; color:var(--blanc); cursor:pointer;">
                 <input type="checkbox" id="timerActif" onchange="toggleTimer()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
                 ⏱️ Reset auto après
             </label>
-            <input type="number" id="timerSecondes" value="5" min="1" max="30" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; text-align:center;">
-            <span style="font-size:0.9em; color:var(--gris);">sec</span>
+            <input type="number" id="timerSecondes" value="5" min="1" max="30" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; font-weight:600; text-align:center;">
+            <span style="font-size:0.9em; font-weight:600; color:var(--blanc);">sec</span>
             <span id="timerAffichage" style="font-size:0.9em; color:var(--accent); font-weight:700; min-width:24px;"></span>
         </div>
 
@@ -586,9 +594,9 @@
             <input type="range" id="sliderVolume" min="0" max="4" step="0.1" value="2"
                 style="width:140px; cursor:pointer;"
                 oninput="gainMaître.gain.value = parseFloat(this.value); document.getElementById('valeurVolume').textContent = Math.round(this.value * 50) + '%'">
-            <span id="valeurVolume" style="font-size:0.9em; color:var(--gris); min-width:36px;">100%</span>
-            <button id="btnTestA" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 14px;" onclick="testerSonÉquipe('A')">🔔 Équipe A</button>
-            <button id="btnTestB" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; padding:6px 14px;" onclick="testerSonÉquipe('B')">🔔 Équipe B</button>
+            <span id="valeurVolume" style="font-size:0.9em; font-weight:600; color:var(--blanc); min-width:36px;">100%</span>
+            <button id="btnTestA" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; font-weight:600; padding:6px 14px;" onclick="testerSonÉquipe('A')">🔔 Équipe A</button>
+            <button id="btnTestB" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; font-weight:600; padding:6px 14px;" onclick="testerSonÉquipe('B')">🔔 Équipe B</button>
         </div>
 
     </div>
@@ -870,9 +878,9 @@
         function togglePositions(aléatoire) {
             positionsAléatoires = aléatoire;
             document.getElementById('btnPosAléatoire').style.background = aléatoire ? 'var(--vert)' : 'var(--fond-champ)';
-            document.getElementById('btnPosAléatoire').style.color = aléatoire ? 'white' : 'var(--gris)';
+            document.getElementById('btnPosAléatoire').style.color = aléatoire ? 'var(--texte-btn)' : 'var(--blanc)';
             document.getElementById('btnPosFixe').style.background = aléatoire ? 'var(--fond-champ)' : 'var(--accent)';
-            document.getElementById('btnPosFixe').style.color = aléatoire ? 'var(--gris)' : 'white';
+            document.getElementById('btnPosFixe').style.color = aléatoire ? 'var(--blanc)' : 'var(--texte-btn)';
             if (partieActuelle) {
                 socket.emit('togglePositions', { noPartie: partieActuelle, aléatoire });
             }
@@ -1037,7 +1045,7 @@
             afficherTempsRéaction = !afficherTempsRéaction;
             const btn = document.getElementById('btnTempsRéaction');
             btn.style.background = afficherTempsRéaction ? 'var(--vert)' : 'var(--fond-champ)';
-            btn.style.color = afficherTempsRéaction ? 'white' : 'var(--gris)';
+            btn.style.color = afficherTempsRéaction ? 'var(--texte-btn)' : 'var(--gris)';
         }
 
         function obtenirQuestionCourante() {
