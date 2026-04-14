@@ -14,7 +14,7 @@
             --rouge: #c0392b;
             --blanc: #ffffff;
             --texte: #2c2c2c;
-            --gris: #888888;
+            --gris: #555555;
             --rayon: 12px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -322,16 +322,25 @@
             }).join('');
         }
 
+        let chartEvolution = null;
+        let chartThemes = null;
+
         function dessinerGraphiques(parties, themes) {
             const couleur = '#2c3e50';
             const couleurFond = 'rgba(44,62,80,0.12)';
+
+            if (chartEvolution) { chartEvolution.destroy(); chartEvolution = null; }
+            if (chartThemes) { chartThemes.destroy(); chartThemes = null; }
+
+            const carteEvolution = document.getElementById('graphEvolution').closest('.graphique-carte');
+            carteEvolution.style.display = '';
 
             // — Évolution des points —
             if (parties.length > 0) {
                 const labels = parties.map(p =>
                     new Date(p.date + 'T12:00:00').toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' })
                 );
-                new Chart(document.getElementById('graphEvolution'), {
+                chartEvolution = new Chart(document.getElementById('graphEvolution'), {
                     type: 'bar',
                     data: {
                         labels,
@@ -367,13 +376,13 @@
                     }
                 });
             } else {
-                document.getElementById('graphEvolution').closest('.graphique-carte').style.display = 'none';
+                carteEvolution.style.display = 'none';
             }
 
             // — Radar par thème —
             if (themes.length >= 3) {
                 const max = themes[0].pts;
-                new Chart(document.getElementById('graphThemes'), {
+                chartThemes = new Chart(document.getElementById('graphThemes'), {
                     type: 'radar',
                     data: {
                         labels: themes.map(t => t.theme),
@@ -402,7 +411,7 @@
                 });
             } else {
                 // Moins de 3 thèmes → barres horizontales
-                new Chart(document.getElementById('graphThemes'), {
+                chartThemes = new Chart(document.getElementById('graphThemes'), {
                     type: 'bar',
                     data: {
                         labels: themes.map(t => t.theme),

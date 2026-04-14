@@ -15,7 +15,7 @@
             --vert: #27ae60;
             --blanc: #ffffff;
             --texte: #2c2c2c;
-            --gris: #888888;
+            --gris: #555555;
             --rayon: 12px;
             --or: #b8860b;
         }
@@ -208,6 +208,10 @@
             color: var(--blanc);
         }
 
+        .matchup.finale .matchup-date {
+            color: rgba(255,255,255,0.85);
+        }
+
         .matchup.finale .équipe-ligne { padding: 12px 14px; }
         .matchup.finale .équipe-nom { font-size: 0.95em; }
         .matchup.finale .équipe-score { font-size: 1.05em; }
@@ -335,7 +339,7 @@
             const classeScoreA = gagnant ? (gagnant === m?.noÉquipeA ? 'gagnant' : 'perdant') : '';
             const classeScoreB = gagnant ? (gagnant === m?.noÉquipeB ? 'gagnant' : 'perdant') : '';
 
-            const date = m?.date ? new Date(m.date + 'T00:00:00').toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' }) : '';
+            const date = m?.date ? new Date(m.date + 'T00:00:00').toLocaleDateString('fr-CA', { month: 'long', day: 'numeric' }) : '';
             let liens = '';
             if (m) {
                 if (m.lienRéunion && !m.terminée) liens += `<a href="${m.lienRéunion}" target="_blank" class="lien-bouton lien-teams">📹 Teams</a>`;
