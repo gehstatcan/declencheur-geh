@@ -431,7 +431,11 @@
                 const classePts = r
                     ? (r.noÉquipe === noÉquipeA ? 'pts-équipe-a' : 'pts-équipe-b')
                     : '';
-                const joueur = r ? `<span class="${classeÉquipe}">${r.alias}</span>` : '<span class="non-répondu">—</span>';
+                const joueur = r
+                    ? (r.noJoueur === 99
+                        ? `<span class="${classeÉquipe}">${r.alias}</span>`
+                        : `<a href="stats-joueur.html?noEquipe=${r.noÉquipe}&noJoueur=${r.noJoueur}" style="text-decoration:none;" class="${classeÉquipe}">${r.alias}${r.nom ? ` <span style="font-weight:400;opacity:0.75;">${escHtml(r.nom)}</span>` : ''}</a>`)
+                    : '<span class="non-répondu">—</span>';
                 const équipe = r ? `<span class="${classeÉquipe}">${r.nomÉquipe}</span>` : '';
                 const pts = r
                     ? `<span class="${classePts}">${r.points}</span>`

@@ -65,6 +65,12 @@
         .toggle-phase { display: flex; gap: 4px; margin-bottom: 20px; background: var(--fond-carte); padding: 4px; border-radius: 20px; }
         .toggle-phase button { padding: 6px 16px; border-radius: 16px; border: none; cursor: pointer; font-size: 0.85em; background: transparent; color: var(--gris); font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.2s; }
         .toggle-phase button.actif { background: var(--accent); color: white; }
+        .nav-joueur-wrap { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; max-width: 860px; margin-bottom: 4px; }
+        .nav-joueur-adj { flex: 1; font-size: 0.85em; color: var(--gris); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nav-joueur-adj:hover { color: var(--accent); }
+        .nav-joueur-adj.gauche { text-align: right; }
+        .nav-joueur-adj.droite { text-align: left; }
+        .nav-joueur-adj.vide { pointer-events: none; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -91,8 +97,16 @@
       <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
     </div>
 
-    <h2 id="titreJoueur">Chargement...</h2>
-    <div class="sous-titre" id="sousTitre"></div>
+    <div class="nav-joueur-wrap">
+        <a id="nav-j-prev" class="nav-joueur-adj gauche vide" href="#"></a>
+        <h2 id="titreJoueur" style="flex:0 0 auto;text-align:center">Chargement...</h2>
+        <a id="nav-j-next" class="nav-joueur-adj droite vide" href="#"></a>
+    </div>
+    <div class="nav-joueur-wrap" style="margin-bottom:16px">
+        <a id="nav-eq-prev" class="nav-joueur-adj gauche vide" href="#"></a>
+        <div class="sous-titre" id="sousTitre" style="flex:0 0 auto;margin-bottom:0"></div>
+        <a id="nav-eq-next" class="nav-joueur-adj droite vide" href="#"></a>
+    </div>
 
     <div class="toggle-phase">
         <button id="btn-tous" class="actif" onclick="setPhase('tous')">Tout</button>
@@ -176,6 +190,43 @@
         const noEquipe = parseInt(params.get('noEquipe'));
         const noJoueur = parseInt(params.get('noJoueur'));
         let saisonStats = params.get("saison") || null;
+
+        async function chargerNavigation() {
+            const [équipes, joueurs] = await Promise.all([
+                fetch('/api/equipes').then(r => r.json()),
+                fetch('/api/joueurs/actifs').then(r => r.json())
+            ]);
+
+            // Navigation joueurs — dans l'équipe seulement
+            const joueursÉquipe = joueurs
+                .filter(j => j.noÉquipe === noEquipe && !j.estÉquipe)
+                .sort((a, b) => a.noJoueur - b.noJoueur);
+            const idxJ = joueursÉquipe.findIndex(j => j.noJoueur === noJoueur);
+            const prévJ = joueursÉquipe[idxJ - 1];
+            const suivJ = joueursÉquipe[idxJ + 1];
+            const urlJ = j => `stats-joueur.html?noEquipe=${j.noÉquipe}&noJoueur=${j.noJoueur}`;
+            const elPrévJ = document.getElementById('nav-j-prev');
+            const elSuivJ = document.getElementById('nav-j-next');
+            if (prévJ) { elPrévJ.href = urlJ(prévJ); elPrévJ.textContent = `← ${prévJ.alias}`; elPrévJ.classList.remove('vide'); }
+            if (suivJ) { elSuivJ.href = urlJ(suivJ); elSuivJ.textContent = `${suivJ.alias} →`; elSuivJ.classList.remove('vide'); }
+
+            // Navigation équipes
+            const équipesSorted = équipes.filter(e => e.estÉquipe).sort((a, b) => a.noÉquipe - b.noÉquipe);
+            const idxÉq = équipesSorted.findIndex(e => e.noÉquipe === noEquipe);
+            const prévÉq = équipesSorted[idxÉq - 1];
+            const suivÉq = équipesSorted[idxÉq + 1];
+            const premierJoueur = éq => joueurs.filter(j => j.noÉquipe === éq.noÉquipe && !j.estÉquipe).sort((a, b) => a.noJoueur - b.noJoueur)[0];
+            const elPrévÉq = document.getElementById('nav-eq-prev');
+            const elSuivÉq = document.getElementById('nav-eq-next');
+            if (prévÉq) {
+                const j = premierJoueur(prévÉq);
+                if (j) { elPrévÉq.href = `stats-joueur.html?noEquipe=${prévÉq.noÉquipe}&noJoueur=${j.noJoueur}`; elPrévÉq.textContent = `← ${prévÉq.nomÉquipe}`; elPrévÉq.classList.remove('vide'); }
+            }
+            if (suivÉq) {
+                const j = premierJoueur(suivÉq);
+                if (j) { elSuivÉq.href = `stats-joueur.html?noEquipe=${suivÉq.noÉquipe}&noJoueur=${j.noJoueur}`; elSuivÉq.textContent = `${suivÉq.nomÉquipe} →`; elSuivÉq.classList.remove('vide'); }
+            }
+        }
 
         async function chargerSélécteurSaison() {
           const [saisonsRes, activeRes] = await Promise.all([
@@ -440,6 +491,7 @@
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         });
         chargerSélécteurSaison().then(() => charger());
+        chargerNavigation();
         function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
         document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
     </script>

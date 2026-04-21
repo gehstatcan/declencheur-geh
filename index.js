@@ -178,6 +178,14 @@ console.log(`✅ ${thèmes.length} thèmes chargés`);
 // ============================================================
 app.get("/api/equipes", (req, res) => res.json(équipes.map(e => ({ ...e, estÉquipe: true }))));
 app.get("/api/joueurs", (req, res) => res.json(joueurs));
+app.get("/api/joueurs/actifs", (req, res) => {
+  try {
+    const contenu = fs.readFileSync(path.join(dossierSaison, "répondants.json"), "utf-8").trim();
+    const répondants = contenu ? JSON.parse(contenu) : [];
+    const clés = new Set(répondants.filter(r => r.noJoueur !== 99).map(r => `${r.noÉquipe}_${r.noJoueur}`));
+    res.json(joueurs.filter(j => !j.estÉquipe && clés.has(`${j.noÉquipe}_${j.noJoueur}`)));
+  } catch { res.json(joueurs.filter(j => !j.estÉquipe)); }
+});
 app.get("/api/parties", (req, res) => res.json(parties));
 app.get("/api/parties/jouees", (req, res) => {
   try {
@@ -2002,11 +2010,14 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
         let répondantInfo = null;
         if (répondant) {
           const nomÉq = équipesDs.find(e => e.noÉquipe === répondant.noÉquipe)?.nomÉquipe || `Équipe ${répondant.noÉquipe}`;
-          const alias = répondant.noJoueur === 99
-            ? '👥 ' + nomÉq
-            : joueursDs.find(j => j.noÉquipe === répondant.noÉquipe && j.noJoueur === répondant.noJoueur)?.alias || `Joueur ${répondant.noJoueur}`;
+          const joueurDs = répondant.noJoueur === 99 ? null : joueursDs.find(j => j.noÉquipe === répondant.noÉquipe && j.noJoueur === répondant.noJoueur);
+          const alias = répondant.noJoueur === 99 ? '👥 ' + nomÉq : (joueurDs?.alias || `Joueur ${répondant.noJoueur}`);
           const pts = répondant.pointsSecondaires ? (qInfo?.pointsSecondaires ?? 0) : (qInfo?.points ?? 0);
-          répondantInfo = { noÉquipe: répondant.noÉquipe, alias, nomÉquipe: nomÉq, points: pts, estSecondaire: répondant.pointsSecondaires };
+          répondantInfo = {
+            noÉquipe: répondant.noÉquipe, noJoueur: répondant.noJoueur,
+            alias, nom: joueurDs?.nom || null, nomÉquipe: nomÉq,
+            points: pts, estSecondaire: répondant.pointsSecondaires
+          };
         }
 
         return {
