@@ -1720,7 +1720,7 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
     });
     const themesResult = Object.entries(ptsParThème)
       .map(([theme, pts]) => ({ theme, pts }))
-      .sort((a, b) => b.pts - a.pts);
+      .sort((a, b) => a.theme.localeCompare(b.theme, 'fr'));
 
     res.json({
       joueur: {

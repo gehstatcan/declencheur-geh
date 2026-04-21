@@ -216,16 +216,15 @@
             const prévÉq = équipesSorted[idxÉq - 1];
             const suivÉq = équipesSorted[idxÉq + 1];
             const premierJoueur = éq => joueurs.filter(j => j.noÉquipe === éq.noÉquipe && !j.estÉquipe).sort((a, b) => a.noJoueur - b.noJoueur)[0];
+            const n = équipesSorted.length;
+            const éqPrév = équipesSorted[(idxÉq - 1 + n) % n];
+            const éqSuiv = équipesSorted[(idxÉq + 1) % n];
             const elPrévÉq = document.getElementById('nav-eq-prev');
             const elSuivÉq = document.getElementById('nav-eq-next');
-            if (prévÉq) {
-                const j = premierJoueur(prévÉq);
-                if (j) { elPrévÉq.href = `stats-joueur.html?noEquipe=${prévÉq.noÉquipe}&noJoueur=${j.noJoueur}`; elPrévÉq.textContent = `← ${prévÉq.nomÉquipe}`; elPrévÉq.classList.remove('vide'); }
-            }
-            if (suivÉq) {
-                const j = premierJoueur(suivÉq);
-                if (j) { elSuivÉq.href = `stats-joueur.html?noEquipe=${suivÉq.noÉquipe}&noJoueur=${j.noJoueur}`; elSuivÉq.textContent = `${suivÉq.nomÉquipe} →`; elSuivÉq.classList.remove('vide'); }
-            }
+            const jPrév = premierJoueur(éqPrév);
+            const jSuiv = premierJoueur(éqSuiv);
+            if (jPrév) { elPrévÉq.href = `stats-joueur.html?noEquipe=${éqPrév.noÉquipe}&noJoueur=${jPrév.noJoueur}`; elPrévÉq.textContent = `← ${éqPrév.nomÉquipe}`; elPrévÉq.classList.remove('vide'); }
+            if (jSuiv) { elSuivÉq.href = `stats-joueur.html?noEquipe=${éqSuiv.noÉquipe}&noJoueur=${jSuiv.noJoueur}`; elSuivÉq.textContent = `${éqSuiv.nomÉquipe} →`; elSuivÉq.classList.remove('vide'); }
         }
 
         async function chargerSélécteurSaison() {
@@ -357,8 +356,9 @@
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--gris);padding:30px;">Aucune donnée</td></tr>';
                 return;
             }
-            const max = themes[0].pts;
-            tbody.innerHTML = themes.map((t, i) => {
+            const triésPts = [...themes].sort((a, b) => b.pts - a.pts);
+            const max = triésPts[0].pts;
+            tbody.innerHTML = triésPts.map((t, i) => {
                 const largeur = max > 0 ? Math.round(t.pts / max * 100) : 0;
                 return `<tr>
                     <td class="rang">${i + 1}</td>
