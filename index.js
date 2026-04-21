@@ -176,7 +176,7 @@ console.log(`✅ ${thèmes.length} thèmes chargés`);
 // ============================================================
 // Routes API — données statiques de la saison
 // ============================================================
-app.get("/api/equipes", (req, res) => res.json(équipes));
+app.get("/api/equipes", (req, res) => res.json(équipes.map(e => ({ ...e, estÉquipe: true }))));
 app.get("/api/joueurs", (req, res) => res.json(joueurs));
 app.get("/api/parties", (req, res) => res.json(parties));
 app.get("/api/parties/jouees", (req, res) => {
@@ -411,6 +411,11 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
     const lignes = XLSX.utils.sheet_to_json(ws, { raw: true, defval: "" });
 
     const parseÉquipe = v => (!v || String(v).trim() === "" || String(v).trim() === "NA") ? null : parseInt(v);
+    const parseÉquipeOuNom = v => {
+      if (!v || String(v).trim() === "" || String(v).trim() === "NA") return null;
+      const n = parseInt(v);
+      return isNaN(n) ? String(v).trim() : n;
+    };
 
     const nouvellesParties = lignes.map(l => ({
       noPartie:               parseInt(l["NoPartie"]),
@@ -420,7 +425,7 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
       noQuestionnaire:        parseInt(l["NoQuestionnaire"]),
       noÉquipeA:              parseÉquipe(l["NoÉquipeA"]),
       noÉquipeB:              parseÉquipe(l["NoÉquipeB"]),
-      noÉquipeQuestionnaire:  parseÉquipe(l["NoÉquipeQuestionnaire"]),
+      noÉquipeQuestionnaire:  parseÉquipeOuNom(l["NoÉquipeQuestionnaire"]),
       lienRéunion:            String(l["LienReunion"] || ""),
       phase:                  String(l["Phase"] || "saison"),
       matchup:                l["Matchup"] ? String(l["Matchup"]) : null,
@@ -443,7 +448,7 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
       if (p.noÉquipeA !== null && !noÉquipesValides.has(p.noÉquipeA)) erreurs.push({ partie: id, message: `noÉquipeA (${p.noÉquipeA}) introuvable` });
       if (p.noÉquipeB !== null && !noÉquipesValides.has(p.noÉquipeB)) erreurs.push({ partie: id, message: `noÉquipeB (${p.noÉquipeB}) introuvable` });
       if (p.noÉquipeA !== null && p.noÉquipeB !== null && p.noÉquipeA === p.noÉquipeB) erreurs.push({ partie: id, message: `noÉquipeA et noÉquipeB identiques` });
-      if (p.noÉquipeQuestionnaire !== null) {
+      if (p.noÉquipeQuestionnaire !== null && typeof p.noÉquipeQuestionnaire === 'number') {
         if (!noÉquipesValides.has(p.noÉquipeQuestionnaire)) erreurs.push({ partie: id, message: `noÉquipeQuestionnaire (${p.noÉquipeQuestionnaire}) introuvable` });
         if (p.noÉquipeQuestionnaire === p.noÉquipeA || p.noÉquipeQuestionnaire === p.noÉquipeB)
           erreurs.push({ partie: id, message: `noÉquipeQuestionnaire ne peut pas être équipe A ou B` });
@@ -468,22 +473,24 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
 
 // ============================================================
 // Modifier les infos d'une ou plusieurs parties (date, animateur, salle,
-// noÉquipeQuestionnaire) — les équipes et le noPartie sont immuables
+// noÉquipeA, noÉquipeB, noÉquipeQuestionnaire) — noPartie est immuable
 // ============================================================
 app.put("/api/admin/parties", (req, res) => {
   const token = getCookie(req, "geh_session");
   if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
 
   try {
-    const mises = req.body; // tableau de { noPartie, date, animateur, salle, noÉquipeQuestionnaire }
+    const mises = req.body;
     if (!Array.isArray(mises)) return res.status(400).json({ erreur: "Format invalide" });
 
-    mises.forEach(({ noPartie, date, animateur, salle, noÉquipeQuestionnaire }) => {
+    mises.forEach(({ noPartie, date, animateur, salle, noÉquipeA, noÉquipeB, noÉquipeQuestionnaire }) => {
       const p = parties.find(p => p.noPartie === noPartie);
       if (!p) return;
       if (date !== undefined) p.date = date;
       if (animateur !== undefined) p.animateur = animateur;
       if (salle !== undefined) p.salle = salle;
+      if (noÉquipeA !== undefined) p.noÉquipeA = noÉquipeA;
+      if (noÉquipeB !== undefined) p.noÉquipeB = noÉquipeB;
       if (noÉquipeQuestionnaire !== undefined) p.noÉquipeQuestionnaire = noÉquipeQuestionnaire;
     });
 
@@ -524,8 +531,6 @@ app.get("/api/admin/series/statut", (_req, res) => {
 });
 
 app.put("/api/admin/series", (req, res) => {
-  if (saisonADémarré())
-    return res.status(403).json({ erreur: "Modification impossible — des parties ont déjà été jouées cette saison." });
   const nouvelles = req.body;
   if (!Array.isArray(nouvelles) || nouvelles.length === 0)
     return res.status(400).json({ erreur: "Format invalide — tableau attendu" });
@@ -533,6 +538,25 @@ app.put("/api/admin/series", (req, res) => {
     if (!s.noSérie || !s.typeSérie || !Array.isArray(s.questions) || s.questions.length === 0)
       return res.status(400).json({ erreur: `Série ${s.noSérie || "?"} : données incomplètes` });
   }
+
+  if (saisonADémarré()) {
+    // Autoriser uniquement les ajouts — les séries existantes doivent être identiques
+    const nosExistants = new Set(séries.map(s => s.noSérie));
+    const modifiées = nouvelles.filter(s => {
+      if (!nosExistants.has(s.noSérie)) return false; // nouvelle série, ok
+      const ancienne = séries.find(a => a.noSérie === s.noSérie);
+      return JSON.stringify(ancienne) !== JSON.stringify(s);
+    });
+    const supprimées = séries.filter(a => !nouvelles.some(s => s.noSérie === a.noSérie));
+    if (modifiées.length > 0 || supprimées.length > 0) {
+      const détail = [
+        ...modifiées.map(s => `S${s.noSérie} modifiée`),
+        ...supprimées.map(s => `S${s.noSérie} supprimée`),
+      ].join(', ');
+      return res.status(403).json({ erreur: `Modification impossible en cours de saison — ${détail}. Seuls les ajouts sont permis.` });
+    }
+  }
+
   const chemin = path.join(dossierSaison, "séries.json");
   fs.writeFileSync(chemin, JSON.stringify(nouvelles, null, 2), "utf-8");
   séries.splice(0, séries.length, ...nouvelles);
@@ -845,7 +869,7 @@ app.get("/api/stats/calendrier", (req, res) => {
 
       const équipeA = équipes.find((e) => e.noÉquipe === partie.noÉquipeA);
       const équipeB = équipes.find((e) => e.noÉquipe === partie.noÉquipeB);
-      const équipeQ = partie.noÉquipeQuestionnaire
+      const équipeQ = (typeof partie.noÉquipeQuestionnaire === 'number')
         ? équipes.find((e) => e.noÉquipe === partie.noÉquipeQuestionnaire)
         : null;
       const scoreA = scores[partie.noÉquipeA] || null;
@@ -859,7 +883,7 @@ app.get("/api/stats/calendrier", (req, res) => {
         noÉquipeB: partie.noÉquipeB,
         nomÉquipeA: équipeA ? équipeA.nomÉquipe : "",
         nomÉquipeB: équipeB ? équipeB.nomÉquipe : "",
-        nomÉquipeQuestionnaire: équipeQ ? équipeQ.nomÉquipe : null,
+        nomÉquipeQuestionnaire: équipeQ ? équipeQ.nomÉquipe : (partie.noÉquipeQuestionnaire || null),
         scoreA,
         scoreB,
         terminée,
@@ -1120,7 +1144,7 @@ app.get('/api/stats/eliminations', (req, res) => {
         nomGagnant: nomÉquipe(gagnant),
         date: partie.date || null,
         lienRéunion: partie.lienRéunion || null,
-        nomÉquipeQuestionnaire: nomÉquipe(partie.noÉquipeQuestionnaire) || null,
+        nomÉquipeQuestionnaire: (typeof partie.noÉquipeQuestionnaire === 'string') ? partie.noÉquipeQuestionnaire : (nomÉquipe(partie.noÉquipeQuestionnaire) || null),
         animateur: partie.animateur || null,
       };
     });
@@ -1671,7 +1695,12 @@ app.get('/api/stats/joueur-profil/:noEquipe/:noJoueur', (req, res) => {
       thèmeLookup[t.noQuestionnaire] = {};
       t.séries.forEach(s => { thèmeLookup[t.noQuestionnaire][s.noSérie] = s.thème; });
     });
+    // Initialiser tous les thèmes valides de la saison à 0
+    const estThèmeValide = t => t && !t.startsWith('--') && isNaN(t);
     const ptsParThème = {};
+    thèmesDs.forEach(q => q.séries.forEach(s => {
+      if (estThèmeValide(s.thème) && !(s.thème in ptsParThème)) ptsParThème[s.thème] = 0;
+    }));
     répJoueurRéel.forEach(r => {
       const noQ = questParPartie[r.noPartie];
       const thème = noQ && thèmeLookup[noQ] ? thèmeLookup[noQ][r.noSérie] : null;
@@ -1779,14 +1808,14 @@ app.get('/api/stats/equipe/:noEquipe', (req, res) => {
       const scoreÉquipe = scores[noÉquipe] || 0;
       const scoreAdv = scores[noAdv] || 0;
 
-      const éqQ = équipesDs.find(e => e.noÉquipe === p.noÉquipeQuestionnaire);
+      const éqQ = (typeof p.noÉquipeQuestionnaire === 'number') ? équipesDs.find(e => e.noÉquipe === p.noÉquipeQuestionnaire) : null;
       return {
         noPartie, date: p.date, terminée: true,
         noÉquipeA: p.noÉquipeA, nomÉquipeA: équipesDs.find(e => e.noÉquipe === p.noÉquipeA)?.nomÉquipe || '',
         noÉquipeB: p.noÉquipeB, nomÉquipeB: équipesDs.find(e => e.noÉquipe === p.noÉquipeB)?.nomÉquipe || '',
         scoreA: p.noÉquipeA === noÉquipe ? scoreÉquipe : scoreAdv,
         scoreB: p.noÉquipeB === noÉquipe ? scoreÉquipe : scoreAdv,
-        noQuestionnaire: p.noQuestionnaire, nomÉquipeQuestionnaire: éqQ?.nomÉquipe || null,
+        noQuestionnaire: p.noQuestionnaire, nomÉquipeQuestionnaire: éqQ?.nomÉquipe || p.noÉquipeQuestionnaire || null,
         lienRéunion: p.lienRéunion || null, animateur: p.animateur || '',
       };
     }).filter(Boolean).sort((a, b) => a.date.localeCompare(b.date));
@@ -1911,8 +1940,8 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
     };
     const partieNonJouée = autresPartiesMêmeQ.find(p => !aDesRépondants(p.noPartie));
     if (partieNonJouée) {
-      const équipeQ = équipesDs.find(e => e.noÉquipe === partieNonJouée.noÉquipeQuestionnaire);
-      const nomÉquipeQ = équipeQ ? équipeQ.nomÉquipe : partieNonJouée.noÉquipeQuestionnaire ? `Équipe ${partieNonJouée.noÉquipeQuestionnaire}` : null;
+      const équipeQ = (typeof partieNonJouée.noÉquipeQuestionnaire === 'number') ? équipesDs.find(e => e.noÉquipe === partieNonJouée.noÉquipeQuestionnaire) : null;
+      const nomÉquipeQ = équipeQ ? équipeQ.nomÉquipe : (partieNonJouée.noÉquipeQuestionnaire || null);
       return res.status(403).json({
         erreur: 'protégé',
         noPartieBloquante: partieNonJouée.noPartie,
@@ -1949,7 +1978,7 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
 
     const équipeA = équipesDs.find(e => e.noÉquipe === partie.noÉquipeA);
     const équipeB = équipesDs.find(e => e.noÉquipe === partie.noÉquipeB);
-    const équipeQ = équipesDs.find(e => e.noÉquipe === partie.noÉquipeQuestionnaire);
+    const équipeQ = (typeof partie.noÉquipeQuestionnaire === 'number') ? équipesDs.find(e => e.noÉquipe === partie.noÉquipeQuestionnaire) : null;
 
     // Scores
     const scores = {};
@@ -1994,6 +2023,7 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
         noSérie: sérieQ.noSérie,
         typeSérie: sérieInfo?.typeSérie || '',
         estÉquipe: sérieInfo?.estÉquipe || false,
+        estProlongation: sérieInfo?.estProlongation || false,
         thème: thèmeSérie?.thème || '',
         sousThème: thèmeSérie?.sousThème || '',
         questionGroupe1: sérieQ.questionGroupe1 || null,
@@ -2001,6 +2031,9 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
         questions
       };
     });
+
+    const sériesJouées = new Set(répondants.map(r => r.noSérie));
+    const sériesMatchFiltrées = sériesMatch.filter(s => !s.estProlongation || sériesJouées.has(s.noSérie));
 
     const saisonRequête = (req.query.saison && /^\d{4}-\d{4}$/.test(req.query.saison)) ? req.query.saison : saisonActive;
     const donnéesSynthétiques = saisonRequête === '2025-2026' && noPartie <= 35;
@@ -2014,11 +2047,11 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
       noÉquipeB: partie.noÉquipeB,
       nomÉquipeA: équipeA?.nomÉquipe || '',
       nomÉquipeB: équipeB?.nomÉquipe || '',
-      nomÉquipeQuestionnaire: équipeQ?.nomÉquipe || null,
+      nomÉquipeQuestionnaire: équipeQ?.nomÉquipe || partie.noÉquipeQuestionnaire || null,
       scoreA: scores[partie.noÉquipeA] || 0,
       scoreB: scores[partie.noÉquipeB] || 0,
       donnéesSynthétiques,
-      séries: sériesMatch
+      séries: sériesMatchFiltrées
     });
   } catch (e) {
     res.status(500).json({ erreur: e.message });

@@ -528,7 +528,7 @@
     <!-- Modifier les parties -->
     <div class="carte carte-large" id="parties" data-section>
         <h2>✏️ Modifier les parties</h2>
-        <p class="info">Date, animateur, salle et équipe questionnaire sont modifiables. Les équipes et le numéro de partie sont fixes.</p>
+        <p class="info">Date, animateur, salle, équipe questionnaire et équipes sont modifiables. Le numéro de partie est fixe.</p>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0;">
             <label style="font-size:0.9em;">Afficher :</label>
             <label style="font-size:0.9em;"><input type="radio" name="filtreParties" value="a-venir" checked onchange="filtrerPartiesAdmin()"> À venir</label>
@@ -554,6 +554,11 @@
 
         <button class="bouton bouton-upload" id="btnParties" onclick="uploadParties()" disabled>
             📅 Importer le calendrier
+        </button>
+
+        <button class="bouton" onclick="exporterCalendrier()"
+            style="background:var(--gris);margin-top:8px">
+            ⬇️ Exporter le calendrier (CSV)
         </button>
 
         <div id="résultatParties"></div>
@@ -923,6 +928,7 @@
                     <label class="toggle-flag"><input type="checkbox" ${s.réplique ? 'checked' : ''} onchange="màjSérie(${idx},'réplique',this.checked)"> Réplique</label>
                     <label class="toggle-flag"><input type="checkbox" ${s.estÉquipe ? 'checked' : ''} onchange="màjSérie(${idx},'estÉquipe',this.checked)"> Équipe</label>
                     <label class="toggle-flag"><input type="checkbox" ${s.consultation ? 'checked' : ''} onchange="màjSérie(${idx},'consultation',this.checked)"> Consultation</label>
+                    <label class="toggle-flag"><input type="checkbox" ${s.estProlongation ? 'checked' : ''} onchange="màjSérie(${idx},'estProlongation',this.checked)"> Prolongation</label>
                     <span class="résumé-pts">${résumépPts(s.questions)}</span>
                     <button class="btn-petit btn-détail" onclick="toggleDétail('${détailId}',this)">▼ Détail</button>
                     <button class="btn-petit btn-suppr-série" onclick="supprimerSérie(${idx})">✕</button>
@@ -1054,11 +1060,10 @@
             const btn = document.querySelector('[onclick="sauvegarderSéries()"]');
             const div = document.getElementById('résultat-séries');
             if (statut.verrouillé) {
-                btn.disabled = true;
-                btn.title = 'Modifications verrouillées — saison en cours';
+                btn.title = 'Séries existantes verrouillées — ajout de nouvelles séries permis';
                 div.style.display = 'block';
-                div.className = 'erreur';
-                div.textContent = `🔒 Séries verrouillées — ${statut.nbParties} partie(s) déjà jouée(s). Modification impossible en cours de saison.`;
+                div.className = 'avertissement';
+                div.textContent = `🔒 ${statut.nbParties} partie(s) jouée(s) — séries existantes verrouillées. Ajout de nouvelles séries permis.`;
             }
         }
 
@@ -1365,16 +1370,34 @@
             const lignes = liste.map(p => `
                 <tr>
                     <td style="text-align:center;color:var(--gris);font-weight:600">${p.noPartie}</td>
-                    <td style="white-space:nowrap;color:var(--gris)">${nomÉq(p.noÉquipeA)} vs ${nomÉq(p.noÉquipeB)}</td>
+                    <td style="white-space:nowrap">
+                        <select class="select-equipe-q" onchange="màjPartieAdmin(${p.noPartie},'noÉquipeA',this.value===''?null:+this.value)">
+                            <option value="" ${p.noÉquipeA == null ? 'selected' : ''}>— À déterminer —</option>
+                            ${équipes.filter(e => e.estÉquipe).map(e =>
+                                `<option value="${e.noÉquipe}" ${e.noÉquipe === p.noÉquipeA ? 'selected' : ''}>${e.nomÉquipe}</option>`
+                            ).join('')}
+                        </select> vs
+                        <select class="select-equipe-q" onchange="màjPartieAdmin(${p.noPartie},'noÉquipeB',this.value===''?null:+this.value)">
+                            <option value="" ${p.noÉquipeB == null ? 'selected' : ''}>— À déterminer —</option>
+                            ${équipes.filter(e => e.estÉquipe).map(e =>
+                                `<option value="${e.noÉquipe}" ${e.noÉquipe === p.noÉquipeB ? 'selected' : ''}>${e.nomÉquipe}</option>`
+                            ).join('')}
+                        </select>
+                    </td>
                     <td><input class="input-type-série" type="date" value="${p.date || ''}"
                         oninput="màjPartieAdmin(${p.noPartie},'date',this.value)" style="width:140px"></td>
                     <td><input class="input-type-série" type="text" value="${p.animateur || ''}"
                         oninput="màjPartieAdmin(${p.noPartie},'animateur',this.value)" style="width:180px"></td>
-                    <td><select class="select-equipe-q" onchange="màjPartieAdmin(${p.noPartie},'noÉquipeQuestionnaire',+this.value)">
-                        ${équipes.filter(e => !e.estÉquipe).map(e =>
-                            `<option value="${e.noÉquipe}" ${e.noÉquipe === p.noÉquipeQuestionnaire ? 'selected' : ''}>${e.nomÉquipe}</option>`
-                        ).join('')}
-                    </select></td>
+                    <td>
+                        <datalist id="dl-eq-q-${p.noPartie}">
+                            ${équipes.map(e => `<option value="${e.nomÉquipe.replace(/"/g,'&quot;')}">`).join('')}
+                        </datalist>
+                        <input class="input-type-série" type="text"
+                            list="dl-eq-q-${p.noPartie}"
+                            value="${typeof p.noÉquipeQuestionnaire === 'number' ? nomÉq(p.noÉquipeQuestionnaire).replace(/"/g,'&quot;') : (p.noÉquipeQuestionnaire || '').replace(/"/g,'&quot;')}"
+                            oninput="màjResponsableQuestionnaire(${p.noPartie}, this.value)"
+                            style="width:180px" placeholder="Équipe ou nom libre">
+                    </td>
                 </tr>`).join('');
 
             document.getElementById('tableParties').innerHTML = liste.length ? `
@@ -1393,6 +1416,40 @@
         function màjPartieAdmin(noPartie, champ, valeur) {
             const p = partiesAdmin.find(p => p.noPartie === noPartie);
             if (p) p[champ] = valeur;
+        }
+
+        function exporterCalendrier() {
+            const entêtes = ['NoPartie','Date','Salle','NomAnimateur','NoQuestionnaire',
+                             'NoÉquipeA','NoÉquipeB','NoÉquipeQuestionnaire','LienReunion','Phase','Matchup'];
+            const esc = v => {
+                if (v == null) return '';
+                const s = String(v);
+                return s.includes(',') || s.includes('"') || s.includes('\n')
+                    ? '"' + s.replace(/"/g, '""') + '"'
+                    : s;
+            };
+            const lignes = [entêtes.join(',')];
+            partiesAdmin.forEach(p => {
+                lignes.push([
+                    p.noPartie, p.date || '', p.salle || '', p.animateur || '',
+                    p.noQuestionnaire || '', p.noÉquipeA ?? '', p.noÉquipeB ?? '',
+                    p.noÉquipeQuestionnaire ?? '', p.lienRéunion || '',
+                    p.phase || 'saison', p.matchup || ''
+                ].map(esc).join(','));
+            });
+            const blob = new Blob([lignes.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'parties.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function màjResponsableQuestionnaire(noPartie, valeur) {
+            const équipes = window._équipesAdmin || [];
+            const éq = équipes.find(e => e.nomÉquipe === valeur.trim());
+            const v = éq ? éq.noÉquipe : (valeur.trim() || null);
+            màjPartieAdmin(noPartie, 'noÉquipeQuestionnaire', v);
         }
 
         async function sauvegarderParties() {
