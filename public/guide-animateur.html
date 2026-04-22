@@ -305,6 +305,7 @@
     <aside class="index-sidebar">
         <div class="index-titre">Sections</div>
         <nav id="index-nav">
+            <a href="#deroulement">🎮 Déroulement d'une partie</a>
             <a href="#fichiers">📁 Fichiers</a>
             <a href="#volume">🔊 Volume buzzers</a>
             <a href="#administration">⚙️ Administration</a>
@@ -317,6 +318,125 @@
     </aside>
 
     <div class="contenu">
+
+        <!-- Déroulement d'une partie -->
+        <div class="carte" id="deroulement" data-section>
+            <h2>Déroulement d'une partie</h2>
+
+            <h3>1. Initialisation</h3>
+            <p>Accéder à <strong>marqueur.html</strong>. Le bandeau orange <em>🔧 Initialisation</em> indique qu'aucune partie n'est en cours.</p>
+            <ol>
+                <li>Sélectionner la partie dans la liste déroulante. Seules les parties des 5 derniers jours apparaissent — cocher <em>Afficher toutes les parties</em> si nécessaire.</li>
+                <li>Choisir le mode de placement des joueurs à l'écran :
+                    <ul>
+                        <li><strong>🎲 Positions aléatoires</strong> — les joueurs sont disposés aléatoirement dans leur bloc d'équipe.</li>
+                        <li><strong>🔢 Positions fixes</strong> — les joueurs sont placés selon le champ <em>Position</em> défini pour chaque joueur dans l'écran "administration".</li>
+                    </ul>
+                </li>
+                <li>Cliquer <strong>▶️ Démarrer la partie</strong>.</li>
+            </ol>
+            <div class="note"><strong>Si tous les joueurs ne sont pas encore connectés :</strong> cliquer sur Démarrer quand même. Les joueurs peuvent rejoindre en cours de route — ils s'enregistrent dès qu'ils choisissent leur nom. Aucune conséquence sur le déroulement.</div>
+
+            <h3>2. L'écran central — à surveiller en permanence</h3>
+            <p>Le bloc central affiche en tout temps la <strong>série</strong>, le <strong>thème</strong> et le <strong>numéro de question</strong> (ex. <em>Série 1 — Individuelle / Langue / Question 1 / 8 — 10 pts</em>). C'est la référence absolue pour savoir où vous en êtes.</p>
+            <p><strong>Il est essentiel que cet affichage corresponde à la question lue à voix haute.</strong> La feuille de match est générée à partir de ces données — une question accordée à la mauvaise série ou au mauvais numéro faussera les statistiques.</p>
+            <div class="note">Avant d'attribuer un point, vérifiez toujours que la série et le numéro de question affichés correspondent bien à ce que vous venez de lire.</div>
+
+            <h3>3. Flux d'une question — boutons principaux</h3>
+            <p>Dès qu'un joueur appuie, son nom s'affiche dans la zone <em>buzzer</em>. Trois actions sont possibles :</p>
+            <table>
+                <thead><tr><th>Bouton</th><th>Effet</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><strong>✅ 10 pts</strong></td>
+                        <td>Attribue 10 pts à l'équipe du joueur et passe automatiquement à la question suivante.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>✅ 5 pts</strong></td>
+                        <td>Visible uniquement pour certaines questions (voir séries spéciales ci-dessous). Attribue 5 pts et avance.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>❌ Mauvaise</strong></td>
+                        <td>Enregistre une mauvaise réponse. La question reste active — l'équipe adverse peut buzzer.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>🔄 Reset</strong></td>
+                        <td>Réinitialise le buzzer sans enregistrer de réponse. Utile si un joueur a buzzé par erreur avant que la question soit lue.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>🗑️ Annuler la réponse</strong></td>
+                        <td>Supprime le dernier point accordé (la question précédente). À utiliser si une erreur est constatée juste après avoir cliqué <em>10 pts</em>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="note"><strong>Donner des points sans buzzer :</strong> si personne n'a buzzé mais qu'une équipe ou un joueur mérite des points (ex. : réponse collective donnée à voix haute), cliquer sur le bon joueur puis sur <em>✅ 10 pts</em> — si c'est une question d'équipe, le système attribue les points à l'équipe.</div>
+
+            <h3>4. Naviguer entre les questions et les séries</h3>
+            <ul>
+                <li><strong>◀️ Question précédente / Question suivante ▶️</strong> — avance ou recule d'une question dans la série.</li>
+                <li><strong>⏮️ Série précédente / Série suivante ⏭️</strong> — saute à la première question de la série adjacente.</li>
+                <li><strong>🔄 Retour initialisation</strong> — revient à l'écran de sélection sans perdre les données. La partie peut être relancée exactement où elle en était.</li>
+            </ul>
+
+            <h3>5. Séries spéciales — points différents</h3>
+            <p>Pour la majorité des séries, le marqueur gère automatiquement les points. Deux séries font exception :</p>
+            <table>
+                <thead><tr><th>Série</th><th>Questions</th><th>Particularité</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Série 6</strong> (Les 4 V)</td>
+                        <td>Q5 à Q8</td>
+                        <td>Le bouton <strong>✅ 5 pts</strong> apparaît. Les bonnes réponses à ces questions valent 5 pts (au lieu de 10).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Série 13</strong> (Associations)</td>
+                        <td>Q4 et Q8</td>
+                        <td>Valent 20 pts. Toutes les autres questions valent 10 pts.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="note"><strong>Série 9 (Indice) :</strong> Q1 et Q2 n'ont pas de réponse associée dans le gabarit — c'est normal, la réponse n'est inscrite qu'à Q3. Si l'indice est réussi à Q1 ou Q2, utiliser le bouton <strong>Série suivante ⏭️</strong> pour sauter les questions restantes et passer à la série suivante.</div>
+
+            <h3>6. Timer de réponse (reset auto)</h3>
+            <p>La case <strong>⏱️ Reset auto après X sec</strong> est cochée par défaut (8 secondes). Une fois un buzzer reçu, si aucun bouton n'est cliqué dans le délai, le buzzer se réinitialise automatiquement — pratique pour les moments où personne ne répond.</p>
+            <ul>
+                <li>Le délai est ajustable (1–30 secondes) dans le champ numérique adjacent.</li>
+                <li>Décocher la case pour désactiver entièrement le reset automatique.</li>
+            </ul>
+
+            <h3>7. Volume des buzzers et test des sons</h3>
+            <p>Le curseur <strong>🔊 Volume buzzers</strong> est accessible une fois la partie démarrée (pas avant). Par défaut à 200% (amplification maximale). Ajuster selon l'acoustique de la salle.</p>
+            <ul>
+                <li>Les boutons <strong>🔔 Équipe A</strong> et <strong>🔔 Équipe B</strong> permettent de tester le son de chaque équipe à tout moment pendant la partie.</li>
+                <li>0% = muet, 100% = amplification normale, 200% = maximum.</li>
+            </ul>
+
+            <h3>8. Affichages optionnels</h3>
+            <ul>
+                <li><strong>📊 Afficher pts/joueur</strong> — affiche les points individuels de chaque joueur dans les blocs d'équipe.</li>
+                <li><strong>⚡ Temps de réaction</strong> — affiche le temps en secondes entre le début de la question et le buzzer.</li>
+            </ul>
+
+            <h3>8. Crash ou déconnexion — pas de panique</h3>
+            <p>Chaque réponse accordée est sauvegardée immédiatement sur le serveur dans un fichier temporaire (<code>répondants-{N}.json</code>). Si le navigateur de l'animateur plante ou si l'onglet est fermé accidentellement :</p>
+            <ol>
+                <li>Retourner sur <strong>marqueur.html</strong> et sélectionner la même partie.</li>
+                <li>Cliquer <strong>▶️ Démarrer la partie</strong> — toutes les réponses déjà enregistrées sont rechargées automatiquement.</li>
+                <li>Naviguer jusqu'à la bonne question et reprendre.</li>
+            </ol>
+            <p>Pour les joueurs, le même mécanisme s'applique : si leur onglet se ferme, ils retournent sur <strong>joueur.html</strong>, rejoignent la même partie et choisissent à nouveau leur nom. Ils retrouvent leur équipe en temps réel.</p>
+
+            <h3>9. Téléchargements en cours de partie</h3>
+            <p>Deux boutons de sauvegarde sont disponibles pendant le jeu :</p>
+            <ul>
+                <li><strong>💾 Télécharger partie en cours</strong> — exporte les répondants de la partie active seulement (fichier <code>répondants-{N}.json</code>).</li>
+                <li><strong>💾 Télécharger cumulatif</strong> — exporte le fichier complet de la saison (<code>répondants.json</code>) tel qu'il est au moment du téléchargement.</li>
+            </ul>
+            <div class="note">Ces téléchargements sont optionnels — une sauvegarde ZIP complète est proposée automatiquement à la fin de chaque partie.</div>
+
+            <h3>10. Terminer la partie</h3>
+            <p>Cliquer <strong>🏁 Terminer la partie</strong> lorsque toutes les séries sont complétées. Le système consolide les données dans <code>répondants.json</code> et affiche une bannière de sauvegarde. Une sauvegarde ZIP est recommandée à ce moment.</p>
+        </div>
 
         <!-- Gestion des fichiers -->
         <div class="carte" id="fichiers" data-section>

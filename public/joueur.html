@@ -536,14 +536,20 @@
             // Pré-sélectionner la partie si noPartie est dans l'URL
             const noPartieURL = parseInt(new URLSearchParams(location.search).get('noPartie'));
             if (noPartieURL) {
-                if (!partiesFiltrees.find(p => p.noPartie === noPartieURL)) {
+                const dansFiltrées = partiesFiltrees.find(p => p.noPartie === noPartieURL);
+                if (!dansFiltrées) {
                     document.getElementById('toutesParties').checked = true;
                     remplirSélecteur(toutesParties);
                 } else {
                     remplirSélecteur(partiesFiltrees);
                 }
-                document.getElementById('listeParties').value = noPartieURL;
-                chargerÉquipes();
+                const select = document.getElementById('listeParties');
+                const optionCible = Array.from(select.options).find(o => parseInt(o.value) === noPartieURL);
+                console.log('[joueur] noPartieURL=', noPartieURL, 'option trouvée=', !!optionCible, 'dansFiltrées=', !!dansFiltrées, 'toutesParties.length=', toutesParties.length);
+                if (optionCible) {
+                    optionCible.selected = true;
+                    chargerÉquipes();
+                }
             } else {
                 remplirSélecteur(partiesFiltrees);
             }
@@ -558,7 +564,7 @@
                 const option = document.createElement('option');
                 option.value = p.noPartie;
                 option.textContent =
-                    `#${p.noPartie} — ${p.date} — ${éA.nomÉquipe} vs ${éB.nomÉquipe}`;
+                    `#${p.noPartie} — ${p.date} — ${éA?.nomÉquipe || 'À déterminer'} vs ${éB?.nomÉquipe || 'À déterminer'}`;
                 select.appendChild(option);
             });
         }
@@ -586,11 +592,11 @@
                 selectÉquipes.innerHTML =
                     '<option value="">-- Choisir votre équipe --</option>';
 
-                [partie.noÉquipeA, partie.noÉquipeB].forEach(noÉquipe => {
+                [partie.noÉquipeA, partie.noÉquipeB].filter(Boolean).forEach(noÉquipe => {
                     const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
                     const option = document.createElement("option");
                     option.value = noÉquipe;
-                    option.textContent = équipe.nomÉquipe;
+                    option.textContent = équipe?.nomÉquipe || 'À déterminer';
                     selectÉquipes.appendChild(option);
                 });
 

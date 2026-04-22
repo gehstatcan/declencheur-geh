@@ -580,7 +580,7 @@
         <!-- Timer auto-reset -->
         <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
             <label style="display:flex; align-items:center; gap:6px; font-size:0.9em; font-weight:600; color:var(--blanc); cursor:pointer;">
-                <input type="checkbox" id="timerActif" onchange="toggleTimer()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+                <input type="checkbox" id="timerActif" onchange="toggleTimer()" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
                 ⏱️ Reset auto après
             </label>
             <input type="number" id="timerSecondes" value="5" min="1" max="30" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; font-weight:600; text-align:center;">
@@ -591,10 +591,10 @@
         <!-- Volume et test des sons -->
         <div style="display:flex; align-items:center; gap:12px; justify-content:center; margin-top:16px; flex-wrap:wrap;">
             <label style="font-size:0.9em; font-weight:600;">🔊 Volume buzzers</label>
-            <input type="range" id="sliderVolume" min="0" max="4" step="0.1" value="2"
+            <input type="range" id="sliderVolume" min="0" max="4" step="0.1" value="4"
                 style="width:140px; cursor:pointer;"
                 oninput="gainMaître.gain.value = parseFloat(this.value); document.getElementById('valeurVolume').textContent = Math.round(this.value * 50) + '%'">
-            <span id="valeurVolume" style="font-size:0.9em; font-weight:600; color:var(--blanc); min-width:36px;">100%</span>
+            <span id="valeurVolume" style="font-size:0.9em; font-weight:600; color:var(--blanc); min-width:36px;">200%</span>
             <button id="btnTestA" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; font-weight:600; padding:6px 14px;" onclick="testerSonÉquipe('A')">🔔 Équipe A</button>
             <button id="btnTestB" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; font-weight:600; padding:6px 14px;" onclick="testerSonÉquipe('B')">🔔 Équipe B</button>
         </div>
@@ -641,7 +641,7 @@
         // Web Audio pour les sons
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const gainMaître = audioCtx.createGain();
-        gainMaître.gain.value = 2.0; // Amplification globale — ajuster si trop fort
+        gainMaître.gain.value = 4.0;
         gainMaître.connect(audioCtx.destination);
 
         function jouerSon(noÉquipe) {
@@ -992,6 +992,7 @@
             const zoneInit = document.getElementById('zoneInitialisation');
             const labelParties = document.getElementById('labelToutesParties');
             const sélecteurPartie = document.getElementById('sélecteurPartie');
+            const nav = document.querySelector('nav.nav-animateur');
 
             document.getElementById('infoQuestion').style.display =
                 mode === 'jeu' ? 'block' : 'none';
@@ -1000,8 +1001,9 @@
             const zoneTéléchargement = document.getElementById('zoneTéléchargement');
 
             if (mode === 'jeu') {
-                badge.textContent = 'Partie en cours';
+                badge.textContent = partieActuelle ? `Partie #${partieActuelle} en cours` : 'Partie en cours';
                 badge.className = 'jeu';
+                nav.style.display = 'none';
                 zoneJeu.style.display = 'block';
                 zoneInit.style.display = 'none';
                 sélecteurPartie.style.display = 'none';
@@ -1015,6 +1017,7 @@
             } else {
                 badge.textContent = '🔧 Initialisation';
                 badge.className = 'initialisation';
+                nav.style.display = '';
                 zoneJeu.style.display = 'none';
                 zoneInit.style.display = 'block';
                 sélecteurPartie.style.display = 'block';
