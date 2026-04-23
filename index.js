@@ -482,6 +482,20 @@ app.post("/api/upload/parties", upload.single("fichier"), (req, res) => {
 // ============================================================
 // Modifier les infos d'une ou plusieurs parties (date, animateur, salle,
 // noÉquipeA, noÉquipeB, noÉquipeQuestionnaire) — noPartie est immuable
+// TEMPORAIRE — patch typo Acutalité → Actualité dans thèmes.json sur le Volume
+app.post("/api/admin/patch-typo-actualite", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  const p = path.join(dossierSaison, "thèmes.json");
+  const data = JSON.parse(fs.readFileSync(p, "utf8"));
+  let count = 0;
+  data.forEach(q => q.séries.forEach(s => {
+    if (s.thème === "Acutalité") { s.thème = "Actualité"; count++; }
+  }));
+  fs.writeFileSync(p, JSON.stringify(data));
+  res.json({ corrigés: count });
+});
+
 // ============================================================
 app.put("/api/admin/parties", (req, res) => {
   const token = getCookie(req, "geh_session");

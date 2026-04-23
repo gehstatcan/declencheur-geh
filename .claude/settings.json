@@ -8,6 +8,9 @@
       "Bash(node -e \"const fs=require\\('fs'\\); const r=JSON.parse\\(fs.readFileSync\\('c:/GIT/declencheur-geh/data/saisons/2025-2026/répondants.json','utf-8'\\)\\); const j=r.filter\\(x=>x.noÉquipe===2&&x.noJoueur===1\\); const parties=new Set\\(j.map\\(x=>x.noPartie\\)\\); console.log\\('Parties joueur 2/1:', [...parties].sort\\(\\(a,b\\)=>a-b\\).join\\(', '\\)\\);\")",
       "Bash(node -e \"const fs=require\\('fs'\\); const r=JSON.parse\\(fs.readFileSync\\('c:/GIT/declencheur-geh/data/saisons/2025-2026/répondants.json','utf-8'\\)\\); const s=JSON.parse\\(fs.readFileSync\\('c:/GIT/declencheur-geh/data/saisons/2025-2026/séries.json','utf-8'\\)\\); const sériesRép=new Set\\(r.map\\(x=>x.noSérie\\)\\); const sériesConnus=new Set\\(s.map\\(x=>x.noSérie\\)\\); const manquants=[...sériesRép].filter\\(x=>!sériesConnus.has\\(x\\)\\); console.log\\('Séries dans répondants:', [...sériesRép].sort\\(\\(a,b\\)=>a-b\\).join\\(', '\\)\\); console.log\\('Séries manquantes dans séries.json:', manquants.join\\(', '\\) || 'aucune'\\);\")",
       "Bash(node -e \"process.stdin.resume\\(\\);let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\(JSON.stringify\\(j[35]\\)\\);}\\);\")"
+    ],
+    "additionalDirectories": [
+      "c:\\GIT\\declencheur-geh\\data\\saisons\\2025-2026"
     ]
   }
 }
