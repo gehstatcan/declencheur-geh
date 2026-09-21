@@ -77,13 +77,6 @@
             border-color: var(--accent);
         }
 
-        .dropdown { position: relative; }
-        .dropdown-btn { font-size: 0.95em; padding: 8px 20px; border-radius: 20px; color: var(--blanc); background: var(--accent); border: 1px solid var(--accent); cursor: pointer; transition: all 0.2s; font-family: inherit; font-weight: 600; }
-        .dropdown-menu { display: none; position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--fond-carte); border: 1px solid var(--fond-champ); border-radius: 12px; padding: 6px; min-width: 200px; z-index: 100; flex-direction: column; gap: 4px; }
-        .dropdown-menu.ouvert { display: flex; }
-        .dropdown-menu a { font-size: 0.9em; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: var(--gris); background: transparent; border: none; transition: all 0.2s; white-space: nowrap; }
-        .dropdown-menu a:hover { background: var(--fond-champ); color: var(--texte); }
-        .dropdown-menu a.actif { background: var(--fond-champ); color: var(--texte); font-weight: 600; }
 
         .contenu {
             width: 100%;
@@ -287,14 +280,7 @@
         <a href="stats-calendrier.html">📅 Calendrier</a>
         <a href="stats-classement.html">🏆 Classement</a>
         <a href="stats-compteurs.html">📊 Compteurs</a>
-        <div class="dropdown">
-            <button class="dropdown-btn" onclick="toggleRessources(this)">📚 Ressources ▾</button>
-            <div class="dropdown-menu" id="menu-ressources">
-                <a href="docs.html">📄 Documentation</a>
-                <a href="plan-questionnaire.html" class="actif">📋 Plan du questionnaire</a>
-                <a href="https://gehstatcan.github.io/Saison24/SaisonReg/p5saisonPr%C3%A9c%C3%A9dentes.html" target="_blank">🕐 Saisons précédentes</a>
-            </div>
-        </div>
+        <a href="docs.html" class="actif">📚 Documentation</a>
     </nav>
 
     <div class="contenu">
@@ -507,8 +493,6 @@
     </div>
 
     <script>
-        function toggleRessources(btn) { document.getElementById("menu-ressources").classList.toggle("ouvert"); }
-        document.addEventListener("click", (e) => { if (!e.target.closest(".dropdown")) document.getElementById("menu-ressources").classList.remove("ouvert"); });
         fetch('/api/stats/phase').then(r => r.json()).then(d => {
             if (d.phase === 'eliminations') document.getElementById('lien-eliminations').style.display = '';
         }).catch(() => {});
