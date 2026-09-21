@@ -501,10 +501,11 @@
     </header>
 
     <nav class="nav-animateur">
-        <a href="admin.html" class="actif">⚙️ Administration</a>
         <a href="marqueur.html">🎮 Marqueur</a>
+        <a href="guide-animateur.html">📖 Guide de l’animateur</a>
         <a href="test-sons.html">🔊 Test sons</a>
-        <a href="guide-animateur.html">📖 Guide</a>
+        <a href="admin.html" class="actif">⚙️ Administration</a>
+        <a href="guide-administration.html">📖 Guide d’administration</a>
         <button onclick="déconnexion()">🔒 Déconnexion</button>
     </nav>
 
@@ -513,13 +514,13 @@
     <aside class="index-sidebar">
         <div class="index-titre">Sections</div>
         <nav id="index-nav">
-            <a href="#calendrier">📅 Calendrier</a>
-            <a href="#parties">✏️ Modifier parties</a>
-            <a href="#questionnaire">📥 Questionnaire</a>
-            <a href="#series">📋 Séries</a>
-            <a href="#equipes">👥 Équipes</a>
-            <a href="#saisons">🗓️ Saisons</a>
-            <a href="#parametres">⚙️ Paramètres</a>
+            <a href="#parties">✏️ Modifier les parties</a>
+            <a href="#calendrier">📅 Importer / exporter le calendrier</a>
+            <a href="#questionnaire">📥 Importer un questionnaire</a>
+            <a href="#series">📋 Configurer les séries</a>
+            <a href="#equipes">👥 Gérer les équipes et les joueurs</a>
+            <a href="#saisons">🗓️ Gérer les saisons et les sauvegardes</a>
+            <a href="#parametres">⚙️ Réglages du marqueur</a>
         </nav>
     </aside>
 
@@ -543,7 +544,7 @@
 
     <!-- Upload parties -->
     <div class="carte" id="calendrier" data-section>
-        <h2>📅 Importer le calendrier</h2>
+        <h2>📅 Importer / exporter le calendrier</h2>
 
         <div class="zone-upload" onclick="document.getElementById('fichierParties').click()">
             <div class="icone">📋</div>
@@ -605,7 +606,7 @@
 
     <!-- Éditeur structure des séries -->
     <div class="carte carte-large" id="series" data-section>
-        <h2>📋 Structure des séries</h2>
+        <h2>📋 Configurer les séries</h2>
         <div id="liste-séries">⏳ Chargement...</div>
         <div class="série-actions-bas">
             <button class="bouton bouton-vert" style="width:auto" onclick="ajouterSérie()">+ Ajouter une série</button>
@@ -618,7 +619,7 @@
 
     <!-- Équipes & Joueurs -->
     <div class="carte carte-large" id="equipes" data-section>
-        <h2>👥 Équipes &amp; Joueurs</h2>
+        <h2>👥 Gérer les équipes et les joueurs</h2>
         <div id="liste-equipes">⏳ Chargement...</div>
         <div class="série-actions-bas">
             <button class="bouton bouton-vert" style="width:auto" onclick="ajouterÉquipe()">+ Ajouter une équipe</button>
@@ -630,7 +631,7 @@
 
     <section id="saisons" data-section="saisons" style="margin-bottom:24px">
       <div class="carte carte-large">
-        <h2>Gestion des saisons</h2>
+        <h2>🗓️ Gérer les saisons et les sauvegardes</h2>
 
         <div class="carte" style="margin-bottom:16px">
           <h3>Saison active</h3>
@@ -664,10 +665,10 @@
 
     <section id="parametres" data-section="parametres" style="margin-bottom:24px">
       <div class="carte carte-large">
-        <h2>⚙️ Paramètres</h2>
+        <h2>⚙️ Réglages du marqueur</h2>
 
         <div class="carte">
-          <h3>⏱️ Timer auto-reset — délai par défaut</h3>
+          <h3>⏱️ Délai de réinitialisation automatique du buzzer</h3>
           <p class="info">Durée (en secondes) pré-remplie dans le timer de la page Marqueur. L'animateur peut la modifier en cours de partie.</p>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
             <input type="number" id="timerDéfaut" class="champ" min="1" max="60" value="5" style="width:80px;text-align:center;">

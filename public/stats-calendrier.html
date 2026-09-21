@@ -340,6 +340,14 @@
             background: var(--accent);
             color: var(--blanc);
         }
+
+        .menu-ressources { position: relative; }
+        .menu-ressources summary { cursor: pointer; padding: 8px 20px; border-radius: 20px; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); font-size: 0.95em; }
+        .menu-ressources summary:hover { background: var(--fond-champ); color: var(--texte); }
+        .menu-ressources.actif summary { background: var(--accent); color: white; }
+        .menu-ressources summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .menu-ressources-liens { position: absolute; right: 0; top: calc(100% + 6px); z-index: 100; display: flex; flex-direction: column; gap: 4px; min-width: 230px; padding: 6px; background: var(--fond-carte); border: 1px solid var(--fond-champ); border-radius: 12px; }
+        .menu-ressources-liens a { white-space: nowrap; }
     </style>
 </head>
 
@@ -355,14 +363,22 @@
         <a href="stats-calendrier.html" class="actif">📅 Calendrier</a>
         <a href="stats-classement.html">🏆 Classement</a>
         <a href="stats-compteurs.html">📊 Compteurs</a>
-        <a href="docs.html">📚 Documentation</a>
+        <details class="menu-ressources">
+            <summary>📚 Ressources</summary>
+            <div class="menu-ressources-liens">
+                <a href="docs.html">Documentation</a>
+                <a href="guide-animateur.html">Guide de l’animateur</a>
+                <a href="https://gehstatcan.github.io/Saison24/SaisonReg/p5saisonPr%C3%A9c%C3%A9dentes.html">Saisons précédentes</a>
+                <a href="champions.html">Champions du passé</a>
+            </div>
+        </details>
     </nav>
 
     <div id="sel-saison-wrap" style="text-align:center;margin-bottom:16px">
       <select id="sel-saison" onchange="changerSaisonStats()" style="background:var(--fond-carte);border:1px solid var(--fond-champ);color:var(--texte);padding:6px 12px;border-radius:8px;font-size:0.95em"></select>
     </div>
 
-    <h2>📅 Calendrier 2025-2026</h2>
+    <h2>📅 Calendrier</h2>
 
     <div class="toggle-phase">
         <button id="btn-tous" class="actif" onclick="setPhase('tous')">Tout</button>

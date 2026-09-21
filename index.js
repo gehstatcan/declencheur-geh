@@ -31,7 +31,7 @@ app.use(express.json());
 const crypto = require("crypto");
 const sessions = new Set();
 const MOT_DE_PASSE_ADMIN = process.env.MOT_DE_PASSE_ADMIN || "Fellegi";
-const PAGES_PROTÉGÉES = ["/admin.html"];
+const PAGES_PROTÉGÉES = ["/admin.html", "/guide-administration.html"];
 
 function getCookie(req, name) {
   const cookies = req.headers.cookie || "";
@@ -40,7 +40,14 @@ function getCookie(req, name) {
 }
 
 app.use((req, res, next) => {
-  if (!PAGES_PROTÉGÉES.includes(req.path)) return next();
+  // Normaliser le chemin avant le service des fichiers statiques.
+  let chemin;
+  try {
+    chemin = path.posix.normalize(decodeURIComponent(req.path).replace(/\\/g, "/")).toLowerCase().replace(/\/+$/, "");
+  } catch {
+    return res.sendStatus(400);
+  }
+  if (!PAGES_PROTÉGÉES.includes(chemin)) return next();
   const token = getCookie(req, "geh_session");
   if (token && sessions.has(token)) return next();
   res.redirect("/login.html?redirect=" + encodeURIComponent(req.path));

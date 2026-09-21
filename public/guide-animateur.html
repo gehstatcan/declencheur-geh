@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Guide animateur — GEH Statcan</title>
+    <title>Guide de l’animateur — GEH Statcan</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&display=swap"
         rel="stylesheet">
     <style>
@@ -131,7 +131,7 @@
         .index-sidebar nav a.actif-section { background: var(--fond-champ); color: var(--accent); font-weight: 600; }
 
         .contenu {
-            flex: 1;
+            flex. : 1;
             min-width: 0;
         }
 
@@ -281,6 +281,9 @@
         .badge-toujours { background: #fce7f3; color: #9d174d; padding: 2px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; white-space: nowrap; }
         .badge-absent { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; white-space: nowrap; }
         .badge-jamais { background: var(--fond-champ); color: var(--gris); padding: 2px 8px; border-radius: 6px; font-size: 0.8em; font-weight: 600; white-space: nowrap; }
+
+        .retour-documentation { margin-bottom: 24px; font-size: 0.9em; }
+        .retour-documentation a { color: var(--accent); text-underline-offset: 3px; }
     </style>
 </head>
 
@@ -292,28 +295,22 @@
     </header>
 
     <nav>
-        <a href="admin.html">⚙️ Administration</a>
         <a href="marqueur.html">🎮 Marqueur</a>
+        <a href="guide-animateur.html" class="actif" aria-current="page">📖 Guide de l’animateur</a>
         <a href="test-sons.html">🔊 Test sons</a>
-        <a href="guide-animateur.html" class="actif">📖 Guide</a>
+        <a href="admin.html">⚙️ Administration</a>
     </nav>
 
-    <div class="page-titre">📖 Guide animateur</div>
+    <div class="page-titre">📖 Guide de l’animateur</div>
+    <p class="retour-documentation"><a href="docs.html">← Retour à la documentation</a></p>
 
     <div class="mise-en-page">
 
     <aside class="index-sidebar">
         <div class="index-titre">Sections</div>
         <nav id="index-nav">
-            <a href="#deroulement">🎮 Déroulement d'une partie</a>
-            <a href="#fichiers">📁 Fichiers</a>
-            <a href="#volume">🔊 Volume buzzers</a>
-            <a href="#administration">⚙️ Administration</a>
-            <a href="#repondants">📝 Répondants</a>
-            <a href="#sauvegarde">💾 Sauvegarde ZIP</a>
-            <a href="#developpeurs">💻 Développeurs</a>
-            <a href="#nouvelle-saison">🗓️ Nouvelle saison</a>
-            <a href="#import-historique">📤 Import historique</a>
+            <a href="#deroulement">🎮 Déroulement d’une partie</a>
+            <a href="#sauvegarde">💾 Sauvegarde après une partie</a>
         </nav>
     </aside>
 
@@ -333,9 +330,9 @@
                         <li><strong>🔢 Positions fixes</strong> — les joueurs sont placés selon le champ <em>Position</em> défini pour chaque joueur dans l'écran "administration".</li>
                     </ul>
                 </li>
-                <li>Cliquer <strong>▶️ Démarrer la partie</strong>.</li>
+                <li>Cliquer sur <strong>▶️ Démarrer la partie</strong>.</li>
             </ol>
-            <div class="note"><strong>Si tous les joueurs ne sont pas encore connectés :</strong> cliquer sur Démarrer quand même. Les joueurs peuvent rejoindre en cours de route — ils s'enregistrent dès qu'ils choisissent leur nom. Aucune conséquence sur le déroulement.</div>
+            <div class="note"><strong>Si tous les joueurs ne sont pas encore connectés :</strong> cliquer sur Démarrer quand même. Les joueurs peuvent rejoindre la partie en cours de route — ils s'enregistrent dès qu'ils choisissent leur nom. Aucune conséquence sur le déroulement.</div>
 
             <h3>2. L'écran central — à surveiller en permanence</h3>
             <p>Le bloc central affiche en tout temps la <strong>série</strong>, le <strong>thème</strong> et le <strong>numéro de question</strong> (ex. <em>Série 1 — Individuelle / Langue / Question 1 / 8 — 10 pts</em>). C'est la référence absolue pour savoir où vous en êtes.</p>
@@ -365,7 +362,7 @@
                     </tr>
                     <tr>
                         <td><strong>🗑️ Annuler la réponse</strong></td>
-                        <td>Supprime le dernier point accordé (la question précédente). À utiliser si une erreur est constatée juste après avoir cliqué <em>10 pts</em>.</td>
+                        <td>Supprime le dernier point accordé (la question précédente). À utiliser si une erreur est constatée juste après avoir cliqué sur <em>10 pts</em>.</td>
                     </tr>
                 </tbody>
             </table>
@@ -405,10 +402,10 @@
             </ul>
 
             <h3>7. Volume des buzzers et test des sons</h3>
-            <p>Le curseur <strong>🔊 Volume buzzers</strong> est accessible une fois la partie démarrée (pas avant). Par défaut à 200% (amplification maximale). Ajuster selon l'acoustique de la salle.</p>
+            <p>Le curseur <strong>🔊 Volume buzzers</strong> est accessible une fois la partie démarrée (pas avant). Par défaut à 200 % (amplification maximale). Ajuster selon l'acoustique de la salle.</p>
             <ul>
                 <li>Les boutons <strong>🔔 Équipe A</strong> et <strong>🔔 Équipe B</strong> permettent de tester le son de chaque équipe à tout moment pendant la partie.</li>
-                <li>0% = muet, 100% = amplification normale, 200% = maximum.</li>
+                <li>0 % = muet, 100 % = amplification normale, 200 % = maximum.</li>
             </ul>
 
             <h3>8. Affichages optionnels</h3>
@@ -417,16 +414,16 @@
                 <li><strong>⚡ Temps de réaction</strong> — affiche le temps en secondes entre le début de la question et le buzzer.</li>
             </ul>
 
-            <h3>8. Crash ou déconnexion — pas de panique</h3>
+            <h3>9. Crash ou déconnexion — pas de panique</h3>
             <p>Chaque réponse accordée est sauvegardée immédiatement sur le serveur dans un fichier temporaire (<code>répondants-{N}.json</code>). Si le navigateur de l'animateur plante ou si l'onglet est fermé accidentellement :</p>
             <ol>
                 <li>Retourner sur <strong>marqueur.html</strong> et sélectionner la même partie.</li>
-                <li>Cliquer <strong>▶️ Démarrer la partie</strong> — toutes les réponses déjà enregistrées sont rechargées automatiquement.</li>
+                <li>Cliquer sur <strong>▶️ Démarrer la partie</strong> — toutes les réponses déjà enregistrées sont rechargées automatiquement.</li>
                 <li>Naviguer jusqu'à la bonne question et reprendre.</li>
             </ol>
             <p>Pour les joueurs, le même mécanisme s'applique : si leur onglet se ferme, ils retournent sur <strong>joueur.html</strong>, rejoignent la même partie et choisissent à nouveau leur nom. Ils retrouvent leur équipe en temps réel.</p>
 
-            <h3>9. Téléchargements en cours de partie</h3>
+            <h3>10. Téléchargements en cours de partie</h3>
             <p>Deux boutons de sauvegarde sont disponibles pendant le jeu :</p>
             <ul>
                 <li><strong>💾 Télécharger partie en cours</strong> — exporte les répondants de la partie active seulement (fichier <code>répondants-{N}.json</code>).</li>
@@ -434,275 +431,14 @@
             </ul>
             <div class="note">Ces téléchargements sont optionnels — ils étaient surtout utilisés durant la phase de test.</div>
 
-            <h3>10. Terminer la partie</h3>
-            <p>Cliquer <strong>🏁 Terminer la partie</strong> lorsque toutes les séries sont complétées. Le système consolide les données dans <code>répondants.json</code> et affiche le détail du pointage par joueur sur l'écran des joueurs.</p>
+            <h3>11. Terminer la partie</h3>
+            <p>Cliquer sur <strong>🏁 Terminer la partie</strong> lorsque toutes les séries sont complétées. Le système consolide les données dans <code>répondants.json</code> et affiche le détail du pointage par joueur sur l'écran des joueurs.</p>
         </div>
 
-        <!-- Gestion des fichiers -->
-        <div class="carte" id="fichiers" data-section>
-            <h2>Gestion des fichiers</h2>
-
-            <p>Les données du système sont réparties dans <code>data/saisons/2025-2026/</code>. Le comportement de chaque fichier diffère selon qu'on est en <strong>local</strong> ou sur <strong>Railway (production)</strong>.</p>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fichier</th>
-                        <th>Railway au déploiement</th>
-                        <th>Rôle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>équipes.json</code></td>
-                        <td><span class="badge-absent">Copié si absent</span></td>
-                        <td>Noms, couleurs, priorité d'égalité — éditable via admin.html</td>
-                    </tr>
-                    <tr>
-                        <td><code>joueurs.json</code></td>
-                        <td><span class="badge-absent">Copié si absent</span></td>
-                        <td>Liste des joueurs par équipe — éditable via admin.html</td>
-                    </tr>
-                    <tr>
-                        <td><code>séries.json</code></td>
-                        <td><span class="badge-absent">Copié si absent</span></td>
-                        <td>Structure des séries — éditable via admin.html</td>
-                    </tr>
-                    <tr>
-                        <td><code>parties.json</code></td>
-                        <td><span class="badge-absent">Copié si absent</span></td>
-                        <td>Calendrier, liens Teams, matchups éliminatoires</td>
-                    </tr>
-                    <tr>
-                        <td><code>thèmes.json</code></td>
-                        <td><span class="badge-jamais">Jamais touché</span></td>
-                        <td>Thèmes et sous-thèmes — géré via import questionnaire (admin.html)</td>
-                    </tr>
-                    <tr>
-                        <td><code>questions.json</code></td>
-                        <td><span class="badge-jamais">Jamais touché</span></td>
-                        <td>Textes et réponses des questions — géré via import questionnaire (admin.html)</td>
-                    </tr>
-                    <tr>
-                        <td><code>répondants.json</code></td>
-                        <td><span class="badge-jamais">Jamais touché</span></td>
-                        <td>Données accumulées en jeu — toute la saison</td>
-                    </tr>
-                    <tr>
-                        <td><code>alignements.json</code></td>
-                        <td><span class="badge-jamais">Jamais touché</span></td>
-                        <td>Alignements des joueurs par partie</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="note"><strong>Règle clé :</strong> un déploiement Railway ne détruira jamais <code>répondants.json</code> ni <code>alignements.json</code> s'ils existent déjà sur le Volume. Les données de la saison sont protégées.</div>
-        </div>
-
-        <!-- Volume des buzzers -->
-        <div class="carte" id="volume" data-section>
-            <h2>Volume des buzzers</h2>
-            <p>Le volume des buzzers se règle dans <strong>marqueur.html</strong> via un curseur affiché dans la zone d'initialisation, avant de démarrer la partie.</p>
-            <ul>
-                <li><strong>0 %</strong> — muet</li>
-                <li><strong>100 %</strong> — amplification par défaut (2× le volume système)</li>
-                <li><strong>200 %</strong> — amplification maximale</li>
-            </ul>
-            <p>Deux boutons permettent de tester le son de chaque équipe une fois la partie sélectionnée, avant de la démarrer.</p>
-            <div class="note">À tester en salle — le rendu varie beaucoup selon les haut-parleurs et l'acoustique.</div>
-        </div>
-
-        <!-- Administration -->
-        <div class="carte" id="administration" data-section>
-            <h2>Page d'administration</h2>
-
-            <h3>📅 Importer le calendrier → <code>parties.json</code></h3>
-            <p><strong>Source :</strong> fichier CSV ou Excel &nbsp;|&nbsp; <strong>Effet :</strong> remplace entièrement le calendrier existant sur le serveur</p>
-            <table>
-                <thead><tr><th>Colonne</th><th>Description</th></tr></thead>
-                <tbody>
-                    <tr><td><code>NoPartie</code></td><td>Numéro unique de la partie</td></tr>
-                    <tr><td><code>Date</code></td><td>Format AAAA-MM-JJ</td></tr>
-                    <tr><td><code>Salle</code></td><td>Salle ou lieu</td></tr>
-                    <tr><td><code>NomAnimateur</code></td><td>Nom de l'animateur</td></tr>
-                    <tr><td><code>NoQuestionnaire</code></td><td>Numéro du questionnaire utilisé</td></tr>
-                    <tr><td><code>NoÉquipeA</code></td><td>Numéro de l'équipe A</td></tr>
-                    <tr><td><code>NoÉquipeB</code></td><td>Numéro de l'équipe B</td></tr>
-                    <tr><td><code>NoÉquipeQuestionnaire</code></td><td>Équipe qui a préparé le questionnaire</td></tr>
-                    <tr><td><code>LienReunion</code></td><td>Lien Teams pour rejoindre la réunion</td></tr>
-                    <tr><td><code>Phase</code></td><td><em>(optionnel)</em> Valeur : <code>eliminations</code></td></tr>
-                    <tr><td><code>Matchup</code></td><td><em>(optionnel)</em> Bracket : <code>Q1</code>, <code>Q2</code>, <code>Q3</code>, <code>D1</code>, <code>D2</code>, <code>F</code></td></tr>
-                </tbody>
-            </table>
-
-            <h3>📥 Importer un questionnaire → <code>thèmes.json</code> + <code>questions.json</code></h3>
-            <p><strong>Source :</strong> fichier Excel avec une feuille nommée <strong>Vers BD</strong> &nbsp;|&nbsp; <strong>Effet :</strong> ajoute ou remplace le questionnaire correspondant</p>
-            <p>Le fichier doit contenir deux tableaux : <code>tblThèmes</code> (un thème par série) et <code>tblQuestionnaires</code> (une question par ligne).</p>
-            <div class="note">
-                <strong>Série 9 (Indice) :</strong> Q1 et Q2 sans réponse sont normales — la réponse n'est inscrite qu'à Q3.<br>
-                <strong>Série 13 (Associations) :</strong> Q1 et Q2 contiennent les textes d'introduction des deux groupes.
-            </div>
-
-            <h3>📋 Éditeur de séries</h3>
-            <p>La structure des séries est modifiable via l'éditeur intégré dans admin.html. Une fois la saison lancée (au moins une partie jouée), l'éditeur est verrouillé automatiquement.</p>
-            <ol>
-                <li>Modifier les séries via l'éditeur</li>
-                <li>Sauvegarder (enregistré directement sur le serveur)</li>
-                <li>Télécharger le JSON pour mettre à jour la copie locale</li>
-            </ol>
-        </div>
-
-        <!-- Répondants -->
-        <div class="carte" id="repondants" data-section>
-            <h2>Répondants — deux fichiers, deux rôles</h2>
-
-            <h3><code>parties/répondants-{N}.json</code> — fichier de travail en direct</h3>
-            <p>Créé dès qu'un premier point est attribué durant la partie N. Mis à jour en temps réel :</p>
-            <ul>
-                <li><strong>Attribuer</strong> → ajoute une entrée</li>
-                <li><strong>Annuler</strong> → supprime l'entrée</li>
-                <li><strong>Écraser</strong> (nouvelle réponse sur une question déjà répondue) → remplace l'entrée après confirmation</li>
-            </ul>
-            <p>Sert aussi à la <strong>reprise automatique</strong> : si le navigateur du marqueur plante ou est fermé, la reconnexion recharge l'état complet depuis ce fichier.</p>
-
-            <h3><code>répondants.json</code> — fichier cumulatif de la saison</h3>
-            <p>Mis à jour <strong>uniquement au moment de terminer une partie</strong>. Alimente toutes les pages de statistiques (classement, compteurs, feuille de match, profil joueur).</p>
-
-            <table>
-                <thead><tr><th></th><th><code>répondants-{N}.json</code></th><th><code>répondants.json</code></th></tr></thead>
-                <tbody>
-                    <tr><td>Mise à jour</td><td>En continu durant la partie</td><td>À la fin seulement</td></tr>
-                    <tr><td>Portée</td><td>Une seule partie</td><td>Toute la saison</td></tr>
-                    <tr><td>Usage</td><td>Score live, marqueur</td><td>Toutes les stats</td></tr>
-                    <tr><td>Ignoré par git</td><td>Oui</td><td>Non (sauvegarde)</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Sauvegarde ZIP -->
         <div class="carte" id="sauvegarde" data-section>
-            <h2>Sauvegarde ZIP</h2>
-            <p>Le système offre deux façons de télécharger une sauvegarde complète de tous les fichiers JSON de la saison active (équipes, joueurs, parties, séries, questions, thèmes, répondants, alignements).</p>
-
-            <h3>Depuis le marqueur (après une partie)</h3>
-            <p>Une bannière apparaît automatiquement à la fin de chaque partie avec un bouton <strong>Télécharger la sauvegarde ZIP</strong>. L'animateur peut ainsi conserver une copie locale sans avoir accès à l'administration.</p>
-
-            <h3>Depuis l'administration</h3>
-            <p>La section <em>Gestion des saisons</em> dans admin.html offre le même bouton de téléchargement, accessible à tout moment.</p>
-
-            <div class="note"><strong>Usage développement :</strong> télécharger le ZIP de Railway et extraire les fichiers dans <code>data/saisons/2025-2026/</code> en local permet de reproduire exactement l'environnement de production.</div>
+            <h2>Sauvegarde après une partie</h2>
+            <p>Une bannière apparaît automatiquement à la fin de chaque partie avec un bouton <strong>Télécharger la sauvegarde ZIP</strong>. L’animateur peut ainsi conserver une copie locale des données de la saison sans avoir accès à l’administration.</p>
         </div>
-
-        <!-- Pour développeurs -->
-        <div class="carte" id="developpeurs" data-section>
-            <h2>Pour développeurs</h2>
-
-            <h3>Flux de déploiement : Local → GitHub → Railway</h3>
-            <p>Chaque <code>git push</code> vers GitHub déclenche automatiquement un redéploiement sur Railway.</p>
-            <pre>LOCAL (PC)               GITHUB                    RAILWAY
-─────────────────        ──────────────            ──────────────────────
-c:\GIT\declencheur       gehstatcan/               gehstatcan.up
-                         declencheur-geh           .railway.app
-
-      │                        │                          │
-      │  git push              │                          │
-      ├───────────────────────>│                          │
-      │                        │  déploiement auto        │
-      │                        ├─────────────────────────>│
-      │                        │    1. télécharge code    │
-      │                        │    2. npm install        │
-      │                        │    3. node index.js      │
-      │                        │    4. initialiserVolume  │</pre>
-
-            <h3>Réinitialisation du Volume (reset)</h3>
-            <p>En cas de besoin, le script <code>init-volume.js</code> permet de réinitialiser le Volume depuis les fichiers git :</p>
-            <pre># Sans --force : copie seulement les fichiers absents (sécuritaire)
-railway run node init-volume.js
-
-# Avec --force : écrase TOUT depuis git (⚠️ détruit les données de jeu)
-railway run node init-volume.js --force</pre>
-            <div class="note"><strong>Attention :</strong> <code>--force</code> écrase <code>répondants.json</code> et <code>alignements.json</code>. À n'utiliser qu'en début de saison ou pour un reset complet.</div>
-
-            <h3>Workflow séries en début de saison</h3>
-            <pre>1. Modifier séries.json via admin.html
-2. Sauvegarder (enregistré sur le serveur)
-3. Télécharger le JSON → remplacer data/saisons/AAAA/séries.json en local
-4. git push → mis à jour dans git pour la prochaine saison</pre>
-        </div>
-
-    <section id="nouvelle-saison" data-section="nouvelle-saison" style="scroll-margin-top:80px">
-      <div class="carte">
-        <h2>🗓️ Démarrer une nouvelle saison</h2>
-
-        <div class="carte" style="margin-bottom:16px">
-          <h3>Étapes à suivre</h3>
-          <ol>
-            <li><strong>Créer la nouvelle saison</strong> dans la page Administration → section <em>Gestion des saisons</em>. Entrer le format <code>AAAA-AAAA</code> (ex: <code>2026-2027</code>) et cliquer <strong>Créer</strong>.</li>
-            <li><strong>Activer la nouvelle saison</strong> : sélectionner la saison dans le menu déroulant et cliquer <strong>Activer</strong>. Toutes les parties suivantes utiliseront cette saison.</li>
-            <li><strong>Configurer les équipes et joueurs</strong> dans la section <em>Équipes &amp; Joueurs</em> de la page Administration.</li>
-            <li><strong>Importer le calendrier</strong> (fichier <code>parties.json</code>) dans la section <em>Calendrier</em>.</li>
-            <li><strong>Configurer la structure des séries</strong> dans la section <em>Séries</em> de la page Administration (types de séries, nombre de questions, points, etc.).</li>
-            <li><strong>Importer les questionnaires au fur et à mesure des parties</strong> : avant chaque partie, importer le fichier <code>questions.xlsx</code> correspondant dans la section <em>Questionnaire</em>.</li>
-          </ol>
-        </div>
-
-        <div class="carte" style="margin-bottom:16px">
-          <h3>Notes importantes</h3>
-          <ul>
-            <li>Chaque saison est isolée dans son propre dossier (<code>data/saisons/AAAA-AAAA/</code>). Les données de saisons précédentes ne sont pas affectées.</li>
-            <li>Les statistiques des saisons passées restent consultables en sélectionnant la saison dans le menu déroulant des pages de statistiques.</li>
-            <li>Si la saison est déployée sur Railway, les fichiers sont stockés sur le Volume. La saison active est persistée dans <code>data/saison-active.txt</code> sur le Volume — elle survit aux redémarrages.</li>
-            <li>Pour revenir à une saison précédente (ex: corriger des données), changer la saison active dans Administration puis revenir à la saison courante quand terminé.</li>
-          </ul>
-        </div>
-
-        <div class="carte">
-          <h3>Sur Railway (production)</h3>
-          <p>La variable d'environnement <code>SAISON_ACTIVE</code> est un fallback — elle n'est lue qu'au démarrage si <code>data/saison-active.txt</code> est absent. En utilisant l'interface Administration, <code>saison-active.txt</code> est mis à jour automatiquement et aucun redéploiement n'est nécessaire.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="import-historique" data-section="import-historique" style="scroll-margin-top:80px">
-      <div class="carte">
-        <h2>📤 Importer des données historiques sur Railway</h2>
-
-        <p>En temps normal, <code>répondants.json</code> et <code>alignements.json</code> sont ignorés par git (<code>skip-worktree</code>) pour éviter d'écraser accidentellement les données de jeu sur le Volume. Mais il est possible de les pousser ponctuellement via git.</p>
-
-        <div class="carte" style="margin-top:16px;margin-bottom:16px">
-          <h3>Pourquoi skip-worktree et pas .gitignore ?</h3>
-          <p><code>.gitignore</code> empêche git de <em>jamais</em> suivre un fichier — impossible de le pousser ensuite. <code>skip-worktree</code> dit à git d'ignorer les modifications locales au quotidien, tout en gardant le fichier suivi. On peut lever le flag temporairement pour faire un push, puis le remettre.</p>
-        </div>
-
-        <div class="carte" style="margin-bottom:16px">
-          <h3>Procédure d'import</h3>
-          <ol>
-            <li>Générer les fichiers localement (ex: script <code>generer-saison24.js</code>)</li>
-            <li>Lever le flag <code>skip-worktree</code> sur les deux fichiers :
-              <pre>git update-index --no-skip-worktree "data/saisons/AAAA-AAAA/répondants.json"
-git update-index --no-skip-worktree "data/saisons/AAAA-AAAA/alignements.json"</pre>
-            </li>
-            <li>Dans <code>initialiserVolume()</code> de <code>index.js</code>, ajouter temporairement une section d'écrasement forcé pour ces deux fichiers :
-              <pre>// TEMPORAIRE — retirer après déploiement
-["répondants.json", "alignements.json"].forEach((f) => {
-  const src = path.join(__dirname, "data", "saisons", saisonActive, f);
-  const dst = path.join(dossierSaison, f);
-  if (fs.existsSync(src)) fs.copyFileSync(src, dst);
-});</pre>
-            </li>
-            <li>Commit + push → Railway redéploie et copie les fichiers sur le Volume</li>
-            <li><strong>Dès que Railway confirme le déploiement</strong>, revert immédiatement :
-              <pre>git revert HEAD --no-edit
-git update-index --skip-worktree "data/saisons/AAAA-AAAA/répondants.json"
-git update-index --skip-worktree "data/saisons/AAAA-AAAA/alignements.json"
-git push</pre>
-            </li>
-          </ol>
-        </div>
-
-        <div class="note"><strong>Important :</strong> ne pas laisser le bloc d'écrasement forcé plus longtemps que nécessaire — chaque redéploiement écraserait le Volume avec la version git, effaçant toutes les nouvelles parties jouées.</div>
-      </div>
-    </section>
 
     </div><!-- fin contenu -->
     </div><!-- fin mise-en-page -->
