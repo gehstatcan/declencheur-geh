@@ -1,0 +1,1 @@
+Répertoire pour entreposer les fichier en format "doc" qui servent à la création des html. Les html seront "exposé" au utilisateurs dans le répertoire "public"

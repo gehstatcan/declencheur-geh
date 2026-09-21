@@ -16,6 +16,8 @@
             --blanc: #ffffff;
             --texte: #2c2c2c;
             --gris: #888888;
+            --modification: #a61b1b;
+            --fond-modification: #f8dddd;
             --rayon: 12px;
         }
 
@@ -101,7 +103,26 @@
             font-size: 0.85em;
             color: var(--gris);
             text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .avis-modifications {
+            color: var(--modification);
+            background: var(--fond-modification);
+            border-left: 4px solid var(--modification);
+            border-radius: 8px;
+            padding: 10px 12px;
             margin-bottom: 24px;
+            font-size: 0.88em;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .modification {
+            color: var(--modification) !important;
+            background: var(--fond-modification);
+            border-radius: 5px;
+            padding: 1px 4px;
         }
 
         .actions-haut {
@@ -243,6 +264,8 @@
             margin: 0;
         }
 
+        .type-question p + p { margin-top: 8px; }
+
         .note-màj {
             font-size: 0.8em;
             color: var(--gris);
@@ -277,16 +300,14 @@
     <div class="contenu">
 
         <div class="page-titre">📋 Plan du questionnaire</div>
-        <div class="page-sous-titre">Saison 2025-2026 — Dernière mise à jour : septembre 2025</div>
-
-        <div class="actions-haut">
-            <a class="bouton-dl" href="ressources/2025-2026/plan-questionnaire.doc" download="Plan du questionnaire 2025-2026.doc">⬇ Télécharger .doc</a>
-        </div>
+        <div class="page-sous-titre">Saison 2026-2027 — Dernière mise à jour : septembre 2026</div>
+        <div class="avis-modifications">Les passages nouveaux ou modifiés par rapport à la saison précédente sont affichés en rouge sur un fond légèrement coloré.</div>
 
         <!-- Tableau des séries -->
         <div class="carte">
             <h2>Les séries</h2>
-            <p>Il y a 15 séries dans le questionnaire. 9 sont avec thèmes imposés, 5 avec thèmes au choix et une sans thème. Pour les thèmes au choix, vous ne devez pas choisir le même deux fois.</p>
+            <p>Il y a 15 séries dans le questionnaire. 9 sont avec thèmes imposés, 5 avec thèmes au choix et une sans thème.</p>
+            <p>Pour les thèmes au choix, vous ne devez pas choisir le même deux fois. Par exemple, pas deux séries en géographie en plus de la série 2. De toute façon, le gabarit vous empêchera de le faire. Pour les thèmes libres, vous avez seulement le choix parmi 3.</p>
             <table class="tableau-séries">
                 <thead>
                     <tr>
@@ -309,7 +330,7 @@
                     <tr>
                         <td><strong>3</strong></td>
                         <td><span class="badge-type badge-collec">Collective</span></td>
-                        <td>Cinéma et télévision</td>
+                        <td><span class="modification">Arts et médias</span></td>
                     </tr>
                     <tr>
                         <td><strong>4</strong></td>
@@ -329,7 +350,7 @@
                     <tr>
                         <td><strong>7</strong></td>
                         <td><span class="badge-type badge-collec">Collective</span></td>
-                        <td>Arts et littérature</td>
+                        <td><span class="modification">Langue et littérature</span></td>
                     </tr>
                     <tr>
                         <td><strong>8</strong></td>
@@ -381,15 +402,16 @@
             <div class="grille-themes">
                 <div class="theme-carte">
                     <h3>1 — Langue</h3>
-                    <p>Proverbes, expressions populaires, conjugaisons, épellation (singulier/pluriel), homonymes, origine des mots, genre des mots, gentilés, traductions, préfixes/suffixes, définitions, anagrammes, vocabulaire, grammaire.</p>
+                    <p>Proverbes (débuter, compléter ou reconnaître un proverbe à sa signification), expressions populaires (dictons, maximes…), conjugaison des verbes, verbes irréguliers en anglais, épellation de mots et de mots composés au singulier et au pluriel, homonymes, origine et genre des mots, gentilés, traductions, préfixes et suffixes, définitions, anagrammes, vocabulaire et grammaire.</p>
                 </div>
                 <div class="theme-carte">
                     <h3>2 — Géographie</h3>
-                    <p>Canada, Québec, le monde, climat, population, tourisme, géographie physique (roches, volcans, vents…).</p>
+                    <p>Canada, Québec, le monde, climat, population, tourisme et géographie physique (roches, volcans, vents…).</p>
                 </div>
                 <div class="theme-carte">
-                    <h3>3 — Cinéma et télévision</h3>
-                    <p>Films, émissions, téléromans, variétés, enfants…</p>
+                    <h3><span class="modification">3 — Arts et médias</span></h3>
+                    <p><strong>Arts :</strong> Théâtre, peinture, danse…<br>
+                    <span class="modification"><strong>Médias :</strong> Films (pas seulement américains), émissions, téléromans, variétés, émissions pour enfants, baladodiffusion, radio et médias sociaux…</span></p>
                 </div>
                 <div class="theme-carte">
                     <h3>4 — Histoire et société</h3>
@@ -400,28 +422,28 @@
                     <strong>Religion :</strong> Religions, rites, mythologie, croyances</p>
                 </div>
                 <div class="theme-carte">
-                    <h3>7 — Arts et littérature</h3>
-                    <p><strong>Arts :</strong> Théâtre, peinture, danse…<br>
-                    <strong>Littérature :</strong> Romans, écrivains, bande dessinée, prix (Nobel, Fémina, Goncourt), genres littéraires, personnages, citations, courants littéraires, nationalité/prénom/pseudonymes d'auteurs.</p>
+                    <h3><span class="modification">7 — Langue et littérature</span></h3>
+                    <p><span class="modification"><strong>Langue :</strong> Comme dans la série 1, mais les questions peuvent être plus difficiles.</span><br>
+                    <strong>Littérature :</strong> Romans, écrivains, bande dessinée, prix (Nobel, Fémina, Goncourt), genres littéraires (poésie, science-fiction…), personnages présents dans les œuvres, auteurs, citations ou vers, courants littéraires (naturalisme, romantisme…), théâtre, nationalité et prénom des auteurs, pseudonymes d'auteurs…</p>
                 </div>
                 <div class="theme-carte">
                     <h3>8 — Sports et loisirs</h3>
-                    <p>Hockey, escrime, judo, tennis, ping-pong, golf, chasse, pêche, passe-temps (Monopoly, échecs…), Jeux olympiques.</p>
+                    <p>Sports (hockey, escrime, judo, tennis, ping-pong, golf, chasse, pêche…), passe-temps (Monopoly, échecs…) et Jeux olympiques.</p>
                 </div>
                 <div class="theme-carte">
                     <h3>11 — Musique</h3>
-                    <p>Chanson, instruments, compositeurs, solfège et vocabulaire musical, musique québécoise, musique actuelle, paroles de chansons, courants musicaux, chanson française d'ici et d'ailleurs, extraits de musique (liste m3u).</p>
+                    <p>Chanson, instruments, compositeurs (leurs œuvres et leur vie), solfège et vocabulaire musical, musique québécoise, musique actuelle, paroles de chansons, courants musicaux, chanson française d'ici et d'ailleurs, extraits de musique (liste m3u)…</p>
                 </div>
                 <div class="theme-carte">
                     <h3>12 — Sciences</h3>
                     <p><strong>Sciences de la vie :</strong> Anatomie, zoologie, biologie, botanique<br>
                     <strong>Sciences physiques :</strong> Physique, chimie, géologie, astronomie<br>
-                    <strong>Mathématiques :</strong> Géométrie, probabilités, calcul mental, suites, formules, algèbre<br>
-                    <strong>Technologie :</strong> Découvertes, informatique, inventions, prix Nobel</p>
+                    <strong>Mathématiques :</strong> Géométrie, probabilités, calcul mental, suites à compléter, histoire des mathématiques, définitions, formules d'aire et de volume, pourcentages, algèbre…<br>
+                    <strong>Technologie :</strong> Découvertes, informatique, technique, outils, machines, histoire des sciences, inventions, prix Nobel…</p>
                 </div>
                 <div class="theme-carte">
                     <h3>15 — Depuis 2020</h3>
-                    <p>Éléments de l'actualité récente : sport en général et Jeux olympiques, politique, mortalités, spectacles et musique, films récents, grands événements.</p>
+                    <p>Éléments de l'actualité récente : sport en général et Jeux olympiques, politique, mortalités, spectacles et musique, films récents et grands événements…</p>
                 </div>
             </div>
         </div>
@@ -452,7 +474,9 @@
 
             <div class="type-question">
                 <h3>Contrôle</h3>
-                <p>Série de 5 questions dont la première (question discipline), en appel à tous, décidera quelle équipe pourra répondre à la question suivante avec consultation, avec droit de réplique. Si la première question n'est pas répondue, la deuxième question devient la question discipline, et ainsi de suite. 5 points pour la première question, 10 points pour les suivantes.</p>
+                <p>Série de 5 questions dont la première (question discipline), en appel à tous, décidera quelle équipe pourra répondre à la question suivante avec consultation, avec droit de réplique également avec consultation. Si la première question n'est pas répondue, la deuxième question devient la question discipline, et ainsi de suite.</p>
+                <p>Pour les questions suivantes, le droit de répondre en premier peut changer de côté si l'équipe « en contrôle » ne peut répondre correctement et que la réplique est bonne. Si aucune bonne réponse n'est donnée, le contrôle ne change pas de côté. Si les quatre premières questions sont répondues par la même équipe, l'autre équipe obtiendra le contrôle pour la cinquième question, toujours avec droit de réplique.</p>
+                <p>La première question vaut 5 points; les suivantes valent 10 points.</p>
             </div>
 
             <div class="type-question">
@@ -462,7 +486,9 @@
 
             <div class="type-question">
                 <h3>Choix d'associations</h3>
-                <p>Deux séries d'associations à 4 éléments (associez 4 éléments avec 4 autres éléments, incluant une inconnue). Une association peut valoir jusqu'à 50 points : 20 points pour l'élément correctement associé à l'inconnue trouvée, puis 10 points pour chaque autre bonne association. Les deux associations doivent être de domaines différents. Questions par équipe avec droit de consultation et sans droit de réplique.</p>
+                <p>Deux séries d'associations à 4 éléments (associez 4 éléments avec 4 autres éléments, incluant une inconnue). Une association peut valoir jusqu'à 50 points : 20 points pour l'élément correctement associé à l'inconnue trouvée — si l'inconnue n'est pas trouvée, aucun point n'est accordé — puis 10 points pour chaque autre bonne association.</p>
+                <p>Les deux associations doivent être de domaines différents. Le domaine doit être énoncé avant la question. Les questions sont par équipe, avec droit de consultation et sans droit de réplique.</p>
+                <p>L'équipe qui tire de l'arrière au début de la catégorie choisit l'association à laquelle elle répondra; l'autre équipe répond ensuite à l'autre association. En cas d'égalité, le choix revient à l'équipe dont un joueur a donné la bonne réponse la plus récente.</p>
             </div>
 
             <div class="type-question">

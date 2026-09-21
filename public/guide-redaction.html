@@ -16,6 +16,8 @@
             --blanc: #ffffff;
             --texte: #2c2c2c;
             --gris: #888888;
+            --modification: #a61b1b;
+            --fond-modification: #f8dddd;
             --rayon: 12px;
         }
 
@@ -101,8 +103,29 @@
             font-size: 0.85em;
             color: var(--gris);
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
         }
+
+        .avis-modifications {
+            color: var(--modification);
+            background: var(--fond-modification);
+            border-left: 4px solid var(--modification);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 24px;
+            font-size: 0.88em;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .modification {
+            color: var(--modification) !important;
+            background: var(--fond-modification);
+            border-radius: 5px;
+            padding: 1px 4px;
+        }
+
+        li.modification { padding: 4px 6px 4px 16px; }
 
         .actions-haut {
             display: flex;
@@ -292,11 +315,8 @@
     <div class="contenu">
 
         <div class="page-titre">✏️ Guide faiseur de questions</div>
-        <div class="page-sous-titre">Saison 2025-2026 — Dernière mise à jour : septembre 2025</div>
-
-        <div class="actions-haut">
-            <a class="bouton-dl" href="ressources/2025-2026/guide-redaction.doc" download="Guide faiseur de questions 2025-2026.doc">⬇ Télécharger .doc</a>
-        </div>
+        <div class="page-sous-titre">Saison 2026-2027 — Dernière mise à jour : septembre 2026</div>
+        <div class="avis-modifications">Les passages nouveaux ou modifiés par rapport à la saison précédente sont affichés en rouge sur un fond légèrement coloré.</div>
 
         <!-- Introduction -->
         <div class="carte">
@@ -317,7 +337,7 @@
                 <li>Ne jamais demander <em>Quand</em>, <em>Où</em> ou <em>Comment</em> — soyez plus précis : <em>en quelle année</em>, <em>dans quelle ville</em>, <em>avec quel outil</em>.</li>
                 <li>Ne jamais rédiger de questions dichotomiques comme les <em>vrai ou faux</em>.</li>
                 <li>Les questions doivent être courtes et précises. Éviter les parenthèses dans la formulation des questions.</li>
-                <li>Privilégier les réponses courtes (un, deux ou trois mots dans la mesure du possible).</li>
+                <li>Privilégier les réponses courtes (un, deux ou trois mots dans la mesure du possible). Il peut toutefois être pertinent d'ajouter un peu d'explications dans la réponse.</li>
                 <li>Les séries prévisibles doivent être évitées — les questions ne doivent pas suivre l'ordre chronologique des faits.</li>
             </ul>
         </div>
@@ -402,6 +422,7 @@
         <!-- Les thèmes -->
         <div class="carte">
             <h2>Les thèmes</h2>
+            <p>Cette section donne des précisions sur les thèmes. Pour des exemples de sujets, consultez le <a href="plan-questionnaire.html" style="color:var(--accent);font-weight:600">Plan du questionnaire</a>.</p>
 
             <div class="sous-section">
                 <h3>Depuis 2020</h3>
@@ -412,10 +433,12 @@
             </div>
 
             <div class="sous-section">
-                <h3>Cinéma et télévision</h3>
+                <h3><span class="modification">Arts et médias</span></h3>
                 <ul>
-                    <li>Variez les thèmes dans les 5 questions (films américains, films français, vieux films, films récents…) — évitez 5 questions sur le même type de film de la même année.</li>
+                    <li class="modification">Variez les thèmes dans les 5 questions de votre série collective : peinture, théâtre, danse, films américains, films français, vieux films, films récents… Bref, évitez de poser 5 questions sur le même type de film de la même année.</li>
                     <li>N'oubliez pas la télévision québécoise (séries, téléromans…) avec ses personnages, les dessins animés, les films Disney, les émissions d'affaires et d'information.</li>
+                    <li class="modification">Les autres médias — radio, baladodiffusion et médias sociaux — peuvent également être abordés dans ce thème.</li>
+                    <li class="modification">Assurez-vous de bien couvrir les deux grands thèmes, les arts et les médias, à l'intérieur de votre questionnaire.</li>
                 </ul>
             </div>
 
@@ -443,10 +466,10 @@
             </div>
 
             <div class="sous-section">
-                <h3>Arts et Littérature</h3>
+                <h3><span class="modification">Langue et Littérature</span></h3>
                 <ul>
-                    <li>Variez les thèmes dans les 5 questions : peinture, théâtre, danse, romans, écrivains, bande dessinée, prix (Nobel, Fémina, Goncourt), genres littéraires…</li>
-                    <li>Assurez-vous de bien couvrir les 2 grands thèmes (Arts et Littérature) à l'intérieur de votre questionnaire.</li>
+                    <li class="modification">Variez les thèmes dans les 5 questions : conjugaison, proverbes, expressions, orthographe, romans, écrivains, bande dessinée, prix (Nobel, Fémina, Goncourt), genres littéraires…</li>
+                    <li class="modification">Assurez-vous de bien couvrir les deux grands thèmes, la langue et la littérature, à l'intérieur de votre questionnaire.</li>
                 </ul>
             </div>
 

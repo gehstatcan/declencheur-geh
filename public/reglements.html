@@ -14,6 +14,8 @@
             --blanc: #ffffff;
             --texte: #2c2c2c;
             --gris: #888888;
+            --modification: #a61b1b;
+            --fond-modification: #f8dddd;
             --rayon: 12px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,11 +36,11 @@
         .dropdown-menu a.actif { background: var(--fond-champ); color: var(--texte); font-weight: 600; }
 
         .contenu { width: 100%; max-width: 760px; }
-        .entete-page { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+        .entete-page { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
         h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2em; color: var(--accent); letter-spacing: 1px; }
         .bouton-dl { display: inline-flex; align-items: center; gap: 6px; background: var(--fond-carte); color: var(--texte); text-decoration: none; padding: 8px 16px; border-radius: 10px; font-size: 0.85em; font-weight: 600; border: 1px solid var(--fond-champ); transition: background 0.2s; }
         .bouton-dl:hover { background: var(--fond-champ); }
-        .meta { font-size: 0.82em; color: var(--gris); margin-bottom: 24px; }
+        .meta { font-size: 0.82em; color: var(--gris); margin-bottom: 8px; }
 
         .section { background: var(--fond-carte); border-radius: var(--rayon); padding: 24px; margin-bottom: 20px; }
         .section h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.3em; color: var(--accent); letter-spacing: 0.5px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--fond-champ); }
@@ -48,6 +50,11 @@
         .sous-section { margin-top: 14px; }
         .sous-section h4 { font-weight: 600; font-size: 0.95em; color: var(--accent); margin-bottom: 8px; }
         .note { font-size: 0.85em; color: var(--gris); font-style: italic; margin-top: 10px; }
+        .avis-modifications { color: var(--modification); background: var(--fond-modification); border-left: 4px solid var(--modification); border-radius: 8px; padding: 10px 12px; margin-bottom: 24px; font-size: 0.88em; font-weight: 600; line-height: 1.5; }
+        .modification { color: var(--modification) !important; background: var(--fond-modification); border-radius: 5px; padding: 1px 4px; }
+        li.modification { padding: 4px 6px; }
+        .bloc-modification { color: var(--modification); background: var(--fond-modification); border-left: 3px solid var(--modification); border-radius: 6px; padding: 10px 12px; }
+        .bloc-modification h4, .bloc-modification p, .bloc-modification li { color: var(--modification); }
 
         .tableau-points { width: 100%; border-collapse: collapse; font-size: 0.9em; margin-top: 10px; }
         .tableau-points th { background: var(--fond-champ); padding: 8px 12px; text-align: left; font-weight: 600; }
@@ -79,9 +86,9 @@
 
         <div class="entete-page">
             <h2>Règlements de la ligue</h2>
-            <a class="bouton-dl" href="ressources/2025-2026/reglements.doc" download="Règlements.doc">⬇ Télécharger .doc</a>
         </div>
-        <p class="meta">Ligue Génies en herbe — Statistique Canada · Dernière mise à jour : septembre 2025</p>
+        <p class="meta">Ligue Génies en herbe — Statistique Canada · Saison 2026-2027 (saison #25) · Dernière mise à jour : 2 septembre 2026</p>
+        <p class="avis-modifications">Les passages nouveaux ou modifiés par rapport à la version précédente sont affichés en rouge sur un fond légèrement coloré.</p>
 
         <!-- 1. Composition des équipes -->
         <div class="section">
@@ -98,14 +105,14 @@
         <div class="section">
             <h3>2. Déroulement des parties</h3>
             <ol>
-                <li>Si un joueur qui n'a pas la parole donne une réponse, la réponse est refusée.</li>
+                <li class="modification">Le joueur doit attendre d'être nommé par l'animateur avant de donner une réponse. Si le joueur n'est pas nommé, mais que la parole est à lui, la réponse sera acceptée et l'animateur lui demandera d'attendre d'être nommé la prochaine fois. Si un joueur qui n'a pas la parole donne une réponse, la réponse est refusée.</li>
                 <li>Seule la première réponse donnée par un joueur sera considérée.</li>
-                <li>Pour les questions portant sur un personnage, le nom de famille est suffisant à moins d'indication contraire dans le libellé de la question ou d'instructions données par l'animateur. Toutefois, si un joueur précise le prénom alors que cela n'est pas nécessaire, celui-ci doit être exact.</li>
+                <li>Pour les questions portant sur un personnage, le nom de famille est suffisant à moins d'indication contraire dans le libellé de la question ou d'instructions données par l'animateur. Toutefois, si un joueur précise le prénom alors que cela n'est pas nécessaire, celui-ci doit être exact. <span class="modification">De la même manière, si la réponse représente un élément qui pourrait potentiellement contenir un suffixe numéral (comme le nom d'un pape) sans contenir le suffixe en question, il faut supposer qu'il s'agit du premier et donner la bonne ou la mauvaise réponse en conséquence, sans demander de précision.</span></li>
                 <li>Pour les questions portant sur le nom d'une équipe sportive, si le nom et la ville sont chacun unique dans la ligue dont elle fait partie, le nom ou la ville peut être accepté. Dans le cas où le nom ou la ville n'est pas unique, l'élément unique (ou la combinaison des deux éléments si aucun n'est unique) devra obligatoirement être donné.</li>
                 <li>Pour les questions avec droit de consultation, le joueur qui appuie est celui qui doit répondre, sinon la réponse est refusée. De plus, aucune communication entre coéquipiers ne sera tolérée après que le joueur ait été nommé par l'animateur.</li>
                 <li>Les joueurs ont droit au crayon dans toutes les catégories à moins que le contraire soit mentionné dans la question.</li>
                 <li>La communication non verbale est autorisée pour manifester à son équipe son intention de répondre. En aucun cas la communication non verbale ne sera tolérée après qu'un joueur ait appuyé sur son déclencheur ou pour donner des indices sur la réponse, ce qui entraînerait le refus de la réponse.</li>
-                <li>Dans la séquence associations, les éléments de réponse ne peuvent être associés à plus d'un élément. Une réponse du type « 2A, 3A » n'est pas autorisée et ne vaudra aucun point.</li>
+                <li>Dans la séquence associations, les éléments de réponse ne peuvent être associés à plus d'un élément. Une réponse du type « 1A – 2A – 3A – 4A » n'est pas autorisée et ne vaudra aucun point.</li>
                 <li>Lorsqu'un joueur appuie sur le bouton, un délai de cinq secondes sera accordé pour qu'il donne la réponse. Passé ce délai, la réponse sera refusée. Les auteurs peuvent inclure un autre délai dans le libellé de la question au besoin.</li>
                 <li>Lors d'un match en format virtuel (par visioconférence), les joueurs devront conserver la caméra allumée et le micro allumé, sauf si un bruit environnant nuit au déroulement de la partie. Si un joueur a son micro éteint, il est responsable de l'allumer rapidement lorsqu'il veut donner une réponse et n'aura pas droit à un délai de réponse supplémentaire.</li>
             </ol>
@@ -134,23 +141,26 @@
                 <li>L'équipe qui conteste une réponse accordée à l'adversaire pendant un match doit formuler la contestation sur-le-champ et donner immédiatement la réponse qu'elle croit être la bonne, pour avoir droit à une réplique, sinon la réplique sera perdue.</li>
                 <li>Les joueurs, les lecteurs et même des gens de l'assistance peuvent formuler une contestation.</li>
                 <li>Les contestations seront entendues et jugées par les réviseurs du questionnaire. Au besoin, un autre membre du comité décisionnel de la ligue (ne faisant pas partie d'une équipe impliquée) peut s'ajouter au jury. Tout membre de ce jury a le droit de se retirer s'il le souhaite.</li>
-                <li>Après avoir entendu les arguments des équipes impliquées et fait les vérifications nécessaires, le jury délibère et rend sa décision par un vote à majorité simple. Les décisions rendues sont finales et ne peuvent être annulées.</li>
+                <li>Après avoir entendu les arguments des équipes impliquées et fait les vérifications nécessaires, le jury délibère et rend sa décision par un vote à majorité simple. <span class="modification">Il n'est pas nécessaire d'obtenir l'unanimité, même si c'est souhaitable.</span> Les décisions rendues sont finales et ne peuvent être annulées.</li>
                 <li>Si la contestation est reconnue comme étant valide, les résultats des deux matchs impliqués seront réajustés en conséquence.</li>
                 <li>La contestation doit porter sur une réponse incorrecte ou incomplète dans le questionnaire.</li>
                 <li>Si la question et la réponse se contredisent, c'est sur le texte de la question qu'on se base pour déterminer l'intention de la question. C'est toujours la réponse qui est considérée incorrecte dans un tel cas.</li>
-                <li>Il n'est pas possible de contester parce qu'un joueur a donné une mauvaise réponse suite à une hésitation commise par un lecteur.</li>
-                <li>Si l'animateur fait une erreur dans la lecture de la question qui change le sens de celle-ci, et que la réponse est donnée avant que le lecteur ne puisse corriger, la question devient la question lue. <span class="note">Exemple : Si l'animateur dit « Quelle est la capitale du Mexique » au lieu de « Quelle est la capitale du Nouveau-Mexique », on accepte « Mexico ».</span></li>
-                <li>Si le texte de la question est erroné (contient une contradiction ou une erreur qui fait en sorte qu'il n'y a aucune réponse possible), toute réponse est refusée.</li>
-                <li>Si le texte de la question était imprécis (il y a au moins une autre réponse acceptable), on accepte une réponse alternative qui est également vraie, incluant un cas limite, mais raisonnable, selon le jury.</li>
+                <li>Il n'est pas possible de contester parce qu'un joueur a donné une mauvaise réponse à la suite d'une hésitation commise par un lecteur<span class="modification">, par exemple si le joueur ajoute un élément à sa réponse qui la rend invalide parce que l'animateur a hésité à dire si la réponse était bonne ou non</span>.</li>
+                <li>Si l'animateur fait une erreur dans la lecture de la question qui change le sens de celle-ci, et que la réponse est donnée avant que le lecteur ne puisse corriger, la question devient la question lue. On accepte ce qui serait alors la bonne réponse à la question lue. <span class="modification">En réplique, le lecteur doit lire la question telle qu'elle est écrite dans le questionnaire.</span> <span class="note">Exemple : Si l'animateur dit « Quelle est la capitale du Mexique » au lieu de « Quelle est la capitale du Nouveau-Mexique », on accepte « Mexico ».</span></li>
+                <li>Si le texte de la question est erroné (contient une contradiction ou une erreur qui fait en sorte qu'il n'y a aucune réponse possible), toute réponse est refusée. <span class="modification">Exception : lorsque l'intention claire de la question est d'obtenir une réponse telle que « personne », « il n'y en a pas » ou « ce n'est jamais arrivé » — formulation à éviter.</span></li>
+                <li>Si le texte de la question était imprécis (il y a au moins une autre réponse acceptable), on accepte une réponse alternative qui est également vraie, incluant un cas limite, mais raisonnable, selon le jury. <span class="modification">Exemple : à la question « Dans quel pays se trouve l'embouchure du Danube? », la Roumanie et l'Ukraine peuvent être acceptées, puisque la rive nord d'un des bras du delta se trouve à la frontière de l'Ukraine.</span></li>
+                <li class="modification">Si la réponse du questionnaire est incomplète, on accepte une réponse alternative qui est également vraie, incluant un cas limite, mais raisonnable, selon le jury.</li>
                 <li>Si la réponse du questionnaire est erronée, on accorde ou enlève les points selon la réponse donnée par le joueur.</li>
+                <li class="modification">Les décisions rendues pour les contestations ne garantissent pas que les décisions suivantes seront rendues exactement de la même façon, les présentes règles devant en principe assurer l'absence de contradictions entre les décisions.</li>
             </ol>
 
-            <div class="sous-section">
+            <div class="sous-section bloc-modification">
                 <h4>Contestation d'une réponse ayant un impact sur le reste de la série</h4>
-                <p style="font-size:0.9em;color:var(--gris);margin-bottom:10px">Pour les séries Contrôle et GEHopardy, la contestation doit être formulée sur-le-champ pour que le reste de la série soit affecté. Pour la série 4V, la contestation peut être immédiate ou dans les 24 heures.</p>
+                <p style="font-size:0.9em;margin-bottom:10px">Pour les séries Contrôle et GEHopardy, la contestation doit être formulée sur-le-champ pour que le reste de la série soit affecté. Pour la série 4V, la contestation peut être immédiate ou dans les 24 heures. S'il n'y a pas de contestation identique dans le match joué simultanément, le reste de la série dans cet autre match ne sera pas affecté par la contestation.</p>
                 <ul>
-                    <li><strong>Série Contrôle</strong> : Pour les questions suivant la contestation, chaque équipe donne par écrit deux réponses. La seconde réponse n'est utilisée que si la première réponse est la même pour les deux équipes et que celle-ci est fausse.</li>
-                    <li><strong>Séries 4V</strong> : Les réviseurs refont une série de questions sur le même thème, jouée à une date ultérieure. On rejoue les questions suivant la contestation.</li>
+                    <li><strong>Série Contrôle</strong> : Pour les questions suivant la contestation, chaque équipe donne par écrit deux réponses. La seconde réponse n'est utilisée que si la première réponse est la même pour les deux équipes et que celle-ci est fausse; cela devient alors la réplique. Elle ne sera pas utilisée pour l'équipe qui devait répondre la première, selon ce qui est établi par la décision de la contestation et les réponses suivantes. Si une seule bonne réponse est donnée par écrit, l'équipe qui l'a réussie prend le contrôle et il n'est plus nécessaire de poursuivre la série par écrit.</li>
+                    <li><strong>Série 4V</strong> : Les réviseurs refont une série de questions sur le même thème, jouée à une date ultérieure. On rejoue les questions suivant la contestation. Cette règle s'applique seulement si cela peut faire une différence dans les points au classement des équipes; sinon, on ne change que le résultat de la réponse contestée.</li>
+                    <li><strong>GEHopardy</strong> : Pour les questions suivant la contestation, jouer alternativement les questions des thèmes 1 et 2. Aussitôt qu'une question est contestée, on passe à l'autre thème, puis on revient au premier, et ainsi de suite, tant qu'un des thèmes n'est pas épuisé. L'animateur demande chaque fois quel serait le thème choisi par la personne qui a répondu. Si personne ne répond correctement à une question, il faut demander à tous les joueurs d'indiquer le thème de leur choix. On peut alors refaire le cheminement une fois la contestation réglée.</li>
                 </ul>
             </div>
         </div>
@@ -160,9 +170,13 @@
             <h3>5. Retard dans la livraison d'un questionnaire</h3>
             <ol>
                 <li>Tout retard dans la livraison d'un questionnaire pour une partie entraînera une pénalité de 1 point au classement général pour l'équipe responsable, ainsi qu'un point supplémentaire pour chaque partie suivante où le questionnaire n'est toujours pas livré (environ 2 points par semaine).</li>
-                <li>La pénalité maximale applicable est de 4 points et d'une remise en retard.</li>
+                <li class="modification">La pénalité maximale applicable est de 4 points et d'une remise en retard. Cela signifie que l'équipe qui ne livre pas un second questionnaire à temps est dans le pétrin. Passé ce délai ou au second retard, les responsables de la ligue décideront des mesures à prendre envers l'équipe fautive.
+                    <ul style="margin-top:6px">
+                        <li>Lorsqu'une équipe se retire ou est forcée de se retirer du calendrier, toutes les parties de cette équipe déjà comptabilisées seront annulées et le classement réajusté.</li>
+                        <li>Les joueurs qui ont joué pour une équipe s'étant retirée pourront intégrer une nouvelle équipe sans tenir compte du règlement 1.2.</li>
+                    </ul>
+                </li>
                 <li>Si le questionnaire d'une partie n'est pas livré à temps, les responsables de la ligue peuvent décider de reporter la partie à une date ultérieure.</li>
-                <li>Lorsqu'une équipe se retire ou est forcée de se retirer du calendrier, toutes les parties de cette équipe déjà comptabilisées seront annulées et le classement réajusté. Les joueurs qui ont joué pour une équipe s'étant retirée pourront intégrer une nouvelle équipe sans tenir compte du règlement 1.2.</li>
             </ol>
         </div>
 
@@ -180,14 +194,21 @@
                     <tr><td>Défaite par plus de 40 points</td><td>0 pt</td></tr>
                 </tbody>
             </table>
-            <div class="sous-section">
-                <h4>Critères de départage (dans l'ordre)</h4>
+            <div class="sous-section bloc-modification">
+                <h4>Durant la saison, le classement est tiré selon</h4>
                 <ol>
                     <li>Pourcentage d'efficacité (points / (parties jouées × 4))</li>
-                    <li>Plus petit nombre de jours de retard dans la livraison des questionnaires</li>
-                    <li>Nombre de victoires dans les parties entre équipes à égalité</li>
-                    <li>Nombre de victoires total</li>
-                    <li>Différentiel points pour — points contre</li>
+                    <li>Différence entre les points pour et les points contre (colonne « diff »)</li>
+                </ol>
+            </div>
+            <div class="sous-section bloc-modification">
+                <h4>Le classement final sera déterminé de la façon suivante </h4>
+                <ol>
+                    <li>Points</li>
+                    <li>Plus petit nombre de jours de retard dans la livraison des questionnaires (un questionnaire est considéré en retard à partir du mercredi précédant la semaine où il doit être joué)</li>
+                    <li>Nombre de victoires dans les parties entre équipes à égalité, peu importe l'écart de points</li>
+                    <li>Nombre total de victoires, peu importe l'écart de points</li>
+                    <li>Si nécessaire, différentiel points pour — points contre</li>
                 </ol>
                 <p class="note">Appliquer les critères dans cet ordre pour diviser les équipes en sous-groupes. Pour chaque sous-groupe, recommencer à appliquer les critères à partir du début.</p>
             </div>
@@ -196,7 +217,7 @@
         <!-- 7. Bris d'égalité séries -->
         <div class="section">
             <h3>7. Bris d'égalité durant les parties de série</h3>
-            <p style="font-size:0.93em;line-height:1.7">Pour les séries éliminatoires, les personnes responsables de la révision du questionnaire devront composer 7 questions supplémentaires de thèmes différents. La première équipe à réussir 3 de ces 7 questions remportera la partie. Les questions supplémentaires seront posées après la dernière série du questionnaire.</p>
+            <p style="font-size:0.93em;line-height:1.7">Pour les séries, les personnes responsables de la révision du questionnaire devront composer 7 questions supplémentaires de thèmes différents. La première équipe à réussir 3 de ces 7 questions remportera la partie. Les questions supplémentaires seront posées après la dernière série du questionnaire.</p>
         </div>
 
     </div>

@@ -70,6 +70,28 @@ app.get("/api/auth/check", (req, res) => {
 
 app.use(express.static("public"));
 
+// Liste des documents Word disponibles dans le dossier public des proces-verbaux.
+app.get("/api/proces-verbaux", async (_req, res) => {
+  try {
+    const dossier = path.join(__dirname, "public", "ressources", "proces-verbaux");
+    const fichiers = await fs.promises.readdir(dossier, { withFileTypes: true });
+    const documents = fichiers.flatMap(fichier => {
+      if (!fichier.isFile()) return [];
+      const correspondance = /^PV[- ](\d{4}-\d{2}-\d{2})\.(docx?)$/i.exec(fichier.name);
+      if (!correspondance) return [];
+      const date = correspondance[1];
+      const dateValidee = new Date(date + "T12:00:00Z");
+      if (Number.isNaN(dateValidee.getTime()) || dateValidee.toISOString().slice(0, 10) !== date) return [];
+      return [{ nom: fichier.name, date, url: "/ressources/proces-verbaux/" + encodeURIComponent(fichier.name) }];
+    }).sort((a, b) => b.date.localeCompare(a.date) || a.nom.localeCompare(b.nom));
+    res.set("Cache-Control", "no-store");
+    res.json(documents);
+  } catch (erreur) {
+    console.error("Lecture des proces-verbaux impossible :", erreur);
+    res.status(500).json({ erreur: "Impossible de charger les proc\u00e8s-verbaux." });
+  }
+});
+
 // ============================================================
 // Chargement des données de la saison
 // ============================================================
