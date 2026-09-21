@@ -103,3 +103,6 @@ typings/
 .dynamodb/
 
 
+
+# Résultats temporaires de la pratique (hors saisons)
+data/pratique/

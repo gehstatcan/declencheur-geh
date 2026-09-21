@@ -1,0 +1,85 @@
+:root { color-scheme: light; --fond:#f5f0e8; --carte:#ede8dc; --accent:#2c3e50; --texte:#2c2c2c; }
+* { box-sizing:border-box; }
+body { margin:0; padding:24px 16px; background:var(--fond); color:var(--texte); font-family:system-ui,sans-serif; line-height:1.6; }
+header { display:flex; align-items:center; justify-content:center; gap:12px; }
+h1 { font-size:1.8rem; } h2 { margin-top:0; font-size:1.3rem; }
+nav { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin-bottom:24px; }
+a { color:var(--accent); text-underline-offset:3px; }
+main { max-width:900px; margin:auto; }
+.carte { background:var(--carte); padding:24px; border-radius:16px; margin-bottom:20px; }
+.badge { display:inline-block; border-radius:24px; padding:4px 14px; background:#dce9df; color:#205b31; font-weight:600; }
+button,input { font:inherit; }
+button { border:0; padding:12px 18px; border-radius:10px; background:var(--accent); color:white; cursor:pointer; font-weight:600; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+button:focus-visible,a:focus-visible,input:focus-visible { outline:3px solid #906312; outline-offset:3px; }
+input[type=text],input:not([type]) { width:100%; padding:12px; margin:8px 0 16px; border:1px solid #817b70; border-radius:8px; background:white; }
+.commandes { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0; }
+.question { font-weight:700; font-size:1.3rem; }
+.premier { font-size:1.5rem; font-weight:700; min-height:2.4rem; }
+.buzzer { width:100%; min-height:150px; font-size:2.4rem; color:#211800; background:#ffd54a; touch-action:manipulation; }
+.danger { background:#932e31; }
+.son { display:block; margin:16px 0; }
+#erreur { color:#972626; font-weight:600; }
+#lien-joueurs { overflow-wrap:anywhere; }
+.tableau { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; } th,td { text-align:left; padding:12px 10px; border-bottom:1px solid #cdc4b4; }
+td:last-child { font-weight:700; }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+[hidden] { display:none !important; }
+@media(max-width:500px) { .carte { padding:18px; } .commandes button { flex:1 1 45%; } th,td { padding:8px; } }
+
+/* Disposition du marqueur : Math à gauche, commandes au centre, Matique à droite. */
+:root { --fond:#f0f0f7; --carte:#fff; --accent:#c0303f; --texte:#1a1a2e; --math:#215aa5; --matique:#a64d15; }
+body { font-family:Inter,system-ui,sans-serif; }
+h1 { font-family:'Bebas Neue',sans-serif; font-size:2.4rem; letter-spacing:2px; margin:0 0 8px; }
+h1 span { color:var(--accent); }
+nav a { text-decoration:none; background:#e4e4f0; padding:8px 16px; border-radius:22px; font-size:.9rem; }
+main { max-width:1400px; }
+.introduction { text-align:center; padding:12px 20px; background:transparent; }
+.introduction h2 { margin:4px 0; }
+.introduction p { margin:6px 0; }
+#connexion { font-size:.8rem; color:#555566; }
+.carte { border:1px solid #d8d8e5; }
+.terrain { display:grid; grid-template-columns:minmax(0,1fr) minmax(340px,1.4fr) minmax(0,1fr); gap:20px; align-items:start; }
+.math { --couleur:var(--math); }
+.matique { --couleur:var(--matique); }
+.equipe { border-top:5px solid var(--couleur); text-align:center; }
+.equipe h2 { color:var(--couleur); font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin:0; }
+.score { font-family:'Bebas Neue',sans-serif; font-size:4rem; line-height:1.2; color:var(--couleur); margin:10px 0 0; font-variant-numeric:tabular-nums; }
+.legende-score { margin:0 0 20px; color:#555566; font-size:.85rem; }
+.joueurs-equipe { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+.joueur { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#f0f0f7; padding:12px; border-radius:10px; text-align:left; }
+.joueur .nom { overflow-wrap:anywhere; font-weight:600; }
+.joueur small { display:block; color:#555566; font-size:.75rem; }
+.joueur strong { white-space:nowrap; color:var(--couleur); }
+.joueur.a-la-parole { outline:3px solid var(--couleur); background:#fff6d8; }
+.joueurs-equipe .vide { font-size:.85rem; color:#555566; }
+.centre { text-align:center; }
+#phase { padding:8px; background:#f9e3c3; border-radius:8px; font-size:.9rem; }
+.question { font-size:1.5rem; }
+.premier { min-height:70px; padding:14px; border:1px solid #d8d8e5; border-radius:12px; display:grid; place-items:center; overflow-wrap:anywhere; font-size:1.25rem; }
+.premier.actif { background:var(--accent); color:white; }
+#replique { color:#794309; font-weight:600; }
+.commandes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+[data-action=demarrer] { grid-column:1/-1; background:#1a7a42; }
+[data-action=points] { background:#1a7a42; }
+[data-action=mauvaise] { background:#b52d3c; }
+[data-action=annuler],[data-action=liberer] { background:#666677; }
+[data-action=terminer] { background:#74409a; grid-column:1/-1; }
+.gestion,#inscription { max-width:700px; margin-left:auto; margin-right:auto; }
+fieldset { border:0; padding:0; margin:0 0 20px; text-align:left; }
+legend { font-weight:600; margin-bottom:10px; }
+.choix-equipes { display:flex; gap:12px; }
+.choix { flex:1; padding:16px; border:2px solid var(--couleur); color:var(--couleur); border-radius:12px; cursor:pointer; font-weight:700; }
+.choix:has(input:checked) { background:#fff3cb; outline:2px solid var(--couleur); outline-offset:2px; }
+@media(max-width:900px) {
+ .terrain { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+ .centre { grid-column:1/-1; grid-row:1; }
+ .equipe { grid-row:2; }
+ .carte { padding:18px; }
+}
+@media(max-width:420px) {
+ body { padding:16px 10px; }
+ .joueur { flex-direction:column; align-items:flex-start; padding:8px; }
+ .equipe { padding:12px; }
+}

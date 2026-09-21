@@ -120,6 +120,9 @@ function lireSaisonActive() {
 let saisonActive = lireSaisonActive();
 let dossierSaison = path.join(dossierBase, "saisons", saisonActive);
 
+// Données de pratique séparées des saisons et des statistiques officielles.
+require("./pratique-serveur").installerPratique(io, path.join(dossierBase, "pratique"));
+
 // ============================================================
 // Initialisation du Volume — copier les données si nécessaire
 // S'assure que la structure de dossiers existe sur le Volume

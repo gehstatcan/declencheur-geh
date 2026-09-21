@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pratique — GEH Statcan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="pratique.css">
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="pratique-client.js" defer></script>
+</head>
+<body>
+  <header><img src="ampouleQuiz.png" alt="" width="48" height="48"><h1>GEH — <span>Statcan</span></h1></header>
+  <nav aria-label="Navigation"><a href="joueur.html">Parties officielles — joueur</a><a href="marqueur.html">Marqueur</a><a href="guide-animateur.html#pratique">Guide de la pratique</a></nav>
+  <main>
+    <section class="carte introduction">
+      <p class="badge">Math contre Matique · Hors classement</p>
+      <h2 id="titre">Participer à la pratique</h2>
+      <p>Une séance pour essayer les déclencheurs et s’exercer. Les points restent dans cette pratique et ne comptent jamais dans les statistiques officielles.</p>
+      <p id="connexion" role="status">Connexion au serveur…</p>
+      <p id="erreur" role="alert"></p>
+    </section>
+    <section id="inscription" class="carte" hidden>
+      <h2>Rejoindre la séance</h2>
+      <form id="form-inscription">
+        <label for="nom">Ton nom</label>
+        <input id="nom" name="nom" maxlength="50" autocomplete="name" required placeholder="Prénom et nom">
+        <fieldset><legend>Choisis ton équipe de pratique</legend>
+          <div class="choix-equipes">
+            <label class="choix math"><input type="radio" name="equipe" value="math" required> Math</label>
+            <label class="choix matique"><input type="radio" name="equipe" value="matique" required> Matique</label>
+          </div>
+        </fieldset>
+        <button type="submit">Rejoindre la pratique</button>
+      </form>
+      <p>Pour retrouver ton équipe et tes points, utilise le même navigateur. Si ton nom est déjà utilisé sur un autre appareil, ajoute une initiale.</p>
+    </section>
+    <div class="terrain">
+<section class="carte equipe math" aria-labelledby="titre-math">
+        <h2 id="titre-math">Math</h2>
+        <p class="score" id="score-math">0</p><p class="legende-score">points</p>
+        <ul class="joueurs-equipe" id="joueurs-math"></ul>
+      </section>
+<section class="carte centre" aria-labelledby="titre-seance">
+      <h2 id="titre-seance">La séance</h2>
+      <p id="phase" role="status">En attente du serveur…</p>
+      <p class="question">Question <span id="question">—</span></p>
+      <p id="premier" class="premier" aria-live="polite"></p>
+      <p id="replique" role="status"></p>
+      <div id="zone-joueur" hidden>
+        <p id="identite"></p>
+        <button id="buzzer" class="buzzer" disabled>BUZZ !</button>
+        <p id="aide-buzz">Clique sur le bouton, ou utilise la barre d’espace.</p>
+      </div>
+      <div id="zone-animateur" hidden>
+        <p>Lis tes questions à voix haute. Une bonne réponse ajoute les points et passe à la question suivante. Après une mauvaise réponse, l’autre équipe peut tenter sa chance.</p>
+        <div class="commandes">
+          <button data-action="demarrer">Démarrer / reprendre</button>
+          <button data-action="points" data-points="10">Bonne réponse · 10 points</button>
+          <button data-action="points" data-points="5">5 points</button>
+          <button data-action="points" data-points="20">20 points</button>
+          <button data-action="mauvaise">Mauvaise réponse</button>
+          <button data-action="liberer">Réouvrir les buzzers</button>
+          <button data-action="suivante">Question suivante</button>
+          <button data-action="annuler">Annuler le dernier pointage</button>
+          <button data-action="terminer">Terminer la pratique</button>
+        </div>
+        <p id="statut-son" class="son" role="status">Clique dans la page pour activer le son du marqueur.</p>
+      </div>
+    </section>
+<section class="carte equipe matique" aria-labelledby="titre-matique">
+        <h2 id="titre-matique">Matique</h2>
+        <p class="score" id="score-matique">0</p><p class="legende-score">points</p>
+        <ul class="joueurs-equipe" id="joueurs-matique"></ul>
+      </section>
+</div>
+<section id="gestion-pratique" class="carte gestion" hidden>
+        <p><strong>Lien à partager aux joueurs :</strong><br><a id="lien-joueurs" href="pratique.html">Rejoindre la pratique</a></p>
+        <p>Les résultats sont conservés après la fin de la séance et les redémarrages du serveur, jusqu’à leur effacement.</p>
+        <button id="effacer" class="danger" data-action="effacer">Effacer la pratique et repartir à zéro</button>
+    </section>
+    <section class="carte">
+      <h2>Points de la pratique</h2>
+      <p id="aucun">Aucun participant pour le moment.</p>
+      <div class="tableau">
+        <table>
+          <caption class="sr-only">Participants et points de cette pratique uniquement</caption>
+          <thead><tr><th scope="col">Joueur</th><th scope="col">Équipe</th><th scope="col">Présence</th><th scope="col">Bonnes réponses</th><th scope="col">Points</th></tr></thead>
+          <tbody id="participants"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
