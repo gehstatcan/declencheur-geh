@@ -1,5 +1,6 @@
 "use strict";
 const animateur = new URLSearchParams(location.search).get("role") === "animateur";
+document.body.classList.toggle("mode-animateur", animateur);
 const socket = io("/pratique", { auth: { role: animateur ? "animateur" : "joueur" } });
 const $ = id => document.getElementById(id);
 let etat = null, identite = null, jeton = "", sessionStockee = "", occupe = false, dernierBuzz = null;
@@ -10,6 +11,7 @@ try {
 } catch {}
 $("zone-animateur").hidden = !animateur;
 $("gestion-pratique").hidden = !animateur;
+document.querySelectorAll(".points-equipe-commandes").forEach(zone => { zone.hidden = !animateur; });
 $("titre").textContent = animateur ? "Animer une pratique" : "Participer à la pratique";
 $("lien-joueurs").href = new URL("pratique.html", location.href).href;
 $("lien-joueurs").textContent = $("lien-joueurs").href;
@@ -74,6 +76,7 @@ function afficher() {
     etat.exclus.length >= 2 ? "Les deux équipes ont répondu. Passe à la question suivante." : "";
   for (const equipe of etat.equipes) {
     $("score-" + equipe.id).textContent = equipe.points;
+    $("points-equipe-" + equipe.id).textContent = (equipe.pointsEquipe || 0) + " pts";
     const membres = etat.joueurs.filter(j => j.equipe === equipe.id);
     const lignes = membres.map(j => {
       const li = document.createElement("li");
@@ -91,7 +94,7 @@ function afficher() {
   $("zone-joueur").hidden = animateur || !identite;
   $("identite").textContent = moi ? moi.nom + " · " + (moi.equipe === "math" ? "Math" : moi.equipe === "matique" ? "Matique" : "Choisis ton équipe") : "";
   $("buzzer").disabled = !pret || !moi?.equipe || etat.phase !== "active" || !!etat.buzz || etat.exclus.includes(moi?.equipe);
-  $("aide-buzz").textContent = etat.exclus.includes(moi?.equipe) ? "Ton équipe a déjà répondu. Attends la prochaine question." : "Clique sur le bouton, ou utilise la barre d’espace.";
+  $("aide-buzz").textContent = etat.exclus.includes(moi?.equipe) ? "Ton équipe a déjà répondu. Attends la prochaine question." : "Clique sur le bouton, ou utilise la barre d’espace ou la touche Entrée.";
   for (const bouton of document.querySelectorAll("[data-action]")) {
     const action = bouton.dataset.action;
     bouton.disabled = !pret || (action === "demarrer" ? etat.phase === "active" :
@@ -99,10 +102,15 @@ function afficher() {
       action === "terminer" ? etat.phase === "terminee" :
       etat.phase !== "active" || (["points", "mauvaise"].includes(action) && !etat.buzz) || (action === "annuler" && !etat.reponses));
   }
-  $("aucun").hidden = etat.joueurs.length > 0;
-  $("participants").replaceChildren(...[...etat.joueurs].sort((a,b) => b.points-a.points || a.nom.localeCompare(b.nom,"fr")).map(j => {
+  $("aucun").hidden = etat.joueurs.length > 0 || etat.equipes.some(e => e.pointsEquipe > 0);
+  const participants = [...etat.joueurs, ...etat.equipes.map(e => ({
+    nom: "Équipe " + e.nom, equipe: e.id, entiteEquipe: true,
+    points: e.pointsEquipe || 0, bonnes: e.bonnesEquipe || 0
+  }))];
+  $("participants").replaceChildren(...participants.sort((a,b) => b.points-a.points || a.nom.localeCompare(b.nom,"fr")).map(j => {
     const ligne = document.createElement("tr");
-    for (const valeur of [j.nom, j.equipe === "math" ? "Math" : j.equipe === "matique" ? "Matique" : "À choisir", j.connecte ? "En ligne" : "Déconnecté", j.bonnes, j.points]) {
+    if (j.entiteEquipe) ligne.className = "ligne-equipe";
+    for (const valeur of [j.nom, j.equipe === "math" ? "Math" : j.equipe === "matique" ? "Matique" : "À choisir", j.entiteEquipe ? "—" : j.connecte ? "En ligne" : "Déconnecté", j.bonnes, j.points]) {
       const cellule = document.createElement("td"); cellule.textContent = valeur; ligne.append(cellule);
     }
     return ligne;
@@ -113,14 +121,17 @@ $("buzzer").addEventListener("click", () => {
   if (!$("buzzer").disabled) envoyer("buzz", { question: etat.question, session: etat.id });
 });
 document.addEventListener("keydown", e => {
-  if (e.code !== "Space" || e.repeat || /INPUT|TEXTAREA|BUTTON|SELECT|A/.test(e.target.tagName)) return;
-  if (!$("zone-joueur").hidden && !$("buzzer").disabled) { e.preventDefault(); $("buzzer").click(); }
+  if ((e.code !== "Space" && e.key !== "Enter") || $("zone-joueur").hidden) return;
+  if (e.target !== $("buzzer") && /INPUT|TEXTAREA|BUTTON|SELECT|A/.test(e.target.tagName)) return;
+  // Garder la page immobile, même si un autre joueur a buzzé ou si la touche reste enfoncée.
+  e.preventDefault();
+  if (!e.repeat && !$("buzzer").disabled) $("buzzer").click();
 });
 for (const bouton of document.querySelectorAll("[data-action]")) bouton.addEventListener("click", () => {
   const action = bouton.dataset.action;
   if (action === "effacer" && !confirm("Effacer tous les participants et tous les points de cette pratique ? Cette action est irréversible.")) return;
   if (action === "terminer" && !confirm("Terminer la pratique ? Les résultats resteront consultables.")) return;
-  envoyer("action", { action, points: Number(bouton.dataset.points), revision: etat.revision, session: etat.id });
+  envoyer("action", { action, points: Number(bouton.dataset.points), equipe: bouton.dataset.equipe, revision: etat.revision, session: etat.id });
 });
 // Les navigateurs exigent une interaction avant de permettre le son.
 function activerSon() {

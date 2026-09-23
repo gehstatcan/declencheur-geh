@@ -19,10 +19,53 @@ function dossierTest(t) {
   });
   return racine;
 }
-function commande(p, action, points) {
+function commande(p, action, points, equipe) {
   const e = p.vue();
-  p.agir(action, e.revision, e.id, points);
+  p.agir(action, e.revision, e.id, points, equipe);
 }
+test("points collectifs : cumul, annulation, sauvegarde et validation", t => {
+  const dir = dossierTest(t), p = creerPratique(dir);
+  assert.throws(() => commande(p, "points-equipe", 10, "math"));
+  const alice = p.inscrire("Alice", undefined, "math");
+  commande(p, "demarrer");
+  const avant = p.vue();
+  for (const [points, equipe] of [[10, "autre"], [10, undefined], [999, "math"], ["10", "math"]]) {
+    assert.throws(() => commande(p, "points-equipe", points, equipe));
+    assert.deepEqual(p.vue(), avant);
+  }
+  commande(p, "points-equipe", 10, "math");
+  assert.throws(() => p.agir("points-equipe", avant.revision, avant.id, 10, "math"));
+  assert.equal(p.vue().question, 2);
+  assert.equal(p.vue().joueurs[0].points, 0);
+  assert.equal(p.vue().joueurs[0].bonnes, 0);
+  assert.equal(p.vue().equipes[0].pointsEquipe, 10);
+  assert(p.buzzer(alice.id, 2, p.vue().id));
+  commande(p, "points", 5);
+  assert.equal(p.vue().equipes[0].points, 15);
+  assert.equal(p.vue().equipes[0].pointsEquipe, 10);
+  assert(p.buzzer(alice.id, 3, p.vue().id));
+  commande(p, "mauvaise");
+  commande(p, "points-equipe", 20, "matique");
+  assert.equal(p.vue().question, 4);
+  assert.equal(p.vue().buzz, null);
+  assert.deepEqual(p.vue().exclus, []);
+  assert.equal(p.vue().equipes[1].points, 20);
+  assert.equal(p.vue().equipes[1].bonnesEquipe, 1);
+  const reprise = creerPratique(dir);
+  assert.deepEqual(reprise.vue(), p.vue());
+  commande(reprise, "annuler");
+  assert.equal(reprise.vue().question, 3);
+  assert.equal(reprise.vue().equipes[1].pointsEquipe, 0);
+  assert.equal(reprise.vue().equipes[0].points, 15);
+  commande(reprise, "annuler");
+  assert.equal(reprise.vue().joueurs[0].points, 0);
+  assert.equal(reprise.vue().equipes[0].points, 10);
+  commande(reprise, "terminer");
+  assert.throws(() => commande(reprise, "points-equipe", 5, "math"));
+  assert.equal(creerPratique(dir).vue().equipes[0].pointsEquipe, 10);
+  commande(reprise, "effacer");
+  assert(reprise.vue().equipes.every(e => e.points === 0 && e.pointsEquipe === 0 && e.bonnesEquipe === 0));
+});
 test("points individuels, premier buzz, réplique et annulation", t => {
   const p = creerPratique(dossierTest(t));
   const alice = p.inscrire("Alice", undefined, "math"), bob = p.inscrire("Bob", undefined, "matique");
@@ -146,6 +189,13 @@ test("Socket.IO : équipes de pratique, buzz simultanés, reconnexion et droits 
   e = p.vue();
   assert((await appel(host,"action",{action:"points",points:10,revision:e.revision,session:e.id})).ok);
   assert.equal(p.vue().joueurs.find(j=>j.id===gagnant).points,10);
+  e = p.vue();
+  assert((await appel(host,"action",{action:"points-equipe",equipe:"math",points:20,revision:e.revision,session:e.id})).ok);
+  assert.equal(p.vue().equipes[0].pointsEquipe,20);
+  assert.equal(p.vue().joueurs.find(j=>j.id===gagnant).points,10);
+  const avantRefus = p.vue();
+  await new Promise(resolve => alice.timeout(100).emit("action",{action:"points-equipe",equipe:"math",points:20,revision:avantRefus.revision,session:e.id},err=>{ assert(err); resolve(); }));
+  assert.deepEqual(p.vue(),avantRefus);
   await new Promise(resolve => alice.timeout(100).emit("action",{action:"effacer",revision:p.vue().revision,session:e.id},err=>{ assert(err); resolve(); }));
   assert.equal(p.vue().joueurs.length,2);
   alice.disconnect();

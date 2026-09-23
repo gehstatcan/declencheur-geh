@@ -54,6 +54,12 @@ main { max-width:1400px; }
 .joueur strong { white-space:nowrap; color:var(--couleur); }
 .joueur.a-la-parole { outline:3px solid var(--couleur); background:#fff6d8; }
 .joueurs-equipe .vide { font-size:.85rem; color:#555566; }
+.entite-equipe { margin:0 0 10px; padding:8px; border:1px solid var(--couleur); border-radius:10px; text-align:left; }
+.entite-equipe p { display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px 8px; margin:0; font-size:.85rem; }
+.entite-equipe span { color:var(--couleur); font-weight:700; white-space:nowrap; }
+.points-equipe-commandes { display:flex; gap:6px; margin-top:8px; }
+.points-equipe-commandes button { flex:1; min-height:36px; padding:6px; background:var(--couleur); font-size:.85rem; }
+.ligne-equipe { background:#f0f0f7; font-weight:600; }
 .centre { text-align:center; }
 #phase { padding:8px; background:#f9e3c3; border-radius:8px; font-size:.9rem; }
 .question { font-size:1.5rem; }
@@ -82,4 +88,46 @@ legend { font-weight:600; margin-bottom:10px; }
  body { padding:16px 10px; }
  .joueur { flex-direction:column; align-items:flex-start; padding:8px; }
  .equipe { padding:12px; }
+}
+
+/* Vue animateur compacte pour garder les équipes et le pointage à portée de vue. */
+.mode-animateur { padding:10px 16px; }
+.mode-animateur header { gap:8px; }
+.mode-animateur header img { width:30px; height:30px; }
+.mode-animateur h1 { font-size:1.6rem; margin:0; }
+.mode-animateur nav { gap:8px; margin:6px 0 10px; }
+.mode-animateur nav a { padding:4px 12px; font-size:.8rem; }
+.mode-animateur .introduction { padding:6px 12px; margin-bottom:12px; }
+.mode-animateur .introduction .badge,
+.mode-animateur .description-pratique { display:none; }
+.mode-animateur .introduction h2 { font-size:1.1rem; margin:0; }
+.mode-animateur .introduction p { margin:2px 0; }
+.mode-animateur #erreur:empty,
+.mode-animateur #replique:empty { display:none; }
+.mode-animateur .terrain { gap:12px; }
+.mode-animateur .terrain .carte { padding:14px; margin-bottom:12px; }
+.mode-animateur .centre h2 { font-size:1.1rem; margin-bottom:6px; }
+.mode-animateur #phase { margin:6px 0; padding:5px 8px; }
+.mode-animateur .question { margin:8px 0; font-size:1.25rem; }
+.mode-animateur .premier { min-height:52px; padding:8px; margin:8px 0; }
+.mode-animateur #replique { margin:8px 0; font-size:.85rem; }
+.mode-animateur .commandes { gap:8px; margin:12px 0; }
+.mode-animateur .commandes button { padding:10px 8px; font-size:.85rem; line-height:1.35; min-height:42px; }
+.mode-animateur .score { font-size:3rem; margin-top:2px; }
+.mode-animateur .legende-score { margin-bottom:10px; }
+.mode-animateur .joueurs-equipe { gap:6px; padding:4px; }
+.mode-animateur .joueur { padding:8px; font-size:.9rem; }
+.mode-animateur .son { margin:8px 0; font-size:.8rem; }
+.consignes-pratique { text-align:left; font-size:.8rem; color:#555566; }
+.consignes-pratique summary { cursor:pointer; }
+.consignes-pratique summary:focus-visible { outline:3px solid #906312; outline-offset:3px; }
+.consignes-pratique p { margin:8px 0 0; }
+@media(min-width:800px) {
+ .mode-animateur .terrain { grid-template-columns:minmax(0,1fr) minmax(380px,1.6fr) minmax(0,1fr); }
+ .mode-animateur .centre { grid-column:2; grid-row:1; }
+ .mode-animateur .equipe { grid-row:1; }
+ .mode-animateur .commandes { grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .mode-animateur [data-action=demarrer],
+ .mode-animateur [data-action=terminer] { grid-column:auto; }
+ .mode-animateur .joueurs-equipe { max-height:max(180px,calc(100dvh - 390px)); overflow-y:auto; }
 }

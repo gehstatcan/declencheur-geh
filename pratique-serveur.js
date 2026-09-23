@@ -66,9 +66,9 @@ function creerPratique(dossier) {
     modifier(s => { s.buzz = { joueur: id, id: crypto.randomUUID() }; });
     return true;
   }
-  function agir(action, revision, session, points) {
+  function agir(action, revision, session, points, equipe) {
     if (session !== etat.id || revision !== etat.revision) throw new Error("La pratique a changé. Réessaie avec l’affichage à jour.");
-    const autorisees = ["demarrer", "suivante", "liberer", "mauvaise", "points", "annuler", "terminer", "effacer"];
+    const autorisees = ["demarrer", "suivante", "liberer", "mauvaise", "points", "points-equipe", "annuler", "terminer", "effacer"];
     if (!autorisees.includes(action)) throw new Error("Action inconnue.");
     if (action === "effacer") { enregistrer(nouvelle()); return; }
     modifier(s => {
@@ -82,6 +82,12 @@ function creerPratique(dossier) {
         const derniere = s.reponses.pop();
         if (!derniere) throw new Error("Aucune réponse à annuler.");
         s.question = derniere.question; s.buzz = null; s.exclus = []; return;
+      }
+      if (action === "points-equipe") {
+        if (!["math", "matique"].includes(equipe)) throw new Error("Équipe invalide.");
+        if (![5, 10, 20].includes(points)) throw new Error("Pointage invalide.");
+        s.reponses.push({ question: s.question, equipe, points });
+        s.question++;
       }
       if (action === "points" || action === "mauvaise") {
         if (!s.buzz) throw new Error("Attends qu’un joueur déclenche son buzzer.");
@@ -100,7 +106,9 @@ function creerPratique(dossier) {
       buzz: etat.buzz, exclus: [...etat.exclus], reponses: etat.reponses.length,
       equipes: ["math", "matique"].map(id => ({
         id, nom: id === "math" ? "Math" : "Matique",
-        points: etat.reponses.filter(r => etat.joueurs.find(j => j.id === r.joueur)?.equipe === id).reduce((n, r) => n + r.points, 0)
+        points: etat.reponses.filter(r => r.equipe === id || etat.joueurs.find(j => j.id === r.joueur)?.equipe === id).reduce((n, r) => n + r.points, 0),
+        pointsEquipe: etat.reponses.filter(r => r.equipe === id).reduce((n, r) => n + r.points, 0),
+        bonnesEquipe: etat.reponses.filter(r => r.equipe === id).length
       })),
       joueurs: etat.joueurs.map(j => ({
         id: j.id, nom: j.nom, equipe: j.equipe || null, connecte: connectes.has(j.id),
@@ -152,7 +160,7 @@ function installerPratique(io, dossier) {
       return { accepte: pratique.buzzer(socket.data.joueur, donnees?.question, donnees?.session) };
     }, retour));
     if (animateur) socket.on("action", (donnees, retour) => traiter(() => {
-      pratique.agir(donnees?.action, donnees?.revision, donnees?.session, donnees?.points);
+      pratique.agir(donnees?.action, donnees?.revision, donnees?.session, donnees?.points, donnees?.equipe);
     }, retour));
     socket.on("disconnect", diffuser);
   });

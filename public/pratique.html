@@ -16,7 +16,7 @@
     <section class="carte introduction">
       <p class="badge">Math contre Matique · Hors classement</p>
       <h2 id="titre">Participer à la pratique</h2>
-      <p>Une séance pour essayer les déclencheurs et s’exercer. Les points restent dans cette pratique et ne comptent jamais dans les statistiques officielles.</p>
+      <p class="description-pratique">Une séance pour essayer les déclencheurs et s’exercer. Les points restent dans cette pratique et ne comptent jamais dans les statistiques officielles.</p>
       <p id="connexion" role="status">Connexion au serveur…</p>
       <p id="erreur" role="alert"></p>
     </section>
@@ -39,6 +39,14 @@
 <section class="carte equipe math" aria-labelledby="titre-math">
         <h2 id="titre-math">Math</h2>
         <p class="score" id="score-math">0</p><p class="legende-score">points</p>
+        <div class="entite-equipe">
+          <p><strong>Équipe Math</strong> <span id="points-equipe-math">0 pts</span></p>
+          <div class="points-equipe-commandes" role="group" aria-label="Attribuer des points à l’équipe Math" hidden>
+            <button data-action="points-equipe" data-equipe="math" data-points="5">+5</button>
+            <button data-action="points-equipe" data-equipe="math" data-points="10">+10</button>
+            <button data-action="points-equipe" data-equipe="math" data-points="20">+20</button>
+          </div>
+        </div>
         <ul class="joueurs-equipe" id="joueurs-math"></ul>
       </section>
 <section class="carte centre" aria-labelledby="titre-seance">
@@ -50,10 +58,9 @@
       <div id="zone-joueur" hidden>
         <p id="identite"></p>
         <button id="buzzer" class="buzzer" disabled>BUZZ !</button>
-        <p id="aide-buzz">Clique sur le bouton, ou utilise la barre d’espace.</p>
+        <p id="aide-buzz">Clique sur le bouton, ou utilise la barre d’espace ou la touche Entrée.</p>
       </div>
       <div id="zone-animateur" hidden>
-        <p>Lis tes questions à voix haute. Une bonne réponse ajoute les points et passe à la question suivante. Après une mauvaise réponse, l’autre équipe peut tenter sa chance.</p>
         <div class="commandes">
           <button data-action="demarrer">Démarrer / reprendre</button>
           <button data-action="points" data-points="10">Bonne réponse · 10 points</button>
@@ -66,11 +73,23 @@
           <button data-action="terminer">Terminer la pratique</button>
         </div>
         <p id="statut-son" class="son" role="status">Clique dans la page pour activer le son du marqueur.</p>
+        <details class="consignes-pratique">
+          <summary>Consignes de la pratique</summary>
+          <p>Lis tes questions à voix haute. Une bonne réponse ajoute les points et passe à la question suivante. Après une mauvaise réponse, l’autre équipe peut tenter sa chance. Les points restent dans cette pratique et ne comptent jamais dans les statistiques officielles.</p>
+        </details>
       </div>
     </section>
 <section class="carte equipe matique" aria-labelledby="titre-matique">
         <h2 id="titre-matique">Matique</h2>
         <p class="score" id="score-matique">0</p><p class="legende-score">points</p>
+        <div class="entite-equipe">
+          <p><strong>Équipe Matique</strong> <span id="points-equipe-matique">0 pts</span></p>
+          <div class="points-equipe-commandes" role="group" aria-label="Attribuer des points à l’équipe Matique" hidden>
+            <button data-action="points-equipe" data-equipe="matique" data-points="5">+5</button>
+            <button data-action="points-equipe" data-equipe="matique" data-points="10">+10</button>
+            <button data-action="points-equipe" data-equipe="matique" data-points="20">+20</button>
+          </div>
+        </div>
         <ul class="joueurs-equipe" id="joueurs-matique"></ul>
       </section>
 </div>
