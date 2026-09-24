@@ -536,6 +536,7 @@
         let donnéesCompteurs = [];
         let requêteCompteurs = 0;
         let donnéesThèmes = null;
+        let requêteThèmes = 0;
         const triÉtat = {
             équipes: { col: 'ptsÉquipeCollectif', dir: -1 },
             joueurs: { col: 'ptsPJ', dir: -1 }
@@ -557,6 +558,7 @@
                 document.getElementById(`btn-${p}`).classList.toggle('actif', p === phase)
             );
             donnéesThèmes = null; // forcer re-fetch
+            requêteThèmes++;
             chargerCompteurs(phase);
             if (document.getElementById('panneau-themes').classList.contains('actif')) {
                 chargerThèmes(phase);
@@ -579,9 +581,13 @@
         function changerSaisonStats() {
           saisonStats = document.getElementById("sel-saison").value;
           donnéesThèmes = null;
+          requêteThèmes++;
           const cumulatif = saisonStats === 'cumulatif';
           document.getElementById('titre-compteurs').textContent = cumulatif ? '📊 Compteurs — toutes saisons' : `📊 Compteurs ${saisonStats}`;
           chargerCompteurs(phaseActive);
+          if (document.getElementById('panneau-themes').classList.contains('actif')) {
+              chargerThèmes(phaseActive);
+          }
         }
 
         async function chargerCompteurs(phase = 'tous') {
@@ -612,13 +618,29 @@
         }
 
         async function chargerThèmes(phase = phaseActive) {
+            const requête = ++requêteThèmes;
             const sidebar = document.getElementById('sidebarThèmes');
             const div = document.getElementById('contenuThemes');
 
 
             const params = new URLSearchParams({ saison: saisonStats });
             if (phase !== 'tous') params.set('phase', phase);
-            donnéesThèmes = await fetch(`/api/stats/themes?${params}`).then(r => r.json());
+            sidebar.innerHTML = '';
+            div.textContent = 'Chargement…';
+            try {
+                const réponse = await fetch(`/api/stats/themes?${params}`);
+                if (!réponse.ok) throw new Error('Chargement des thèmes impossible');
+                const données = await réponse.json();
+                if (!Array.isArray(données)) throw new Error('Réponse invalide');
+                if (requête !== requêteThèmes) return;
+                donnéesThèmes = données;
+            } catch (erreur) {
+                if (requête !== requêteThèmes) return;
+                donnéesThèmes = null;
+                div.innerHTML = '<p role="alert">Impossible de charger les thèmes. Réessaie en sélectionnant la saison.</p>';
+                console.error(erreur);
+                return;
+            }
 
             if (!donnéesThèmes.length) {
                 sidebar.innerHTML = '';

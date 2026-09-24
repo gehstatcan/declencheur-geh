@@ -1202,6 +1202,8 @@ app.get('/api/stats/themes', (req, res) => {
     if (req.query.saison === 'cumulatif') {
       const saisons = listerDossiersSaisons();
       const statsParThème = {};
+      const joueursThèmes = new Map();
+      const équipesThèmes = new Map();
       const phase = req.query.phase;
 
       for (const { nom, chemin } of saisons) {
@@ -1209,6 +1211,14 @@ app.get('/api/stats/themes', (req, res) => {
         const sér = lireJSON(path.join(chemin, 'séries.json'), []);
         const thèmesD = lireJSON(path.join(chemin, 'thèmes.json'), []);
         const partiesD = lireJSON(path.join(chemin, 'parties.json'), []);
+
+        // Les noms doivent aussi provenir des archives, pas seulement de la saison active.
+        for (const joueur of lireJSON(path.join(chemin, 'joueurs.json'), [])) {
+          joueursThèmes.set(`${joueur.noÉquipe}-${joueur.noJoueur}`, joueur);
+        }
+        for (const équipe of lireJSON(path.join(chemin, 'équipes.json'), [])) {
+          équipesThèmes.set(équipe.noÉquipe, équipe);
+        }
 
         // Exclure parties synthétiques
         if (nom === SAISON_SYNTHÉTIQUE)
@@ -1248,8 +1258,8 @@ app.get('/api/stats/themes', (req, res) => {
 
       const résultat = Object.entries(statsParThème).map(([thème, joueursMap]) => {
         const joueursList = Object.values(joueursMap).map(j => {
-          const joueur = joueurs.find(jj => jj.noÉquipe === j.noÉquipe && jj.noJoueur === j.noJoueur);
-          const équipe = équipes.find(e => e.noÉquipe === j.noÉquipe);
+          const joueur = joueursThèmes.get(`${j.noÉquipe}-${j.noJoueur}`);
+          const équipe = équipesThèmes.get(j.noÉquipe);
           return { noJoueur: j.noJoueur, alias: joueur?.alias || `J${j.noJoueur}`, nom: joueur?.nom || '', nomÉquipe: équipe?.nomÉquipe || '', noÉquipe: j.noÉquipe, pts: j.pts };
         }).sort((a, b) => b.pts - a.pts);
         return { thème, joueurs: joueursList };
