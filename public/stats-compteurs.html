@@ -534,6 +534,7 @@
     <script>
         let saisonStats = new URLSearchParams(window.location.search).get("saison") || null;
         let donnéesCompteurs = [];
+        let requêteCompteurs = 0;
         let donnéesThèmes = null;
         const triÉtat = {
             équipes: { col: 'ptsÉquipeCollectif', dir: -1 },
@@ -584,11 +585,30 @@
         }
 
         async function chargerCompteurs(phase = 'tous') {
+            const requête = ++requêteCompteurs;
             const params = new URLSearchParams({ saison: saisonStats });
             if (phase !== 'tous') params.set('phase', phase);
-            donnéesCompteurs = await fetch(`/api/stats/compteurs?${params}`).then(r => r.json());
-            afficherÉquipes();
-            afficherJoueurs();
+            for (const id of ['tbodyÉquipes', 'tbodyJoueurs']) {
+                document.getElementById(id).innerHTML = '<tr><td colspan="7">Chargement…</td></tr>';
+            }
+            try {
+                const réponse = await fetch(`/api/stats/compteurs?${params}`);
+                if (!réponse.ok) throw new Error('Chargement des compteurs impossible');
+                const données = await réponse.json();
+                if (!Array.isArray(données)) throw new Error('Réponse invalide');
+                // Une réponse lente ne doit pas remplacer une sélection plus récente.
+                if (requête !== requêteCompteurs) return;
+                donnéesCompteurs = données;
+                afficherÉquipes();
+                afficherJoueurs();
+            } catch (erreur) {
+                if (requête !== requêteCompteurs) return;
+                donnéesCompteurs = [];
+                for (const id of ['tbodyÉquipes', 'tbodyJoueurs']) {
+                    document.getElementById(id).innerHTML = '<tr><td colspan="7" role="alert">Impossible de charger les statistiques. Réessaie en sélectionnant la saison.</td></tr>';
+                }
+                console.error(erreur);
+            }
         }
 
         async function chargerThèmes(phase = phaseActive) {

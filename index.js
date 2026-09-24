@@ -1334,6 +1334,8 @@ app.get("/api/stats/compteurs", (req, res) => {
       const ptsJoueur = {};
       const partiesJoueurSet = {};
       const pjParÉquipe = {};
+      const équipesCumulées = new Map();
+      const joueursCumulés = new Map();
       const phase = req.query.phase;
 
       for (const { nom, chemin } of saisons) {
@@ -1341,6 +1343,14 @@ app.get("/api/stats/compteurs", (req, res) => {
         const sér = lireJSON(path.join(chemin, 'séries.json'), []);
         let alig = lireJSON(path.join(chemin, 'alignements.json'), []);
         const partiesD = lireJSON(path.join(chemin, 'parties.json'), []);
+
+        // Inclure les participants des anciennes saisons, même si la saison active est vide.
+        for (const équipe of lireJSON(path.join(chemin, 'équipes.json'), [])) {
+          équipesCumulées.set(équipe.noÉquipe, équipe);
+        }
+        for (const joueur of lireJSON(path.join(chemin, 'joueurs.json'), [])) {
+          joueursCumulés.set(`${joueur.noÉquipe}-${joueur.noJoueur}`, joueur);
+        }
 
         if (phase && phase !== 'tous') {
           const noPartiesFiltées = new Set(
@@ -1367,9 +1377,9 @@ app.get("/api/stats/compteurs", (req, res) => {
         });
       }
 
-      const résultat = équipes.map(é => {
+      const résultat = [...équipesCumulées.values()].map(é => {
         const pjÉquipe = pjParÉquipe[é.noÉquipe]?.size || 0;
-        const membresÉquipe = joueurs.filter(j => j.noÉquipe === é.noÉquipe && !j.estÉquipe);
+        const membresÉquipe = [...joueursCumulés.values()].filter(j => j.noÉquipe === é.noÉquipe && !j.estÉquipe && j.noJoueur !== 99);
         const joueursStats = membresÉquipe.map(j => {
           const clé = `${j.noÉquipe}-${j.noJoueur}`;
           const pts = ptsJoueur[clé] || 0;

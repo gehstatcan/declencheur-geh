@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node --test tests/pratique.test.js"
+    "test": "node --test tests/pratique.test.js tests/stats-compteurs.test.js"
   },
   "keywords": [],
   "author": "",
