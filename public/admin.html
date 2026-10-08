@@ -490,6 +490,9 @@
         .nav-animateur a.actif { background: var(--accent); color: var(--blanc); border-color: var(--accent); }
         .nav-animateur button { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); cursor: pointer; font-family: inherit; transition: all 0.2s; }
         .nav-animateur button:hover { background: var(--fond-champ); color: var(--texte); }
+        .import-repliable { margin: 12px 0; padding: 12px 16px; border: 1px solid var(--gris); border-radius: var(--rayon); }
+        .import-repliable > summary { cursor: pointer; font-weight: 700; }
+        .import-repliable[open] > summary { margin-bottom: 12px; }
     </style>
 </head>
 
@@ -607,6 +610,18 @@
     <!-- Éditeur structure des séries -->
     <div class="carte carte-large" id="series" data-section>
         <h2>📋 Configurer les séries</h2>
+        <p class="info">Saison active : <strong id="saison-structure">Chargement…</strong>.</p>
+        <details id="bloc-importer-structure" class="import-repliable">
+        <summary>Importer les séries</summary>
+        <p class="info">Importez une structure seulement si cette saison n’a aucune série et n’a pas démarré.</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <label for="source-structure">Saison source</label>
+            <select id="source-structure" class="champ"></select>
+            <button id="btn-importer-structure" class="bouton bouton-upload" style="width:auto" onclick="importerStructure()" disabled>Importer la structure d’une saison précédente</button>
+        </div>
+        <p class="info">Copie les séries, règles et points, indépendamment des équipes. Le contenu des questions n’est pas copié. Une structure existante ne sera jamais remplacée par cette importation.</p>
+        </details>
+        <p id="msg-importer-structure" role="status" aria-live="polite"></p>
         <div id="liste-séries">⏳ Chargement...</div>
         <div class="série-actions-bas">
             <button class="bouton bouton-vert" style="width:auto" onclick="ajouterSérie()">+ Ajouter une série</button>
@@ -620,6 +635,19 @@
     <!-- Équipes & Joueurs -->
     <div class="carte carte-large" id="equipes" data-section>
         <h2>👥 Gérer les équipes et les joueurs</h2>
+        <p class="info">Vous gérez les équipes de la saison active : <strong id="saison-equipes">Chargement…</strong>.</p>
+        <details id="bloc-importer-equipes" class="import-repliable">
+        <summary>Importer les équipes</summary>
+        <p class="info">Pour préparer une nouvelle année : <a href="#saisons">créez puis activez la nouvelle saison</a>, puis revenez ici pour importer ses équipes.</p>
+        <p id="statut-importer-equipes" class="info" role="status"></p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+            <label for="source-equipes">Saison source</label>
+            <select id="source-equipes" class="champ"></select>
+            <button id="btn-importer-equipes" class="bouton bouton-upload" style="width:auto" onclick="importerÉquipes()" disabled>Importer les équipes d’une saison précédente</button>
+        </div>
+        <p class="info">Les équipes et leurs joueurs sont copiés. Les priorités d’égalité sont réinitialisées; les matchs, résultats et statistiques ne sont pas importés.</p>
+        </details>
+        <p id="msg-importer-equipes" role="status" aria-live="polite"></p>
         <div id="liste-equipes">⏳ Chargement...</div>
         <div class="série-actions-bas">
             <button class="bouton bouton-vert" style="width:auto" onclick="ajouterÉquipe()">+ Ajouter une équipe</button>
@@ -645,7 +673,7 @@
 
         <div class="carte">
           <h3>Créer une nouvelle saison</h3>
-          <p class="info">Initialise un nouveau dossier de saison vide (équipes, parties, répondants, etc.).</p>
+          <p class="info">Crée une saison vide sans changer la saison active. Après la création, cliquez sur « Activer » ci-dessus, puis importez les équipes dans « Gérer les équipes et les joueurs ».</p>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
             <input type="text" id="nouvelle-saison" class="champ" placeholder="ex: 2026-2027" style="width:160px" pattern="\d{4}-\d{4}">
             <button class="bouton bouton-upload" style="width:auto" onclick="créerSaison()">➕ Créer</button>
@@ -895,6 +923,7 @@
         }
 
         function rendreSéries() {
+            actualiserImportStructure();
             const container = document.getElementById('liste-séries');
             if (!sériesData.length) { container.innerHTML = '<p style="color:var(--gris)">Aucune série.</p>'; return; }
             container.innerHTML = sériesData.map((s, idx) => rendreSérieHTML(s, idx)).join('');
@@ -1069,7 +1098,51 @@
         }
 
         // Charger les séries et vérifier le statut au démarrage
-        (async () => {
+        let structureChargée = false;
+        function actualiserBlocImport(id, occupé) {
+            const bloc = document.getElementById(id);
+            const état = occupé ? 'occupé' : 'vide';
+            // Respecter le choix manuel tant que l’état de la liste ne change pas.
+            if (bloc.dataset.état !== état) {
+                bloc.open = !occupé;
+                bloc.dataset.état = état;
+            }
+        }
+
+        function actualiserImportStructure() {
+            if (structureChargée) actualiserBlocImport('bloc-importer-structure', sériesData.length > 0 || sériesVerrouillées);
+            document.getElementById('btn-importer-structure').disabled = !structureChargée || sériesData.length > 0 || sériesVerrouillées || !document.getElementById('source-structure').value;
+        }
+
+        async function importerStructure() {
+            const msg = document.getElementById('msg-importer-structure');
+            if (!structureChargée || sériesData.length || sériesVerrouillées) {
+                msg.textContent = 'Importation impossible : la structure doit être vide et la saison ne doit pas avoir démarré.';
+                return;
+            }
+            document.getElementById('btn-importer-structure').disabled = true;
+            const demande = { source: document.getElementById('source-structure').value, destination: saisonÉquipes };
+            const envoyer = async corps => {
+                const r = await fetch('/api/admin/importer-structure', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps) });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.erreur || 'Importation impossible');
+                return d;
+            };
+            try {
+                msg.textContent = 'Préparation de l’importation…';
+                const aperçu = await envoyer(demande);
+                if (!confirm(`Copier la structure de ${aperçu.source} vers ${aperçu.destination} : ${aperçu.nbSéries} séries, ${aperçu.nbQuestions} emplacements de questions et leurs règles de points ?\n\nLe contenu des questions et les équipes restent inchangés. La saison source est conservée.`)) {
+                    msg.textContent = 'Importation annulée.';
+                    return;
+                }
+                const résultat = await envoyer({ ...demande, confirmation: aperçu.empreinte });
+                msg.textContent = `✅ Structure de ${résultat.nbSéries} séries importée et sauvegardée dans ${résultat.destination}.`;
+                await chargerStructure();
+            } catch (e) { msg.textContent = `❌ ${e.message}`; }
+            finally { actualiserImportStructure(); }
+        }
+
+        async function chargerStructure() {
             try {
                 const [respSéries, respStatut] = await Promise.all([
                     fetch('/api/series'),
@@ -1077,12 +1150,67 @@
                 ]);
                 sériesData = await respSéries.json();
                 const statut = await respStatut.json();
+                if (!respSéries.ok || !respStatut.ok) throw new Error('Chargement impossible');
+                structureChargée = true;
                 rendreSéries();
                 afficherStatutVerrou(statut);
+                actualiserImportStructure();
             } catch (e) {
                 document.getElementById('liste-séries').textContent = `❌ Impossible de charger les séries : ${e.message}`;
             }
-        })();
+        }
+        chargerStructure();
+
+        let saisonÉquipes = null;
+        let équipesChargées = false;
+        function actualiserImportÉquipes() {
+            const source = document.getElementById('source-equipes');
+            const occupée = équipesData.length > 0 || joueursData.length > 0;
+            if (équipesChargées) actualiserBlocImport('bloc-importer-equipes', occupée);
+            document.getElementById('btn-importer-equipes').disabled = !équipesChargées || !saisonÉquipes || occupée || !source.value;
+            source.disabled = occupée || !source.value;
+            document.getElementById('statut-importer-equipes').textContent = !équipesChargées
+                ? 'Chargement des équipes…'
+                : occupée
+                    ? `La saison ${saisonÉquipes || ''} contient déjà des équipes ou des joueurs. Pour importer, activez une nouvelle saison vide.`
+                    : !source.value
+                        ? 'Aucune saison précédente disponible pour l’importation.'
+                        : `Les équipes de la saison source seront copiées vers ${saisonÉquipes}.`;
+        }
+        async function importerÉquipes() {
+            const bouton = document.getElementById('btn-importer-equipes');
+            const msg = document.getElementById('msg-importer-equipes');
+            if (équipesData.length || joueursData.length) {
+                msg.textContent = 'L’importation nécessite une liste vide, sans équipes ni joueurs en cours de modification.';
+                return;
+            }
+            bouton.disabled = true;
+            msg.textContent = 'Préparation de l’importation…';
+            const demande = { source: document.getElementById('source-equipes').value, destination: saisonÉquipes };
+            const envoyer = async corps => {
+                const r = await fetch('/api/admin/importer-equipes', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corps)
+                });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.erreur || 'Importation impossible');
+                return d;
+            };
+            try {
+                const aperçu = await envoyer(demande);
+                if (!confirm(`Copier ${aperçu.nbÉquipes} équipes et leurs ${aperçu.nbJoueurs} joueurs de ${aperçu.source} vers ${aperçu.destination} ?\n\nLes priorités d’égalité seront réinitialisées. Aucun match, résultat ou statistique ne sera importé. La saison source restera intacte.`)) {
+                    msg.textContent = 'Importation annulée.';
+                    return;
+                }
+                const résultat = await envoyer({ ...demande, confirmation: aperçu.empreinte });
+                msg.textContent = `✅ ${résultat.nbÉquipes} équipes et ${résultat.nbJoueurs} joueurs importés et sauvegardés dans la saison ${résultat.destination}. Vous pouvez maintenant modifier leur composition.`;
+                await chargerÉquipesJoueurs();
+                await chargerPartiesAdmin();
+            } catch (e) {
+                msg.textContent = `❌ ${e.message}`;
+            } finally {
+                actualiserImportÉquipes();
+            }
+        }
 
         // ============================================================
         // Éditeur équipes & joueurs
@@ -1125,6 +1253,7 @@
         let joueursData = [];
 
         function rendreÉquipes() {
+            actualiserImportÉquipes();
             const container = document.getElementById('liste-equipes');
             if (!équipesData.length) { container.innerHTML = '<p style="color:var(--gris)">Aucune équipe.</p>'; return; }
             container.innerHTML = équipesData.map((eq, idx) => rendreÉquipeHTML(eq, idx)).join('');
@@ -1260,7 +1389,7 @@
         }
 
         // Charger équipes et joueurs au démarrage
-        (async () => {
+        async function chargerÉquipesJoueurs() {
             try {
                 const [respEq, respJ] = await Promise.all([
                     fetch('/api/admin/equipes'),
@@ -1268,11 +1397,13 @@
                 ]);
                 équipesData = await respEq.json();
                 joueursData = await respJ.json();
+                équipesChargées = true;
                 rendreÉquipes();
             } catch (e) {
                 document.getElementById('liste-equipes').textContent = `❌ Impossible de charger : ${e.message}`;
             }
-        })();
+        }
+        chargerÉquipesJoueurs();
 
         // ============================================================
         // Gestion des saisons
@@ -1283,6 +1414,18 @@
           ]);
           const saisons = await saisonsRes.json();
           const { saison: active } = await activeRes.json();
+          saisonÉquipes = active;
+          document.getElementById('saison-structure').textContent = active;
+          document.getElementById('saison-equipes').textContent = active;
+          const sources = saisons.filter(s => s < active).sort().reverse();
+          const sourceStructure = document.getElementById('source-structure');
+          sourceStructure.replaceChildren(...(sources.length ? sources.map(s => new Option(s, s)) : [new Option('Aucune saison précédente', '')]));
+          sourceStructure.disabled = !sources.length;
+          actualiserImportStructure();
+          const choixSource = document.getElementById('source-equipes');
+          choixSource.replaceChildren(...(sources.length ? sources.map(s => new Option(s, s)) : [new Option('Aucune saison précédente', '')]));
+          choixSource.value = sources[0] || '';
+          actualiserImportÉquipes();
           const sel = document.getElementById("sel-saison-active");
           sel.innerHTML = saisons.map(s =>
             `<option value="${s}" ${s === active ? "selected" : ""}>${s}${s === active ? " (active)" : ""}</option>`
@@ -1300,7 +1443,7 @@
             if (d.succès) {
               msg.style.color = "var(--vert)";
               msg.textContent = `✅ Saison ${saison} activée`;
-              chargerSaisons();
+              window.location.reload();
             } else {
               msg.style.color = "var(--orange)";
               msg.textContent = "❌ " + (d.erreur || "Erreur");
@@ -1323,9 +1466,10 @@
             const d = await r.json();
             if (d.succès) {
               msg.style.color = "var(--vert)";
-              msg.textContent = `✅ Saison ${saison} créée`;
+              msg.textContent = `✅ Saison ${saison} créée, mais pas encore active. Cliquez sur « Activer » ci-dessus, puis allez dans « Gérer les équipes et les joueurs » pour importer la saison précédente.`;
               document.getElementById("nouvelle-saison").value = "";
-              chargerSaisons();
+              await chargerSaisons();
+              document.getElementById('sel-saison-active').value = saison;
             } else {
               msg.style.color = "var(--orange)";
               msg.textContent = "❌ " + (d.erreur || "Erreur");

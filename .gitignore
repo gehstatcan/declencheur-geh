@@ -11,6 +11,9 @@ data/saisons/*/parties.json
 data/saisons/2025-2026/parties - test.json
 data/saisons/*/questions.json
 data/saisons/*/thèmes.json
+data/saison-active.txt
+# temporaire!
+data/saisons/2026-2027/
 
 # Logs
 logs
@@ -106,3 +109,5 @@ typings/
 
 # Résultats temporaires de la pratique (hors saisons)
 data/pratique/
+
+data/saison-active.txt

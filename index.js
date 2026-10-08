@@ -570,6 +570,38 @@ app.get("/api/admin/series/statut", (_req, res) => {
   res.json({ verrouillé, nbParties });
 });
 
+app.post("/api/admin/importer-structure", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  const { source, destination, confirmation } = req.body || {};
+  if (destination !== saisonActive) return res.status(409).json({ erreur: "La saison active a changé. Rechargez la page." });
+  if (typeof source !== "string" || !/^\d{4}-\d{4}$/.test(source) || source >= destination)
+    return res.status(400).json({ erreur: "Choisissez une saison précédente." });
+  const cheminSource = path.join(dossierBase, "saisons", source, "séries.json");
+  if (!fs.existsSync(cheminSource)) return res.status(404).json({ erreur: "Structure source introuvable." });
+  try {
+    const chemin = path.join(dossierSaison, "séries.json");
+    const existante = JSON.parse(fs.readFileSync(chemin, "utf-8"));
+    if (!Array.isArray(existante) || existante.length || séries.length || saisonADémarré())
+      return res.status(409).json({ erreur: "Importation refusée : une structure existe déjà ou la saison a démarré. La structure actuelle est conservée." });
+    const structure = JSON.parse(fs.readFileSync(cheminSource, "utf-8"));
+    if (!Array.isArray(structure) || !structure.length || structure.some(s => !s || !s.noSérie || !s.typeSérie || !Array.isArray(s.questions) || !s.questions.length))
+      return res.status(400).json({ erreur: "La saison source ne contient pas de structure valide." });
+    const empreinte = crypto.createHash("sha256").update(JSON.stringify([source, destination, structure])).digest("hex");
+    const résumé = { source, destination, nbSéries: structure.length, nbQuestions: structure.reduce((n, s) => n + s.questions.length, 0), empreinte };
+    if (confirmation === undefined) return res.json(résumé);
+    if (confirmation !== empreinte) return res.status(409).json({ erreur: "La structure source a changé. Recommencez l’aperçu." });
+    // Écrire avant de remplacer le fichier pour éviter une structure partielle.
+    fs.writeFileSync(chemin + ".tmp", JSON.stringify(structure, null, 2), "utf-8");
+    fs.renameSync(chemin + ".tmp", chemin);
+    séries.splice(0, séries.length, ...structure);
+    res.json({ succès: true, ...résumé });
+  } catch (e) {
+    console.error("Importation de la structure impossible:", e);
+    res.status(500).json({ erreur: "Impossible d’importer la structure du questionnaire." });
+  }
+});
+
 app.put("/api/admin/series", (req, res) => {
   const nouvelles = req.body;
   if (!Array.isArray(nouvelles) || nouvelles.length === 0)
@@ -612,6 +644,83 @@ app.get("/api/admin/equipes", (_req, res) => {
 
 app.get("/api/admin/joueurs", (_req, res) => {
   res.json(joueurs.filter((j) => !j.estÉquipe));
+});
+
+// Aperçu puis confirmation : revérifier la destination et la source à chaque appel.
+app.post("/api/admin/importer-equipes", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  const { source, destination, confirmation, inclureStructure = false } = req.body || {};
+  if (typeof inclureStructure !== "boolean") return res.status(400).json({ erreur: "Option de structure invalide." });
+  if (typeof source !== "string" || !/^\d{4}-\d{4}$/.test(source) || source >= destination)
+    return res.status(400).json({ erreur: "Choisissez une saison source antérieure à la destination." });
+  if (destination !== saisonActive)
+    return res.status(409).json({ erreur: "La saison active a changé. Rechargez la page." });
+  if (équipes.length || joueurs.length)
+    return res.status(409).json({ erreur: "L’importation nécessite une saison sans équipes ni joueurs." });
+  const dossierSource = path.join(dossierBase, "saisons", source);
+  if (!fs.existsSync(dossierSource)) return res.status(404).json({ erreur: "Saison source introuvable." });
+  try {
+    const cheminStructure = path.join(dossierSaison, "séries.json");
+    let structure = null;
+    let avantStructure;
+    if (inclureStructure) {
+      avantStructure = fs.readFileSync(cheminStructure, "utf-8");
+      const existante = JSON.parse(avantStructure);
+      if (!Array.isArray(existante) || existante.length || séries.length || saisonADémarré())
+        return res.status(409).json({ erreur: "La structure de cette saison est déjà définie ou la saison a démarré. Décochez la copie de structure pour la conserver et importer seulement les équipes." });
+      structure = JSON.parse(fs.readFileSync(path.join(dossierSource, "séries.json"), "utf-8"));
+      if (!Array.isArray(structure) || !structure.length || structure.some(s => !s || !s.noSérie || !s.typeSérie || !Array.isArray(s.questions) || !s.questions.length))
+        return res.status(400).json({ erreur: "La saison source ne contient pas de structure valide." });
+    }
+    const eqSource = JSON.parse(fs.readFileSync(path.join(dossierSource, "équipes.json"), "utf-8"));
+    const jSource = JSON.parse(fs.readFileSync(path.join(dossierSource, "joueurs.json"), "utf-8"));
+    if (!Array.isArray(eqSource) || !eqSource.length || !Array.isArray(jSource))
+      return res.status(400).json({ erreur: "La saison source ne contient pas d’équipes valides." });
+    const ids = new Set();
+    const nouvellesÉquipes = eqSource.map(e => {
+      if (!e || !Number.isInteger(e.noÉquipe) || e.noÉquipe <= 0 || !e.nomÉquipe || ids.has(e.noÉquipe))
+        throw new Error("Équipes sources invalides.");
+      ids.add(e.noÉquipe);
+      return { noÉquipe: e.noÉquipe, nomÉquipe: e.nomÉquipe, prioritéÉgalité: null, son: e.son || "ding_dong" };
+    });
+    const idsJoueurs = new Set();
+    const nouveauxJoueurs = jSource.filter(j => !j?.estÉquipe).map(j => {
+      const id = `${j?.noÉquipe}:${j?.noJoueur}`;
+      if (!j || !ids.has(j.noÉquipe) || !Number.isInteger(j.noJoueur) || j.noJoueur <= 0 || j.noJoueur === 99 || idsJoueurs.has(id))
+        throw new Error("Joueurs sources invalides.");
+      idsJoueurs.add(id);
+      return { noÉquipe: j.noÉquipe, noJoueur: j.noJoueur, alias: j.alias, prénom: j.prénom, nom: j.nom, position: j.position };
+    });
+    const empreinte = crypto.createHash("sha256").update(JSON.stringify([source, destination, nouvellesÉquipes, nouveauxJoueurs, structure])).digest("hex");
+    const résumé = { source, destination, nbÉquipes: nouvellesÉquipes.length, nbJoueurs: nouveauxJoueurs.length, nbSéries: structure?.length || 0, empreinte };
+    if (confirmation === undefined) return res.json(résumé);
+    if (confirmation !== empreinte)
+      return res.status(409).json({ erreur: "La composition source a changé. Recommencez l’aperçu." });
+    const tousJoueurs = [...nouveauxJoueurs, ...nouvellesÉquipes.map(e => ({ noÉquipe: e.noÉquipe, noJoueur: 99, alias: e.nomÉquipe, estÉquipe: true }))];
+    tousJoueurs.sort((a, b) => a.noÉquipe - b.noÉquipe || a.noJoueur - b.noJoueur);
+    const cheminEq = path.join(dossierSaison, "équipes.json");
+    const cheminJ = path.join(dossierSaison, "joueurs.json");
+    const avantEq = fs.readFileSync(cheminEq, "utf-8");
+    const avantJ = fs.readFileSync(cheminJ, "utf-8");
+    try {
+      fs.writeFileSync(cheminEq, JSON.stringify(nouvellesÉquipes, null, 2), "utf-8");
+      fs.writeFileSync(cheminJ, JSON.stringify(tousJoueurs, null, 2), "utf-8");
+      if (structure) fs.writeFileSync(cheminStructure, JSON.stringify(structure, null, 2), "utf-8");
+    } catch (e) {
+      fs.writeFileSync(cheminEq, avantEq, "utf-8");
+      fs.writeFileSync(cheminJ, avantJ, "utf-8");
+      if (structure) fs.writeFileSync(cheminStructure, avantStructure, "utf-8");
+      throw e;
+    }
+    équipes.splice(0, équipes.length, ...nouvellesÉquipes);
+    joueurs.splice(0, joueurs.length, ...tousJoueurs);
+    if (structure) séries.splice(0, séries.length, ...structure);
+    res.json({ succès: true, ...résumé });
+  } catch (e) {
+    console.error("Importation des équipes impossible:", e);
+    res.status(500).json({ erreur: "Importation impossible. Vérifiez les fichiers de la saison source et réessayez." });
+  }
 });
 
 app.put("/api/admin/equipes-joueurs", (req, res) => {
