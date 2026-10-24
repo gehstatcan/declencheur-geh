@@ -7,6 +7,7 @@ public/ressources/parties-import.csv
 
 # Données de jeu — gérées par Railway Volume, ne pas committer
 data/saisons/*/parties/
+data/saisons/*/sauvegardes-corrections/
 data/saisons/*/parties.json
 data/saisons/2025-2026/parties - test.json
 data/saisons/*/questions.json

@@ -518,6 +518,7 @@
         <div class="index-titre">Sections</div>
         <nav id="index-nav">
             <a href="#parties">✏️ Modifier les parties</a>
+            <a href="#resultats">Corriger une partie terminée</a>
             <a href="#calendrier">📅 Importer / exporter le calendrier</a>
             <a href="#questionnaire">📥 Importer un questionnaire</a>
             <a href="#series">📋 Configurer les séries</a>
@@ -528,6 +529,17 @@
     </aside>
 
     <div class="contenu-principal">
+      <section id="resultats" data-section="resultats" style="margin-bottom:24px">
+        <div class="carte carte-large">
+          <h2>Corriger une partie terminée</h2>
+          <p class="info">Choisir le joueur ou l’équipe à créditer pour chaque question. Une question non répondue ne donne aucun point. Les points suivent les règles du questionnaire. Chaque sauvegarde conserve une copie des résultats précédents et met à jour les statistiques, sans modifier les alignements.</p>
+          <button class="bouton bouton-upload" style="width:auto" onclick="listerResultats()">Charger les parties terminées</button>
+          <select id="partie-resultats" class="champ" onchange="chargerResultats()"><option value="">Choisir une partie</option></select>
+          <div id="message-resultats" role="status"></div>
+          <div id="editeur-resultats"></div>
+          <button id="sauver-resultats" class="bouton bouton-vert" style="display:none;width:auto" onclick="sauverResultats()">Sauvegarder les corrections</button>
+        </div>
+      </section>
 
     <!-- Modifier les parties -->
     <div class="carte carte-large" id="parties" data-section>
@@ -932,15 +944,14 @@
         function rendreSérieHTML(s, idx) {
             const détailId = `détail-${idx}`;
             const questionsHTML = s.questions.map((q, qIdx) => {
-                const hasEstÉquipeQ = q.estÉquipe !== undefined;
-                const optEstÉquipe = hasEstÉquipeQ ? `
+                const optEstÉquipe = `
                     <td>
-                        <select class="select-equipe-q" onchange="màjQuestion(${idx},${qIdx},'estÉquipe', this.value === 'null' ? null : this.value === 'true')">
-                            <option value="null" ${q.estÉquipe === null ? 'selected' : ''}>—</option>
+                        <select class="select-equipe-q" onchange="màjQuestion(${idx},${qIdx},'estÉquipe', this.value === 'undefined' ? undefined : this.value === 'true')">
+                            <option value="false" ${q.estÉquipe === false ? 'selected' : ''}>Individuelle</option>
                             <option value="true" ${q.estÉquipe === true ? 'selected' : ''}>Équipe</option>
-                            <option value="false" ${q.estÉquipe === false ? 'selected' : ''}>Indiv.</option>
+                            <option value="undefined" ${q.estÉquipe == null ? 'selected' : ''}>Selon la série</option>
                         </select>
-                    </td>` : '<td></td>';
+                    </td>`;
                 return `<tr>
                     <td style="color:var(--gris);text-align:center">Q${q.noQuestion}</td>
                     <td><input class="input-pts" type="number" min="0" value="${q.points}" oninput="màjQuestion(${idx},${qIdx},'points',+this.value)"></td>
@@ -949,7 +960,6 @@
                     <td><button class="btn-suppr-q" title="Supprimer" onclick="supprimerQuestion(${idx},${qIdx})">✕</button></td>
                 </tr>`;
             }).join('');
-            const hasEstÉquipeQ = s.questions.some(q => q.estÉquipe !== undefined);
 
             return `<div class="série-item">
                 <div class="série-header">
@@ -969,7 +979,7 @@
                             <th style="text-align:center;width:36px">Q</th>
                             <th>Points</th>
                             <th>Pts sec.</th>
-                            <th>${hasEstÉquipeQ ? 'Mode' : ''}</th>
+                            <th>Mode</th>
                             <th></th>
                         </tr></thead>
                         <tbody id="tbody-${idx}">${questionsHTML}</tbody>
@@ -1093,7 +1103,7 @@
                 btn.title = 'Séries existantes verrouillées — ajout de nouvelles séries permis';
                 div.style.display = 'block';
                 div.className = 'avertissement';
-                div.textContent = `🔒 ${statut.nbParties} partie(s) jouée(s) — séries existantes verrouillées. Ajout de nouvelles séries permis.`;
+                div.textContent = `🔒 ${statut.nbParties} partie(s) jouée(s) — points et structure verrouillés. Mode par question et ajout de séries modifiables.`;
             }
         }
 
@@ -1628,6 +1638,7 @@
         document.querySelectorAll('[data-section]').forEach(s => observer.observe(s));
     </script>
 
+<script src="/editeur-parties.js"></script>
 </body>
 
 </html>

@@ -1,5 +1,11 @@
 # Guide d'utilisation — Système GEH Statcan
 
+## Corriger une partie terminée
+
+Dans **admin.html → Corriger une partie terminée**, charger les parties, sélectionner la partie et ouvrir la série concernée. Choisir le joueur ou l’équipe à créditer, ou « Non répondue » pour retirer une réponse. Le menu de points utilise les valeurs normales ou secondaires configurées pour la question. Pour déplacer une réponse, vider la question d’origine puis sélectionner le même répondant à la bonne question.
+
+La sauvegarde affiche les changements à confirmer, conserve les anciens fichiers dans `sauvegardes-corrections/` dans le dossier de la saison, puis met à jour le fichier de la partie et le cumulatif. Les alignements sont conservés. Une partie ouverte dans le marqueur ne peut pas être corrigée; les données modifiées depuis le chargement nécessitent de recharger la partie. Les corrections faites en DEV ne sont pas transférées sur le Volume Railway par un déploiement : les effectuer aussi dans l’administration en production après le déploiement du code.
+
 ## Gestion des fichiers
 
 ### Vue d'ensemble
@@ -25,7 +31,7 @@ Les données du système sont réparties dans `data/saisons/2025-2026/`. Le comp
 
 ### Fichiers gérés par git (référentiels)
 
-`équipes.json`, `séries.json`, `joueurs.json` sont les seuls fichiers **toujours remplacés** au déploiement. Pour les modifier en production, il suffit de les éditer localement et de faire un `git push`.
+Les fichiers administrables, dont `séries.json`, sont copiés seulement si absents du Volume. Un `git push` ne remplace pas les données existantes. Pour corriger le mode d’une question en production : ouvrir admin.html sur Railway, puis Configurer les séries → Détail, choisir le mode et sauvegarder. Le mode par question reste modifiable en cours de saison; les points et la structure restent verrouillés. Le menu offre Individuelle, Équipe et Selon la série. Les réponses déjà enregistrées ne sont pas réécrites; utiliser l’éditeur de parties terminées pour les corriger.
 
 ### Fichiers gérés via admin (calendrier et questionnaires)
 

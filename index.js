@@ -611,13 +611,18 @@ app.put("/api/admin/series", (req, res) => {
       return res.status(400).json({ erreur: `Série ${s.noSérie || "?"} : données incomplètes` });
   }
 
+  for (const s of nouvelles) {
+    if (s.questions.some(q => !q || (q.estÉquipe !== undefined && q.estÉquipe !== null && typeof q.estÉquipe !== "boolean")))
+      return res.status(400).json({ erreur: "Mode par question invalide" });
+  }
   if (saisonADémarré()) {
-    // Autoriser uniquement les ajouts — les séries existantes doivent être identiques
+    // Seul le mode par question peut être corrigé dans les séries existantes.
+    const sansModeQuestion = s => ({ ...s, questions: s.questions.map(({ estÉquipe, ...q }) => q) });
     const nosExistants = new Set(séries.map(s => s.noSérie));
     const modifiées = nouvelles.filter(s => {
       if (!nosExistants.has(s.noSérie)) return false; // nouvelle série, ok
       const ancienne = séries.find(a => a.noSérie === s.noSérie);
-      return JSON.stringify(ancienne) !== JSON.stringify(s);
+      return JSON.stringify(sansModeQuestion(ancienne)) !== JSON.stringify(sansModeQuestion(s));
     });
     const supprimées = séries.filter(a => !nouvelles.some(s => s.noSérie === a.noSérie));
     if (modifiées.length > 0 || supprimées.length > 0) {
@@ -625,7 +630,7 @@ app.put("/api/admin/series", (req, res) => {
         ...modifiées.map(s => `S${s.noSérie} modifiée`),
         ...supprimées.map(s => `S${s.noSérie} supprimée`),
       ].join(', ');
-      return res.status(403).json({ erreur: `Modification impossible en cours de saison — ${détail}. Seuls les ajouts sont permis.` });
+      return res.status(403).json({ erreur: `Modification impossible en cours de saison — ${détail}. Seuls le mode par question et les ajouts sont modifiables.` });
     }
   }
 
@@ -2235,6 +2240,11 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
 // Chaque partie a sa propre room Socket.io : "partie-25", etc.
 // ============================================================
 const étatsParties = {};
+
+require('./editeur-parties')(app, () => ({
+  dossierSaison, saisonActive, parties, séries, joueurs, équipes, étatsParties,
+  auth: req => sessions.has(getCookie(req, 'geh_session')),
+}));
 
 function obtenirÉtat(noPartie) {
   if (!étatsParties[noPartie]) {
