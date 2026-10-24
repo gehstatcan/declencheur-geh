@@ -2380,7 +2380,7 @@ function questionCourante(état) {
     }
   }
 
-  return { série, question, répondantExistant, estÉquipe };
+  return { série, question, répondantExistant, estÉquipe, réplique: état.réplique };
 }
 
 // ============================================================

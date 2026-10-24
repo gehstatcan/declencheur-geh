@@ -532,9 +532,9 @@
                 ✅ 5 pts
             </button>
             <button class="bouton bouton-mauvaise" id="btnMauvaise" onclick="mauvaiseRéponse()">
-                ❌ Mauvaise
+                ↩️ Réplique
             </button>
-            <button class="bouton" style="background:#7f8c8d;" onclick="resetBuzz()">
+            <button class="bouton" style="background:#7f8c8d;" onclick="resetBuzz()" title="Annuler le buzz et le timer sans changer de question. Les deux équipes peuvent buzzer à nouveau; le droit de réplique est annulé.">
                 🔄 Reset
             </button>
         </div>
@@ -584,7 +584,7 @@
                 <input type="checkbox" id="timerActif" onchange="toggleTimer()" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
                 ⏱️ Reset auto après
             </label>
-            <input type="number" id="timerSecondes" value="5" min="1" max="30" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; font-weight:600; text-align:center;">
+            <input type="number" id="timerSecondes" value="5" min="1" max="60" oninput="modifierDélaiTimer()" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; font-weight:600; text-align:center;">
             <span style="font-size:0.9em; font-weight:600; color:var(--blanc);">sec</span>
             <span id="timerAffichage" style="font-size:0.9em; color:var(--accent); font-weight:700; min-width:24px;"></span>
         </div>
@@ -636,6 +636,7 @@
         let derniersJoueursConnectés = [];
         let timerReset = null;
         let timerInterval = null;
+        let timerModifié = false;
         let positionsAléatoires = false;
         let afficherTempsRéaction = false;
 
@@ -815,6 +816,9 @@
         });
 
         socket.on('reset', () => {
+            annulerTimer();
+            répliqueEnCours = false;
+            actualiserBoutonMauvaise();
             joueurAyantBuzzé = null;
             afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
             const buzzer = document.getElementById('buzzer');
@@ -824,6 +828,9 @@
         });
 
         socket.on('réplique', (noÉquipe) => {
+            annulerTimer();
+            répliqueEnCours = true;
+            actualiserBoutonMauvaise();
             joueurAyantBuzzé = null;
             afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
             const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
@@ -841,6 +848,7 @@
         });
 
         socket.on('questionMisÀJour', (info) => {
+            annulerTimer();
             if (info) {
                 if (modeActuel === 'jeu') jouerSonParId('avance_question');
                 afficherInfoQuestion(info);
@@ -904,6 +912,7 @@
 
         function buzzManuel(noÉquipe, noJoueur, alias, nomÉquipe) {
             if (modeActuel !== 'jeu') return;
+            annulerTimer();
             joueurAyantBuzzé = { noÉquipe, noJoueur, alias, nomÉquipe };
             jouerSon(noÉquipe);
             const buzzer = document.getElementById('buzzer');
@@ -920,6 +929,18 @@
             document.getElementById('btnSecondaire').style.display =
                 (question && question.pointsSecondaires > 0) ? 'inline-block' : 'none';
             document.getElementById('boutonsPoints').style.display = 'block';
+        }
+
+        let répliqueEnCours = false;
+
+        function actualiserBoutonMauvaise() {
+            const { série } = obtenirQuestionCourante();
+            const répliquePossible = série?.réplique && !répliqueEnCours;
+            const bouton = document.getElementById('btnMauvaise');
+            bouton.textContent = répliquePossible ? '↩️ Réplique' : '➡️ Question suivante';
+            bouton.title = répliquePossible
+                ? 'Réponse incorrecte : donner la réplique à l’équipe adverse'
+                : 'Réponse incorrecte : passer à la question suivante';
         }
 
         function mauvaiseRéponse() {
@@ -940,10 +961,20 @@
             if (!document.getElementById('timerActif').checked) annulerTimer();
         }
 
+        function modifierDélaiTimer() {
+            timerModifié = true;
+            const secondes = Number(document.getElementById('timerSecondes').value);
+            if (!Number.isInteger(secondes) || secondes < 1 || secondes > 60) return;
+            // Repartir avec la nouvelle durée remplace le délai déjà programmé.
+            if (timerReset !== null) démarrerTimer();
+        }
+
         function démarrerTimer() {
-            if (!document.getElementById('timerActif').checked) return;
             annulerTimer();
-            let secondes = parseInt(document.getElementById('timerSecondes').value) || 5;
+            if (!document.getElementById('timerActif').checked) return;
+            const durée = Math.min(60, Math.max(1, parseInt(document.getElementById('timerSecondes').value) || 5));
+            document.getElementById('timerSecondes').value = durée;
+            let secondes = durée;
             const affichage = document.getElementById('timerAffichage');
             affichage.textContent = secondes;
             timerInterval = setInterval(() => {
@@ -958,7 +989,7 @@
                 jouerSonParId('falldown');
                 annulerTimer();
                 resetBuzz();
-            }, (parseInt(document.getElementById('timerSecondes').value) || 5) * 1000);
+            }, durée * 1000);
         }
 
         function annulerTimer() {
@@ -1067,6 +1098,8 @@
 
         function afficherInfoQuestion(info) {
             questionCouranteInfo = info;
+            répliqueEnCours = info.réplique != null;
+            actualiserBoutonMauvaise();
             const { série, question, répondantExistant, estÉquipe } = info;
             if (!série || !question) return;
 
@@ -1236,7 +1269,7 @@
 
             // Lire le timer par défaut depuis la config
             const config = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
-            if (config.timerDéfaut) document.getElementById('timerSecondes').value = config.timerDéfaut;
+            if (config.timerDéfaut && !timerModifié && timerReset === null) document.getElementById('timerSecondes').value = config.timerDéfaut;
 
             const partiesJouées = await fetch('/api/parties/jouees').then(r => r.json());
             const jouéesSet = new Set(partiesJouées);
