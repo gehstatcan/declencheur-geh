@@ -4,6 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 
 module.exports = function installerEditeur(app, contexte) {
+  // Relire le contexte à chaque demande : la saison active peut changer sans redémarrage.
   const empreinte = données => crypto.createHash('sha256').update(JSON.stringify(données)).digest('hex');
   function lire(noPartie) {
     const c = contexte();
@@ -40,6 +41,8 @@ module.exports = function installerEditeur(app, contexte) {
     let c;
     try {
       c = lire(Number(req.params.numero));
+      // L’empreinte représente les données vues au chargement de l’éditeur.
+      // Refuser une copie périmée évite d’écraser une correction faite entre-temps.
       if (req.body.saison !== c.saisonActive || req.body.version !== c.version)
         return res.status(409).json({ erreur: 'Les données ont changé. Rechargez la partie avant de recommencer.' });
       const réponses = req.body.réponses;
@@ -57,16 +60,21 @@ module.exports = function installerEditeur(app, contexte) {
       }
       réponses.sort((a, b) => a.noSérie - b.noSérie || a.noQuestion - b.noQuestion);
       const fusion = [...c.cumul.filter(r => r.noPartie !== c.partie.noPartie), ...réponses].sort((a, b) => a.noPartie - b.noPartie || a.noSérie - b.noSérie || a.noQuestion - b.noQuestion);
+      // Remplacer seulement cette partie dans le cumul; conserver les autres parties.
+      // Les alignements ne sont jamais réécrits par cet éditeur.
       const sauvegarde = path.join(c.dossierSaison, 'sauvegardes-corrections', `${Date.now()}-${crypto.randomUUID()}`);
       fs.mkdirSync(sauvegarde, { recursive: true });
       const cheminPartie = path.join(c.dossierSaison, c.nom);
       const cheminCumul = path.join(c.dossierSaison, 'répondants.json');
       const originalCumul = fs.readFileSync(cheminCumul);
+      // Sauvegarder les originaux et le détail avant/après avant toute modification.
       const originalPartie = c.fichierExiste ? fs.readFileSync(cheminPartie) : null;
       fs.writeFileSync(path.join(sauvegarde, 'répondants.json'), originalCumul);
       if (originalPartie) fs.writeFileSync(path.join(sauvegarde, `répondants-${c.partie.noPartie}.json`), originalPartie);
       fs.writeFileSync(path.join(sauvegarde, 'correction.json'), JSON.stringify({ saison: c.saisonActive, noPartie: c.partie.noPartie, date: new Date().toISOString(), avant: c.réponses, après: réponses }, null, 2));
       try {
+        // Préparer les fichiers complets avant de les substituer aux fichiers existants.
+        // Chaque renommage est distinct : le catch restaure les originaux en cas d’erreur.
         fs.writeFileSync(cheminPartie + '.tmp', JSON.stringify(réponses, null, 2));
         fs.writeFileSync(cheminCumul + '.tmp', JSON.stringify(fusion, null, 2));
         fs.renameSync(cheminPartie + '.tmp', cheminPartie);
@@ -77,6 +85,7 @@ module.exports = function installerEditeur(app, contexte) {
         else if (fs.existsSync(cheminPartie)) fs.unlinkSync(cheminPartie);
         throw e;
       }
+      // Oublier les anciens scores en mémoire; une reprise les relira depuis les fichiers.
       delete c.étatsParties[c.partie.noPartie];
       res.json({ succès: true, sauvegarde: path.basename(sauvegarde) });
     } catch (e) { res.status(400).json({ erreur: e.message }); }

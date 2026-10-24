@@ -331,7 +331,7 @@
         <img src="/ampouleQuiz.png" alt="Logo Génie en Herbe" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — Statcan</h1>
     </header>
-    <p style="text-align:center;margin:12px 0 20px"><a href="pratique.html" style="color:inherit;font-weight:600">Rejoindre la pratique — Math ou Matique</a></p>
+    <p id="lienPratique" style="text-align:center;margin:12px 0 20px"><a href="pratique.html" style="color:inherit;font-weight:600">Rejoindre la pratique — Math ou Matique</a></p>
 
     <!-- Statut — aria-live pour lecteurs d'écran -->
     <div id="statut" role="status" aria-live="polite">
@@ -498,6 +498,9 @@
         // Passer en mode jeu — cacher inscription, montrer BUZZ
         // ============================================================
         function passerEnModeJeu() {
+            // Garder le joueur sur les commandes de sa partie; le lien pratique
+            // réapparaît lorsqu’il revient à l’inscription.
+            document.getElementById('lienPratique').hidden = true;
             document.getElementById('zoneInscription').style.display = 'none';
             document.getElementById('zoneJeu').style.display = 'flex';
             document.getElementById('boutonBuzz').style.display = 'block';
@@ -514,6 +517,7 @@
         // Passer en mode inscription
         // ============================================================
         function passerEnModeInscription() {
+            document.getElementById('lienPratique').hidden = false;
             document.getElementById("zoneInscription").style.display = "flex";
             document.getElementById("zoneJeu").style.display = "none";
         }

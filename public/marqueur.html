@@ -559,7 +559,8 @@
             <button class="bouton bouton-action" onclick="sérieSuivante()">
                 Série suivante ⏭️
             </button>
-            <br>
+        </div>
+        <div style="text-align:center; margin-top:32px; padding-top:24px; border-top:1px solid var(--gris);">
             <button class="bouton bouton-orange" onclick="réinitialiser()">
                 🔄 Retour initialisation
             </button>
@@ -569,6 +570,8 @@
         </div>
 
         <!-- Toggles : pts/joueur et temps de réaction -->
+        <div style="margin-top:28px; padding-top:20px; border-top:1px solid var(--gris);">
+        <h3 style="text-align:center; margin:0 0 16px;">Réglages du marqueur</h3>
         <div style="text-align:center; margin-top:8px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
             <button id="btnPtsJoueurs" class="bouton" style="background:var(--fond-champ); color:var(--blanc); font-size:0.85em; font-weight:600; padding:6px 16px;" onclick="togglePtsJoueurs()">
                 📊 Afficher pts/joueur
@@ -582,10 +585,11 @@
         <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
             <label style="display:flex; align-items:center; gap:6px; font-size:0.9em; font-weight:600; color:var(--blanc); cursor:pointer;">
                 <input type="checkbox" id="timerActif" onchange="toggleTimer()" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
-                ⏱️ Reset auto après
+                ⏱️ Signal sonore après
             </label>
             <input type="number" id="timerSecondes" value="5" min="1" max="60" oninput="modifierDélaiTimer()" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; font-weight:600; text-align:center;">
             <span style="font-size:0.9em; font-weight:600; color:var(--blanc);">sec</span>
+            <span style="font-size:0.9em;">+ <span id="timerGrâceTexte">3</span> sec de grâce avant reset</span>
             <span id="timerAffichage" style="font-size:0.9em; color:var(--accent); font-weight:700; min-width:24px;"></span>
         </div>
 
@@ -602,6 +606,7 @@
 
     </div>
 
+    </div>
     <div id="zoneTéléchargement" style="margin-top:16px; display:none;">
         <button class="bouton" style="background:#2980b9;" onclick="téléchargerPartie()">
             💾 Télécharger partie en cours
@@ -636,6 +641,9 @@
         let derniersJoueursConnectés = [];
         let timerReset = null;
         let timerInterval = null;
+        // Deux phases : temps de réponse (son), puis grâce (boutons encore disponibles).
+        // timerReset et timerInterval sont réutilisés pour la phase courante.
+        let timerGrâce = 3;
         let timerModifié = false;
         let positionsAléatoires = false;
         let afficherTempsRéaction = false;
@@ -934,6 +942,8 @@
         let répliqueEnCours = false;
 
         function actualiserBoutonMauvaise() {
+            // Annoncer l’action réelle du bouton : réplique adverse ou question suivante.
+            // La décision et le changement de question restent gérés par le serveur.
             const { série } = obtenirQuestionCourante();
             const répliquePossible = série?.réplique && !répliqueEnCours;
             const bouton = document.getElementById('btnMauvaise');
@@ -970,6 +980,7 @@
         }
 
         function démarrerTimer() {
+            // Toujours supprimer les tâches précédentes pour éviter un ancien son/reset.
             annulerTimer();
             if (!document.getElementById('timerActif').checked) return;
             const durée = Math.min(60, Math.max(1, parseInt(document.getElementById('timerSecondes').value) || 5));
@@ -986,13 +997,24 @@
                 }
             }, 1000);
             timerReset = setTimeout(() => {
+                // Fin du temps de réponse : jouer le signal sans retirer le répondant.
+                // L’animateur peut encore valider une réponse pendant la grâce.
                 jouerSonParId('falldown');
                 annulerTimer();
-                resetBuzz();
+                if (timerGrâce === 0) { resetBuzz(); return; }
+                let grâceRestante = timerGrâce;
+                affichage.textContent = `Grâce : ${grâceRestante} s`;
+                timerInterval = setInterval(() => {
+                    grâceRestante--;
+                    affichage.textContent = `Grâce : ${Math.max(0, grâceRestante)} s`;
+                }, 1000);
+                timerReset = setTimeout(() => resetBuzz(), timerGrâce * 1000);
             }, durée * 1000);
         }
 
         function annulerTimer() {
+            // Annule aussi bien le temps de réponse que la grâce : points, réplique,
+            // reset ou changement de question ne doivent laisser aucune tâche en attente.
             clearTimeout(timerReset);
             clearInterval(timerInterval);
             timerReset = null;
@@ -1269,6 +1291,10 @@
 
             // Lire le timer par défaut depuis la config
             const config = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
+            // Charger les réglages admin une fois. Ne pas écraser un délai déjà saisi
+            // par l’animateur pendant que les requêtes de chargement étaient en cours.
+            timerGrâce = Number.isInteger(config.timerGrâce) && config.timerGrâce >= 0 && config.timerGrâce <= 30 ? config.timerGrâce : 3;
+            document.getElementById('timerGrâceTexte').textContent = timerGrâce;
             if (config.timerDéfaut && !timerModifié && timerReset === null) document.getElementById('timerSecondes').value = config.timerDéfaut;
 
             const partiesJouées = await fetch('/api/parties/jouees').then(r => r.json());

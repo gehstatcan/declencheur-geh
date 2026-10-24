@@ -708,14 +708,17 @@
         <h2>⚙️ Réglages du marqueur</h2>
 
         <div class="carte">
-          <h3>⏱️ Délai de réinitialisation automatique du buzzer</h3>
+          <h3>⏱️ Temps de réponse et délai de grâce</h3>
           <p class="info">Durée (en secondes) pré-remplie dans le timer de la page Marqueur. L'animateur peut la modifier en cours de partie.</p>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
+            <label for="timerDéfaut">Signal sonore après</label>
             <input type="number" id="timerDéfaut" class="champ" min="1" max="60" value="5" style="width:80px;text-align:center;">
             <span style="font-size:0.9em;color:var(--texte-gris);">secondes</span>
             <button class="bouton bouton-vert" style="width:auto" onclick="sauvegarderConfig()">✅ Sauvegarder</button>
           </div>
           <div id="msg-config" style="margin-top:12px"></div>
+          <p class="info"><label for="timerGrâce">Délai de grâce après le signal sonore :</label>
+            <input type="number" id="timerGrâce" class="champ" min="0" max="30" value="3" style="width:80px;text-align:center;"> secondes avant le reset. Les boutons de points restent disponibles pendant ce délai.</p>
         </div>
 
       </div>
@@ -733,14 +736,22 @@
         async function chargerConfig() {
             const config = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
             if (config.timerDéfaut) document.getElementById('timerDéfaut').value = config.timerDéfaut;
+            document.getElementById('timerGrâce').value = config.timerGrâce ?? 3;
         }
 
         async function sauvegarderConfig() {
+            // Enregistrer les deux durées séparément : le son marque l’expiration,
+            // et la grâce laisse ensuite à l’animateur le temps d’attribuer les points.
             const timerDéfaut = parseInt(document.getElementById('timerDéfaut').value) || 5;
+            const timerGrâce = Number(document.getElementById('timerGrâce').value);
+            if (!Number.isInteger(timerGrâce) || timerGrâce < 0 || timerGrâce > 30) {
+                document.getElementById('msg-config').textContent = 'Choisissez un délai de grâce entre 0 et 30 secondes.';
+                return;
+            }
             const r = await fetch('/api/config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ timerDéfaut })
+                body: JSON.stringify({ timerDéfaut, timerGrâce })
             });
             const msg = document.getElementById('msg-config');
             if (r.ok) {

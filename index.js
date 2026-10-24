@@ -900,10 +900,14 @@ app.get("/api/sauvegarde-zip", (_req, res) => {
 const cheminConfig = path.join(dossierBase, "config.json");
 
 function lireConfig() {
+  // Compléter les anciens config.json qui n’avaient pas encore de délai de grâce.
+  // Les valeurs enregistrées passent après les valeurs par défaut et les remplacent.
   try {
-    if (fs.existsSync(cheminConfig)) return JSON.parse(fs.readFileSync(cheminConfig, "utf-8"));
+    if (fs.existsSync(cheminConfig)) return { timerGrâce: 3, ...JSON.parse(fs.readFileSync(cheminConfig, "utf-8")) };
   } catch (e) { /* ignore */ }
-  return { timerDéfaut: 5 };
+  // Sans fichier lisible : signal après 5 s, puis reset 3 s plus tard.
+  // Le serveur fournit ces réglages; le compte à rebours s’exécute dans marqueur.html.
+  return { timerDéfaut: 5, timerGrâce: 3 };
 }
 
 app.get("/api/config", (_req, res) => {
@@ -914,6 +918,8 @@ app.post("/api/config", (req, res) => {
   const token = getCookie(req, "geh_session");
   if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
   const config = { ...lireConfig(), ...req.body };
+  if (!Number.isInteger(config.timerGrâce) || config.timerGrâce < 0 || config.timerGrâce > 30)
+    return res.status(400).json({ erreur: "Le délai de grâce doit être un entier entre 0 et 30 secondes." });
   fs.writeFileSync(cheminConfig, JSON.stringify(config, null, 2), "utf-8");
   res.json({ succès: true, config });
 });
