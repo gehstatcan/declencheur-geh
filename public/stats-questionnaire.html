@@ -71,11 +71,21 @@
         }
         contenu.innerHTML = (data.séries || []).map(s => `<h3 class="series">Série #${s.noSérie}${s.thème ? ` — ${esc(s.thème)}` : ''}${s.sousThème ? ` (${esc(s.sousThème)})` : ''}</h3><div class="table-wrap"><table><thead><tr><th># série</th><th># question</th><th>Question</th><th>Réponse</th><th>Parties jouées — répondants et tentatives</th></tr></thead><tbody>${(s.questions || []).map(q => {
           const matches = q.parties.map(p => {
+            const indexDroitRéplique = p.tentatives.findIndex(x => x.type === 'droit-replique');
+            const tentatives = p.tentatives
+              .map((x, index) => ({ ...x, genre: x.type || 'tentative-incorrecte', ordreTentative: index }))
+              .filter((x, index, liste) =>
+                x.genre !== 'droit-replique' || liste.findIndex(y => y.genre === 'droit-replique') === index
+              );
             const événements = [
               ...p.réponses.map(x => ({ ...x, genre: 'réponse' })),
-              ...p.tentatives.map(x => ({ ...x, genre: x.type }))
+              ...tentatives
             ].map((x, index) => ({ ...x, index })).sort((a, b) => {
-              const étape = x => x.genre === 'droit-replique' ? 1 : x.enRéplique ? 2 : 0;
+              const étape = x => {
+                if (x.genre === 'droit-replique') return 1;
+                if (x.enRéplique || (indexDroitRéplique >= 0 && (x.genre === 'réponse' || x.ordreTentative > indexDroitRéplique))) return 2;
+                return 0;
+              };
               const ordreÉtape = étape(a) - étape(b);
               if (ordreÉtape) return ordreÉtape;
               const tempsA = Date.parse(a.date);
@@ -86,9 +96,9 @@
               return tempsA - tempsB || a.index - b.index;
             });
             const lignes = événements.map(x => {
-              if (x.genre === 'réponse') return `<div class="${x.enRéplique === null ? 'inconnu' : 'bonne'}">✓ <strong>${esc(x.répondant)}</strong>${x.enRéplique === null ? '' : x.enRéplique ? ' · bonne réponse en réplique' : ' · bonne réponse sans réplique'}</div>`;
+              if (x.genre === 'réponse') return `<div class="bonne">✓ <strong>${esc(x.répondant)}</strong></div>`;
               if (x.genre === 'droit-replique') return '<div class="mauvaise">↩ Droit de réplique</div>';
-              return `<div class="mauvaise">✗ <strong>${esc(x.répondant)}</strong> · ${x.enRéplique ? 'tentative incorrecte en réplique' : 'tentative incorrecte'}</div>`;
+              return `<div class="mauvaise">✗ <strong>${esc(x.répondant)}</strong></div>`;
             });
             return `<div class="partie"><div class="partie-titre">Partie #${p.noPartie}</div>${lignes.length ? lignes.join('') : '<div class="inconnu">—</div>'}</div>`;
           }).join('');

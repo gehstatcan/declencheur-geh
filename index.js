@@ -1045,6 +1045,7 @@ app.get("/api/stats/questionnaire/:noQuestionnaire", (req, res) => {
     const répondants = lire("répondants.json");
     const équipes = lire("équipes.json");
     const joueurs = lire("joueurs.json");
+    const sériesConfig = getSériesStats(ds);
     const questionnaires = lire("questions.json");
     const thèmesData = lire("thèmes.json");
     const questionnaire = questionnaires.find(q => q.noQuestionnaire === noQuestionnaire);
@@ -1054,30 +1055,55 @@ app.get("/api/stats/questionnaire/:noQuestionnaire", (req, res) => {
     if (nonJouées.length) return res.status(403).json({ erreur: "Les résultats seront accessibles lorsque toutes les parties utilisant ce questionnaire auront été jouées." });
     const partiesQuestionnaire = toutesPartiesQuestionnaire;
     const réponsesQuestionnaire = répondants.filter(r => partiesQuestionnaire.some(p => p.noPartie === r.noPartie));
-    const statutRépliqueComplet = réponsesQuestionnaire.length > 0 && réponsesQuestionnaire.every(r => typeof r.enRéplique === "boolean");
+    // Les anciens répondants sans champ enRéplique sont inférés à partir des événements de droit de réplique par question.
+    const statutRépliqueComplet = true;
     const nomÉquipe = no => équipes.find(e => e.noÉquipe === no)?.nomÉquipe || `Équipe ${no}`;
+    const nomJoueur = (noÉquipe, noJoueur) => {
+      const joueur = joueurs.find(j => j.noÉquipe === noÉquipe && j.noJoueur === noJoueur);
+      return joueur ? [joueur.alias, joueur.nom].filter(Boolean).join(" ") : `Joueur ${noJoueur}`;
+    };
     const nomRépondant = r => r.noJoueur === 99
       ? `Équipe (${nomÉquipe(r.noÉquipe)})`
-      : joueurs.find(j => j.noÉquipe === r.noÉquipe && j.noJoueur === r.noJoueur)?.alias || `Joueur ${r.noJoueur}`;
+      : nomJoueur(r.noÉquipe, r.noJoueur);
     const tentativesParPartie = new Map(partiesQuestionnaire.map(p => [p.noPartie, lire(path.join("parties", `tentatives-${p.noPartie}.json`))]));
-    const séries = (questionnaire.séries || []).map(s => {
+    const séries = (questionnaire.séries || []).filter(s => {
+      const configSérie = sériesConfig.find(x => x.noSérie === s.noSérie);
+      if (!configSérie?.estProlongation) return true;
+      const sérieJouée = répondants.some(r =>
+        partiesQuestionnaire.some(p => p.noPartie === r.noPartie) && r.noSérie === s.noSérie
+      );
+      const enSaisonRégulière = partiesQuestionnaire.some(p => (p.phase || "saison") === "saison");
+      return sérieJouée || !enSaisonRégulière;
+    }).map(s => {
       const thème = thèmesData.find(t => t.noQuestionnaire === noQuestionnaire)?.séries?.find(t => t.noSérie === s.noSérie);
       return {
         noSérie: s.noSérie, thème: thème?.thème || "", sousThème: thème?.sousThème || "",
-        questions: (s.questions || []).map(q => ({
+        questions: (s.questions || []).map(q => {
+          const configSérie = sériesConfig.find(x => x.noSérie === s.noSérie);
+          const configQuestion = configSérie?.questions.find(x => x.noQuestion === q.noQuestion);
+          return ({
           noQuestion: q.noQuestion, texte: q.texte, réponse: q.réponse,
           parties: partiesQuestionnaire.map(p => {
             const tentatives = tentativesParPartie.get(p.noPartie) || [];
             const réponses = répondants.filter(r => r.noPartie === p.noPartie && r.noSérie === s.noSérie && r.noQuestion === q.noQuestion);
             const tentativesQ = tentatives.filter(t => t.noSérie === s.noSérie && t.noQuestion === q.noQuestion);
+            const estÉquipe = configQuestion?.estÉquipe === null
+              ? répondants.some(r => r.noPartie === p.noPartie && r.noSérie === s.noSérie && r.noQuestion === 1) || réponses.some(r => r.noJoueur === 99) || tentativesQ.some(t => t.noJoueur === 99)
+              : (configQuestion?.estÉquipe ?? configSérie?.estÉquipe ?? false);
             return {
               noPartie: p.noPartie, date: p.date || "",
               équipeA: nomÉquipe(p.noÉquipeA), équipeB: nomÉquipe(p.noÉquipeB),
-              réponses: réponses.map(r => ({ équipe: nomÉquipe(r.noÉquipe), répondant: nomRépondant(r), enRéplique: typeof r.enRéplique === "boolean" ? r.enRéplique : null, pointsSecondaires: !!r.pointsSecondaires })),
-              tentatives: tentativesQ.map(t => ({ type: t.type || "tentative-incorrecte", équipe: nomÉquipe(t.noÉquipe), répondant: t.noJoueur == null ? "Identité non enregistrée" : (t.noJoueur === 99 ? `Équipe (${nomÉquipe(t.noÉquipe)})` : joueurs.find(j => j.noÉquipe === t.noÉquipe && j.noJoueur === t.noJoueur)?.alias || `Joueur ${t.noJoueur}`), enRéplique: !!t.enRéplique, date: t.date || null }))
+              réponses: réponses.map(r => {
+                const enRéplique = typeof r.enRéplique === "boolean"
+                  ? r.enRéplique
+                  : tentativesQ.some(t => t.type === "droit-replique" && t.noÉquipe === r.noÉquipe);
+                return { équipe: nomÉquipe(r.noÉquipe), répondant: nomRépondant(r), enRéplique, pointsSecondaires: !!r.pointsSecondaires };
+              }),
+              tentatives: tentativesQ.map(t => ({ type: t.type || "tentative-incorrecte", équipe: nomÉquipe(t.noÉquipe), répondant: estÉquipe ? nomÉquipe(t.noÉquipe) : (t.noJoueur == null ? "Identité non enregistrée" : (t.noJoueur === 99 ? nomÉquipe(t.noÉquipe) : nomJoueur(t.noÉquipe, t.noJoueur))), enRéplique: !!t.enRéplique, date: t.date || null }))
             };
           })
-        }))
+        })
+        })
       };
     });
     res.set("Cache-Control", "no-store").json({ noQuestionnaire, nbParties: partiesQuestionnaire.length, statutRépliqueComplet, parties: partiesQuestionnaire.map(p => ({ noPartie: p.noPartie, date: p.date || "" })), séries });
@@ -1324,7 +1350,6 @@ app.get("/api/stats/classement", (req, res) => {
 
     // Calculer le % et trier: % desc → prioritéÉgalité asc (null en dernier) → diff desc
     const résultat = Object.values(classement)
-      .filter((c) => c.MJ > 0)
       .map((c) => ({
         ...c,
         pct:
@@ -1332,6 +1357,7 @@ app.get("/api/stats/classement", (req, res) => {
         diff: c.ptsMarqués - c.ptsSubis,
       }))
       .sort((a, b) => {
+        if ((a.MJ === 0) !== (b.MJ === 0)) return a.MJ === 0 ? 1 : -1;
         if (b.pct !== a.pct) return b.pct - a.pct;
         const pa = a.prioritéÉgalité ?? Infinity;
         const pb = b.prioritéÉgalité ?? Infinity;
@@ -2498,7 +2524,7 @@ function enregistrerRépondant(
   état,
   répondants,
   cheminPartie,
-  { noÉquipe, noJoueur, points, estSecondaire },
+  { noÉquipe, noJoueur, points, estSecondaire, sansRéplique = false },
 ) {
   if (!état.scores[noÉquipe]) état.scores[noÉquipe] = 0;
   état.scores[noÉquipe] += points;
@@ -2513,7 +2539,7 @@ function enregistrerRépondant(
     noJoueur,
     noÉquipe,
     pointsSecondaires: estSecondaire,
-    enRéplique: état.réplique !== null,
+    enRéplique: !sansRéplique && état.réplique !== null,
   });
 
   répondants.sort((a, b) => {
@@ -2835,7 +2861,7 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   // Bonne réponse — attribuer les points
   // --------------------------------------------------------
-  socket.on("attribuerPoints", ({ noPartie, noÉquipe, noJoueur, points, estSecondaire }) => {
+  socket.on("attribuerPoints", ({ noPartie, noÉquipe, noJoueur, points, estSecondaire, sansRéplique = false }) => {
     const état = obtenirÉtat(noPartie);
 
     // Si mode équipe, les points vont à noJoueur = 99
@@ -2870,6 +2896,7 @@ io.on("connection", (socket) => {
         noJoueur: noJoueurFinal, // ← utiliser noJoueurFinal
         points,
         ancienRépondant: répondants[indexDoublon],
+        sansRéplique,
       });
       return;
     }
@@ -2879,6 +2906,7 @@ io.on("connection", (socket) => {
       noJoueur: noJoueurFinal,
       points,
       estSecondaire: estSecondaire || false,
+      sansRéplique,
     });
   });
 
@@ -2889,7 +2917,7 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on(
     "confirmerÉcrasement",
-    ({ noPartie, noÉquipe, noJoueur, points, estSecondaire }) => {
+    ({ noPartie, noÉquipe, noJoueur, points, estSecondaire, sansRéplique = false }) => {
       const état = obtenirÉtat(noPartie);
       const cheminPartie = path.join(
         dossierSaison,
@@ -2951,6 +2979,7 @@ io.on("connection", (socket) => {
         noJoueur,
         points,
         estSecondaire: estSecondaire || false,
+        sansRéplique,
       });
     },
   );
@@ -2960,8 +2989,9 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on("mauvaiseRéponse", ({ noPartie, noÉquipe, noJoueur }) => {
     const état = obtenirÉtat(noPartie);
-    const { série } = questionCourante(état);
-    enregistrerÉvénementQuestion(état, { type: "tentative-incorrecte", noÉquipe, noJoueur: Number.isInteger(noJoueur) ? noJoueur : null, enRéplique: état.réplique !== null });
+    const { série, estÉquipe } = questionCourante(état);
+    const noJoueurFinal = estÉquipe ? 99 : (Number.isInteger(noJoueur) ? noJoueur : null);
+    enregistrerÉvénementQuestion(état, { type: "tentative-incorrecte", noÉquipe, noJoueur: noJoueurFinal, enRéplique: état.réplique !== null });
 
     if (série.réplique && état.réplique === null) {
       // Première mauvaise réponse — donner le droit de réplique à l'équipe adverse
@@ -3131,6 +3161,15 @@ io.on("connection", (socket) => {
     try {
       const contenuPartie = fs.readFileSync(cheminPartie, "utf-8").trim();
       const répondantsPartie = contenuPartie ? JSON.parse(contenuPartie) : [];
+      let tentativesPartie = [];
+      try {
+        const contenuTentatives = fs.readFileSync(path.join(dossierSaison, "parties", `tentatives-${noPartie}.json`), "utf-8").trim();
+        tentativesPartie = contenuTentatives ? JSON.parse(contenuTentatives) : [];
+      } catch (e) {}
+      const joueursAyantJoué = new Set([
+        ...répondantsPartie.filter((r) => r.noJoueur !== 99).map((r) => `${r.noÉquipe}_${r.noJoueur}`),
+        ...tentativesPartie.filter((t) => Number.isInteger(t.noJoueur) && t.noJoueur !== 99).map((t) => `${t.noÉquipe}_${t.noJoueur}`),
+      ]);
 
       let répondantsCumulatifs = [];
       try {
@@ -3237,6 +3276,7 @@ io.on("connection", (socket) => {
                 points: ptsJoueur,
               };
             })
+            .filter((j) => joueursAyantJoué.has(`${noÉq}_${j.noJoueur}`))
             .sort((a, b) => b.points - a.points);
 
           // Ajouter les points collectifs si > 0

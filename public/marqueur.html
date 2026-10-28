@@ -493,6 +493,7 @@
         <div id="bannièreSauvegarde" style="display:none; margin-top:16px; background:#1a5276; color:white; border-radius:12px; padding:16px 20px; text-align:center;">
             <div style="font-size:1.1em; font-weight:600; margin-bottom:8px;">✅ Partie terminée</div>
             <div style="font-size:0.9em; margin-bottom:12px; opacity:0.9;">Pensez à sauvegarder vos données.</div>
+            <div id="résuméFinPartie" style="text-align:left; margin:12px auto; max-width:560px;"></div>
             <a href="/api/sauvegarde-zip" class="bouton" style="background:white; color:#1a5276; display:inline-block; text-decoration:none;">⬇️ Télécharger la sauvegarde ZIP</a>
         </div>
     </div>
@@ -639,6 +640,7 @@
         let partieActuelle = null;
         let joueurAyantBuzzé = null;
         let modeActuel = 'initialisation';
+        let partieTerminee = false;
         let derniersScores = {};
         let derniersScoresJoueurs = {};
         let afficherPtsJoueurs = false;
@@ -706,6 +708,7 @@
         // Réception état global
         socket.on('état', (état) => {
             modeActuel = état.mode;
+            partieTerminee = état.mode === 'terminée';
             derniersScores = état.scores || {};
             derniersScoresJoueurs = état.scoresJoueurs || {};
             derniersJoueursConnectés = état.joueursConnectés || []; // Sauvegarder les joueurs connectés reçus du serveur
@@ -804,7 +807,7 @@
         // Demande de confirmation à l'animateur quand une question
         // a déjà une réponse enregistrée — évite les doublons
         // ============================================================
-        socket.on('confirmerÉcrasement', ({ noÉquipe, noJoueur, points, estSecondaire, ancienRépondant }) => {
+        socket.on('confirmerÉcrasement', ({ noÉquipe, noJoueur, points, estSecondaire, ancienRépondant, sansRéplique = false }) => {
             const équipe = toutesÉquipes.find(e => e.noÉquipe === ancienRépondant.noÉquipe);
             const nomÉquipe = équipe ? équipe.nomÉquipe : `Équipe ${ancienRépondant.noÉquipe}`;
 
@@ -827,7 +830,7 @@
             );
 
             if (confirmer) {
-                socket.emit('confirmerÉcrasement', { noPartie: partieActuelle, noÉquipe, noJoueur, points, estSecondaire });
+                socket.emit('confirmerÉcrasement', { noPartie: partieActuelle, noÉquipe, noJoueur, points, estSecondaire, sansRéplique });
             }
         });
 
@@ -924,14 +927,15 @@
                 noÉquipe: joueurAyantBuzzé.noÉquipe,
                 noJoueur: joueurAyantBuzzé.noJoueur,
                 points,
-                estSecondaire
+                estSecondaire,
+                sansRéplique: !!joueurAyantBuzzé.attributionManuelle
             });
         }
 
         function buzzManuel(noÉquipe, noJoueur, alias, nomÉquipe) {
             if (modeActuel !== 'jeu') return;
             annulerTimer();
-            joueurAyantBuzzé = { noÉquipe, noJoueur, alias, nomÉquipe };
+            joueurAyantBuzzé = { noÉquipe, noJoueur, alias, nomÉquipe, attributionManuelle: true };
             jouerSon(noÉquipe);
             const buzzer = document.getElementById('buzzer');
             buzzer.textContent = `👆 ${alias} (${nomÉquipe}) — attribution manuelle`;
@@ -1235,6 +1239,7 @@
                     const équipe = toutesÉquipes.find(e => e.noÉquipe === noÉquipe);
                     let membres = tousJoueurs.filter(j => {
                         if (j.noÉquipe !== noÉquipe || j.estÉquipe) return false;
+                        if (partieTerminee && !(derniersScoresJoueurs[`${j.noÉquipe}_${j.noJoueur}`] > 0)) return false;
                         if (modeActuel === 'jeu') {
                             // En mode jeu — seulement les joueurs connectés à la partie
                             return joueursConnectés.some(
@@ -1383,8 +1388,12 @@
         function téléchargerRépondants() {
             window.open('/api/telecharger/repondants', '_blank');
         }
-        socket.on('partieTerminée', ({ noPartie, scores }) => {
+        socket.on('partieTerminée', ({ noPartie, scores, résumé = [] }) => {
             console.log(`Partie ${noPartie} terminée !`, scores);
+            partieTerminee = true;
+            document.getElementById('résuméFinPartie').innerHTML = résumé.map(é =>
+                `<div style="margin:8px 0"><strong>${é.nomÉquipe}</strong> — ${é.score} pts${é.joueurs.length ? `<ul style="margin:4px 0 0;padding-left:22px">${é.joueurs.map(j => `<li>${j.alias} — ${j.points} pts</li>`).join('')}</ul>` : ''}</div>`
+            ).join('');
             modeActuel = 'initialisation';
             partieActuelle = null;
             mettreÀJourMode('initialisation');
