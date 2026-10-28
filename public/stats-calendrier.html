@@ -304,7 +304,15 @@
         }
 
         tr.aujourd-hui td {
-            border-top: 2px solid var(--orange);
+            background: #fff2df;
+        }
+
+        tr.aujourd-hui td:first-child {
+            box-shadow: inset 4px 0 0 var(--orange);
+        }
+
+        tr.aujourd-hui:hover td {
+            background: #ffe8c7;
         }
 
         .note-bas {
@@ -453,7 +461,8 @@
 
         function afficherCalendrier(parties) {
             const tbody = document.getElementById('corpsTableau');
-            const aujourdhui = new Date().toISOString().split('T')[0];
+            const maintenant = new Date();
+            const aujourdhui = `${maintenant.getFullYear()}-${String(maintenant.getMonth() + 1).padStart(2, '0')}-${String(maintenant.getDate()).padStart(2, '0')}`;
 
             if (parties.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--gris);padding:40px;">Aucune partie dans cette catégorie</td></tr>`;

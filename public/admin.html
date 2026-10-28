@@ -517,9 +517,10 @@
     <aside class="index-sidebar">
         <div class="index-titre">Sections</div>
         <nav id="index-nav">
-            <a href="#parties">✏️ Modifier les parties</a>
             <a href="#resultats">Corriger une partie terminée</a>
+            <a href="#parties">✏️ Modifier les parties</a>
             <a href="#calendrier">📅 Importer / exporter le calendrier</a>
+            <a href="#questionnaires-charges">🔎 Questionnaires chargés</a>
             <a href="#questionnaire">📥 Importer un questionnaire</a>
             <a href="#series">📋 Configurer les séries</a>
             <a href="#equipes">👥 Gérer les équipes et les joueurs</a>
@@ -592,6 +593,14 @@
             entièrement le calendrier existant.
         </div>
     </div>
+
+    <section class="carte carte-large" id="questionnaires-charges" data-section>
+        <h2>🔎 Questionnaires chargés</h2>
+        <p class="info">Valider que le questionnaire a bien été chargé avant une partie.</p>
+        <button class="bouton bouton-upload" style="width:auto" onclick="chargerQuestionnairesAdmin()">Actualiser la liste</button>
+        <div id="liste-questionnaires-admin" style="overflow-x:auto;margin-top:12px">Chargement…</div>
+        <div id="aperçu-questionnaire-admin" style="margin-top:16px"></div>
+    </section>
 
     <!-- Upload questionnaire -->
     <div class="carte" id="questionnaire" data-section>
@@ -909,6 +918,7 @@
                         ${htmlThèmes}
                         ${htmlQuestions}
                     `;
+                    await chargerQuestionnairesAdmin();
                 } else {
                     div.className = 'erreur';
                     div.textContent = `❌ Erreur : ${résultat.erreur}`;
@@ -1501,6 +1511,40 @@
         chargerSaisons();
         chargerConfig();
         chargerPartiesAdmin();
+        chargerQuestionnairesAdmin();
+
+        const échappeHtml = valeur => String(valeur ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        async function chargerQuestionnairesAdmin() {
+            const conteneur = document.getElementById('liste-questionnaires-admin');
+            conteneur.textContent = 'Chargement…';
+            try {
+                const r = await fetch('/api/admin/questionnaires');
+                if (!r.ok) throw new Error('Connexion administrateur requise.');
+                const { questionnaires } = await r.json();
+                if (!questionnaires.length) { conteneur.innerHTML = '<p>Aucun questionnaire chargé.</p>'; return; }
+                conteneur.innerHTML = `<table class="questions-table"><thead><tr><th>Questionnaire</th><th>Contenu</th><th>Parties associées</th><th>Aperçu</th></tr></thead><tbody>${questionnaires.map(q => {
+                    const partiesTexte = q.parties.length ? q.parties.map(p => `<div style="margin-bottom:6px">Partie #${p.noPartie} — ${échappeHtml(p.date || 'date à déterminer')} — ${p.jouée ? 'Jouée' : 'À venir'}</div>`).join('') : 'Aucune partie associée';
+                    return `<tr><td>#${q.noQuestionnaire}</td><td>${q.nbSéries} séries, ${q.nbQuestions} questions</td><td>${partiesTexte}</td><td><button class="bouton bouton-upload" style="width:auto;margin:2px" onclick="aperçuQuestionnaireAdmin(${q.noQuestionnaire})">Voir le questionnaire</button></td></tr>`;
+                }).join('')}</tbody></table>`;
+            } catch (e) { conteneur.textContent = `Impossible de charger les questionnaires : ${e.message}`; }
+        }
+
+        async function aperçuQuestionnaireAdmin(noQuestionnaire) {
+            const avertissement = `ATTENTION — Questionnaire #${noQuestionnaire}\n\nL’aperçu affiche les questions et leurs réponses. Vous pourriez les voir par erreur avant une partie. Ne continuez que si vous êtes certain de vouloir révéler ce contenu.\n\nAfficher l’aperçu ?`;
+            if (!window.confirm(avertissement)) return;
+            const sortie = document.getElementById('aperçu-questionnaire-admin');
+            sortie.textContent = 'Chargement de l’aperçu…';
+            try {
+                const r = await fetch(`/api/admin/questionnaires/${noQuestionnaire}`);
+                const data = await r.json();
+                if (!r.ok) throw new Error(data.erreur || 'Erreur');
+                sortie.innerHTML = `<div class="carte"><h3>Aperçu — questionnaire #${data.noQuestionnaire}</h3>${(data.séries || []).map(s => {
+                    const thème = data.thèmes.find(t => t.noSérie === s.noSérie);
+                    return `<h4 style="margin:14px 0 6px">Série ${s.noSérie}${thème?.thème ? ` — ${échappeHtml(thème.thème)}` : ''}${thème?.sousThème ? ` (${échappeHtml(thème.sousThème)})` : ''}</h4>${s.questionGroupe1 ? `<p style="margin:4px 0 8px;color:var(--gris)">${échappeHtml(s.questionGroupe1)}</p>` : ''}<div style="overflow-x:auto"><table class="questions-table" style="margin:0"><thead><tr><th># série</th><th># question</th><th>Question</th><th>Réponse</th></tr></thead><tbody>${(s.questions || []).map(q => `<tr><td>${s.noSérie}</td><td>${q.noQuestion}</td><td>${échappeHtml(q.texte)}</td><td>${échappeHtml(q.réponse)}</td></tr>`).join('')}</tbody></table></div>`;
+                }).join('')}<button class="bouton bouton-upload" style="width:auto;margin-top:12px" onclick="document.getElementById('aperçu-questionnaire-admin').innerHTML = ''">Fermer l’aperçu</button></div>`;
+                sortie.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (e) { sortie.textContent = `Impossible de charger l’aperçu : ${e.message}`; }
+        }
 
         // ============================================================
         // Modifier les parties

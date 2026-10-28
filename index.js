@@ -570,6 +570,56 @@ app.get("/api/admin/series/statut", (_req, res) => {
   res.json({ verrouillé, nbParties });
 });
 
+// Inventaire des questionnaires et aperçu — réservé aux administrateurs.
+app.get("/api/admin/questionnaires", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  try {
+    const lire = (nom, défaut = []) => {
+      try { const texte = fs.readFileSync(path.join(dossierSaison, nom), "utf-8").trim(); return texte ? JSON.parse(texte) : défaut; }
+      catch { return défaut; }
+    };
+    const questionnaires = lire("questions.json");
+    const thèmesQ = lire("thèmes.json");
+    const répondants = lire("répondants.json");
+    const résultats = questionnaires.map(q => {
+      const partiesQ = parties.filter(p => p.noQuestionnaire === q.noQuestionnaire).map(p => {
+        const réponses = répondants.filter(r => r.noPartie === p.noPartie);
+        const sr = new Set(réponses.map(r => r.noSérie));
+        const scores = {};
+        réponses.forEach(r => {
+          const règle = séries.find(s => s.noSérie === r.noSérie)?.questions.find(x => x.noQuestion === r.noQuestion);
+          const pts = r.pointsSecondaires ? (règle?.pointsSecondaires ?? 0) : (règle?.points ?? 0);
+          scores[r.noÉquipe] = (scores[r.noÉquipe] || 0) + pts;
+        });
+        const scoreA = réponses.length ? (scores[p.noÉquipeA] || 0) : null;
+        const scoreB = réponses.length ? (scores[p.noÉquipeB] || 0) : null;
+        const eqA = équipes.find(e => e.noÉquipe === p.noÉquipeA)?.nomÉquipe || (p.noÉquipeA ?? "À déterminer");
+        const eqB = équipes.find(e => e.noÉquipe === p.noÉquipeB)?.nomÉquipe || (p.noÉquipeB ?? "À déterminer");
+        return { noPartie: p.noPartie, date: p.date, équipeA: eqA, équipeB: eqB,
+          jouée: réponses.length > 0, scoreA, scoreB };
+      });
+      return { noQuestionnaire: q.noQuestionnaire, nbSéries: q.séries?.length || 0,
+        nbQuestions: (q.séries || []).reduce((n, s) => n + (s.questions?.length || 0), 0),
+        parties: partiesQ };
+    }).sort((a, b) => a.noQuestionnaire - b.noQuestionnaire);
+    res.set("Cache-Control", "no-store").json({ questionnaires: résultats });
+  } catch (e) { res.status(500).json({ erreur: e.message }); }
+});
+
+app.get("/api/admin/questionnaires/:noQuestionnaire", (req, res) => {
+  const token = getCookie(req, "geh_session");
+  if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
+  try {
+    const noQuestionnaire = Number(req.params.noQuestionnaire);
+    const lire = nom => { const t = fs.readFileSync(path.join(dossierSaison, nom), "utf-8").trim(); return t ? JSON.parse(t) : []; };
+    const questionnaire = lire("questions.json").find(q => q.noQuestionnaire === noQuestionnaire);
+    if (!questionnaire) return res.status(404).json({ erreur: "Questionnaire introuvable" });
+    const thèmesQ = lire("thèmes.json").find(q => q.noQuestionnaire === noQuestionnaire);
+    res.set("Cache-Control", "no-store").json({ ...questionnaire, thèmes: thèmesQ?.séries || [] });
+  } catch (e) { res.status(500).json({ erreur: e.message }); }
+});
+
 app.post("/api/admin/importer-structure", (req, res) => {
   const token = getCookie(req, "geh_session");
   if (!token || !sessions.has(token)) return res.status(401).json({ erreur: "Non authentifié" });
