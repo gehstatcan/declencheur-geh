@@ -1033,6 +1033,57 @@ function listerDossiersSaisons() {
 }
 
 // Calendrier — parties avec scores calculés
+app.get("/api/stats/questionnaire/:noQuestionnaire", (req, res) => {
+  try {
+    const ds = getDossierStats(req);
+    const noQuestionnaire = Number(req.params.noQuestionnaire);
+    const lire = (nom, défaut = []) => {
+      try { const texte = fs.readFileSync(path.join(ds, nom), "utf-8").trim(); return texte ? JSON.parse(texte) : défaut; }
+      catch { return défaut; }
+    };
+    const parties = lire("parties.json");
+    const répondants = lire("répondants.json");
+    const équipes = lire("équipes.json");
+    const joueurs = lire("joueurs.json");
+    const questionnaires = lire("questions.json");
+    const thèmesData = lire("thèmes.json");
+    const questionnaire = questionnaires.find(q => q.noQuestionnaire === noQuestionnaire);
+    if (!questionnaire) return res.status(404).json({ erreur: "Questionnaire introuvable" });
+    const toutesPartiesQuestionnaire = parties.filter(p => p.noQuestionnaire === noQuestionnaire);
+    const nonJouées = toutesPartiesQuestionnaire.filter(p => !répondants.some(r => r.noPartie === p.noPartie));
+    if (nonJouées.length) return res.status(403).json({ erreur: "Les résultats seront accessibles lorsque toutes les parties utilisant ce questionnaire auront été jouées." });
+    const partiesQuestionnaire = toutesPartiesQuestionnaire;
+    const réponsesQuestionnaire = répondants.filter(r => partiesQuestionnaire.some(p => p.noPartie === r.noPartie));
+    const statutRépliqueComplet = réponsesQuestionnaire.length > 0 && réponsesQuestionnaire.every(r => typeof r.enRéplique === "boolean");
+    const nomÉquipe = no => équipes.find(e => e.noÉquipe === no)?.nomÉquipe || `Équipe ${no}`;
+    const nomRépondant = r => r.noJoueur === 99
+      ? `Équipe (${nomÉquipe(r.noÉquipe)})`
+      : joueurs.find(j => j.noÉquipe === r.noÉquipe && j.noJoueur === r.noJoueur)?.alias || `Joueur ${r.noJoueur}`;
+    const tentativesParPartie = new Map(partiesQuestionnaire.map(p => [p.noPartie, lire(path.join("parties", `tentatives-${p.noPartie}.json`))]));
+    const séries = (questionnaire.séries || []).map(s => {
+      const thème = thèmesData.find(t => t.noQuestionnaire === noQuestionnaire)?.séries?.find(t => t.noSérie === s.noSérie);
+      return {
+        noSérie: s.noSérie, thème: thème?.thème || "", sousThème: thème?.sousThème || "",
+        questions: (s.questions || []).map(q => ({
+          noQuestion: q.noQuestion, texte: q.texte, réponse: q.réponse,
+          parties: partiesQuestionnaire.map(p => {
+            const tentatives = tentativesParPartie.get(p.noPartie) || [];
+            const réponses = répondants.filter(r => r.noPartie === p.noPartie && r.noSérie === s.noSérie && r.noQuestion === q.noQuestion);
+            const tentativesQ = tentatives.filter(t => t.noSérie === s.noSérie && t.noQuestion === q.noQuestion);
+            return {
+              noPartie: p.noPartie, date: p.date || "",
+              équipeA: nomÉquipe(p.noÉquipeA), équipeB: nomÉquipe(p.noÉquipeB),
+              réponses: réponses.map(r => ({ équipe: nomÉquipe(r.noÉquipe), répondant: nomRépondant(r), enRéplique: typeof r.enRéplique === "boolean" ? r.enRéplique : null, pointsSecondaires: !!r.pointsSecondaires })),
+              tentatives: tentativesQ.map(t => ({ type: t.type || "tentative-incorrecte", équipe: nomÉquipe(t.noÉquipe), répondant: t.noJoueur == null ? "Identité non enregistrée" : (t.noJoueur === 99 ? `Équipe (${nomÉquipe(t.noÉquipe)})` : joueurs.find(j => j.noÉquipe === t.noÉquipe && j.noJoueur === t.noJoueur)?.alias || `Joueur ${t.noJoueur}`), enRéplique: !!t.enRéplique, date: t.date || null }))
+            };
+          })
+        }))
+      };
+    });
+    res.set("Cache-Control", "no-store").json({ noQuestionnaire, nbParties: partiesQuestionnaire.length, statutRépliqueComplet, parties: partiesQuestionnaire.map(p => ({ noPartie: p.noPartie, date: p.date || "" })), séries });
+  } catch (e) { res.status(500).json({ erreur: e.message }); }
+});
+
 app.get("/api/stats/calendrier", (req, res) => {
   try {
     const ds = getDossierStats(req);
@@ -2462,6 +2513,7 @@ function enregistrerRépondant(
     noJoueur,
     noÉquipe,
     pointsSecondaires: estSecondaire,
+    enRéplique: état.réplique !== null,
   });
 
   répondants.sort((a, b) => {
@@ -2479,6 +2531,20 @@ function enregistrerRépondant(
   io.to(room).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
   io.to(room).emit("questionMisÀJour", questionCourante(état));
   io.to(room).emit("reset");
+}
+
+function enregistrerÉvénementQuestion(état, événement) {
+  const chemin = path.join(dossierSaison, "parties", `tentatives-${état.noPartie}.json`);
+  let tentatives = [];
+  try { const contenu = fs.readFileSync(chemin, "utf-8").trim(); tentatives = contenu ? JSON.parse(contenu) : []; }
+  catch { tentatives = []; }
+  tentatives.push({
+    ...événement,
+    noSérie: état.noSérieActuelle,
+    noQuestion: état.noQuestionActuelle,
+    date: new Date().toISOString(),
+  });
+  fs.writeFileSync(chemin, JSON.stringify(tentatives, null, 2), "utf-8");
 }
 
 // ============================================================
@@ -2737,6 +2803,7 @@ io.on("connection", (socket) => {
 
     // Vider le fichier de répondants
     fs.writeFileSync(cheminPartie, "[]", "utf-8");
+    fs.writeFileSync(path.join(dossierSaison, "parties", `tentatives-${noPartie}.json`), "[]", "utf-8");
 
     io.to(`partie-${noPartie}`).emit("état", état);
     io.to(`partie-${noPartie}`).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
@@ -2891,15 +2958,17 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   // Mauvaise réponse — droit de réplique ou question suivante
   // --------------------------------------------------------
-  socket.on("mauvaiseRéponse", ({ noPartie, noÉquipe }) => {
+  socket.on("mauvaiseRéponse", ({ noPartie, noÉquipe, noJoueur }) => {
     const état = obtenirÉtat(noPartie);
     const { série } = questionCourante(état);
+    enregistrerÉvénementQuestion(état, { type: "tentative-incorrecte", noÉquipe, noJoueur: Number.isInteger(noJoueur) ? noJoueur : null, enRéplique: état.réplique !== null });
 
     if (série.réplique && état.réplique === null) {
       // Première mauvaise réponse — donner le droit de réplique à l'équipe adverse
       const partie = parties.find((p) => p.noPartie === noPartie);
       état.réplique =
         noÉquipe === partie.noÉquipeA ? partie.noÉquipeB : partie.noÉquipeA;
+      enregistrerÉvénementQuestion(état, { type: "droit-replique", noÉquipe: état.réplique, noJoueur: null, enRéplique: true });
       libérerBuzz(état);
       io.to(`partie-${noPartie}`).emit("réplique", état.réplique);
     } else {

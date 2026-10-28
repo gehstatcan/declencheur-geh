@@ -539,6 +539,12 @@
             </button>
         </div>
 
+        <div id="boutonSansRéponse" style="text-align:center; margin:10px 0;">
+            <button class="bouton bouton-bonne" onclick="passerQuestionSansRéponse()" title="Passer à la question suivante sans enregistrer de réponse">
+                Pas de réponse, passer à la question suivante
+            </button>
+        </div>
+
         <!-- Bouton annuler -->
         <div id="boutonAnnuler">
             <button class="bouton" style="background:#7f8c8d;" onclick="annulerRéponse()">
@@ -581,7 +587,7 @@
             </button>
         </div>
 
-        <!-- Timer auto-reset -->
+        <!-- Timer de réponse et délai de grâce -->
         <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
             <label style="display:flex; align-items:center; gap:6px; font-size:0.9em; font-weight:600; color:var(--blanc); cursor:pointer;">
                 <input type="checkbox" id="timerActif" onchange="toggleTimer()" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
@@ -589,7 +595,7 @@
             </label>
             <input type="number" id="timerSecondes" value="5" min="1" max="60" oninput="modifierDélaiTimer()" style="width:52px; padding:4px 8px; border-radius:8px; border:1px solid var(--gris); background:var(--fond-champ); color:var(--blanc); font-size:0.9em; font-weight:600; text-align:center;">
             <span style="font-size:0.9em; font-weight:600; color:var(--blanc);">sec</span>
-            <span style="font-size:0.9em;">+ <span id="timerGrâceTexte">3</span> sec de grâce avant reset</span>
+            <span style="font-size:0.9em;">+ <span id="timerGrâceTexte">3</span> sec de grâce avant intervention</span>
             <span id="timerAffichage" style="font-size:0.9em; color:var(--accent); font-weight:700; min-width:24px;"></span>
         </div>
 
@@ -764,6 +770,7 @@
 
         socket.on('buzz', (joueur) => {
             joueurAyantBuzzé = joueur;
+            document.getElementById('boutonSansRéponse').style.display = 'none';
             jouerSon(joueur.noÉquipe);
             const buzzer = document.getElementById('buzzer');
 
@@ -790,6 +797,7 @@
             document.getElementById('btnSecondaire').style.display =
                 (question && question.pointsSecondaires > 0) ? 'inline-block' : 'none';
             document.getElementById('boutonsPoints').style.display = 'block';
+            document.getElementById('boutonSansRéponse').style.display = 'none';
         });
 
         // ============================================================
@@ -833,6 +841,7 @@
             buzzer.textContent = 'En attente d\'un buzzer...';
             buzzer.className = '';
             document.getElementById('boutonsPoints').style.display = 'none';
+            document.getElementById('boutonSansRéponse').style.display = 'block';
         });
 
         socket.on('réplique', (noÉquipe) => {
@@ -846,6 +855,7 @@
             buzzer.textContent = `↩️ Droit de réplique — ${équipe ? équipe.nomÉquipe : ''}`;
             buzzer.className = 'réplique';
             document.getElementById('boutonsPoints').style.display = 'none';
+            document.getElementById('boutonSansRéponse').style.display = 'block';
         });
 
         socket.on('scoresMisÀJour', ({ scores, scoresJoueurs }) => {
@@ -937,6 +947,7 @@
             document.getElementById('btnSecondaire').style.display =
                 (question && question.pointsSecondaires > 0) ? 'inline-block' : 'none';
             document.getElementById('boutonsPoints').style.display = 'block';
+            document.getElementById('boutonSansRéponse').style.display = 'none';
         }
 
         let répliqueEnCours = false;
@@ -958,7 +969,8 @@
             annulerTimer();
             socket.emit('mauvaiseRéponse', {
                 noPartie: partieActuelle,
-                noÉquipe: joueurAyantBuzzé.noÉquipe
+                noÉquipe: joueurAyantBuzzé.noÉquipe,
+                noJoueur: joueurAyantBuzzé.noJoueur
             });
         }
 
@@ -1001,14 +1013,20 @@
                 // L’animateur peut encore valider une réponse pendant la grâce.
                 jouerSonParId('falldown');
                 annulerTimer();
-                if (timerGrâce === 0) { resetBuzz(); return; }
+                const terminerGrâce = () => {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    timerReset = null;
+                    affichage.textContent = 'Délai écoulé — animateur';
+                };
+                if (timerGrâce === 0) { terminerGrâce(); return; }
                 let grâceRestante = timerGrâce;
                 affichage.textContent = `Grâce : ${grâceRestante} s`;
                 timerInterval = setInterval(() => {
                     grâceRestante--;
                     affichage.textContent = `Grâce : ${Math.max(0, grâceRestante)} s`;
                 }, 1000);
-                timerReset = setTimeout(() => resetBuzz(), timerGrâce * 1000);
+                timerReset = setTimeout(terminerGrâce, timerGrâce * 1000);
             }, durée * 1000);
         }
 
@@ -1029,6 +1047,11 @@
 
         function questionSuivante() {
             socket.emit('questionSuivante', partieActuelle);
+        }
+
+        function passerQuestionSansRéponse() {
+            annulerTimer();
+            questionSuivante();
         }
 
         function sériePrécédente() {

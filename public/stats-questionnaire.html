@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Performance du questionnaire — GEH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    :root { --accent:#34495e; --fond:#f4f6f8; --carte:#fff; --texte:#263238; --gris:#687782; --vert:#218c54; --orange:#b96712; --bord:#dce2e6; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--fond); color:var(--texte); font:15px Inter,Arial,sans-serif; }
+    header { background:var(--accent); color:white; padding:18px 24px; }
+    h1 { max-width:1200px; margin:auto; font:2rem 'Bebas Neue',sans-serif; letter-spacing:1px; }
+    main { max-width:1200px; margin:24px auto; padding:0 16px; }
+    .retour { display:inline-block; color:var(--accent); margin-bottom:14px; font-weight:700; text-decoration:none; }
+    .carte { background:var(--carte); border-radius:12px; padding:18px; box-shadow:0 2px 12px #00000012; margin-bottom:18px; }
+    .info { color:var(--gris); line-height:1.55; }
+    .series { margin:22px 0 8px; font:1.45rem 'Bebas Neue',sans-serif; color:var(--accent); }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; min-width:760px; font-size:.92rem; }
+    th { background:#e9eef2; color:var(--accent); text-align:left; }
+    th,td { padding:10px 12px; border-bottom:1px solid var(--bord); vertical-align:top; }
+    td.numero { white-space:nowrap; text-align:center; }
+    td.question { min-width:260px; }
+    td.reponse { min-width:180px; color:var(--vert); font-weight:600; }
+    .partie { border-left:3px solid #d9e0e5; padding:3px 0 5px 9px; margin:0 0 8px; }
+    .partie-titre { font-weight:700; }
+    .bonne { color:var(--vert); }
+    .mauvaise { color:var(--orange); }
+    .inconnu { color:var(--gris); font-style:italic; }
+    .erreur { color:#b42318; }
+    @media (max-width:650px) { header { padding:16px; } main { margin:16px auto; padding:0 10px; } .carte { padding:13px; } }
+  </style>
+</head>
+<body>
+  <header><h1>Performance du questionnaire</h1></header>
+  <main>
+    <a class="retour" id="retour" href="stats-calendrier.html">← Retour au calendrier</a>
+    <div class="carte">
+      <h2 id="titre">Chargement…</h2>
+      <p id="message" class="info">Les résultats regroupent les parties jouées avec ce questionnaire. Les tentatives incorrectes sont consignées à partir de la mise en service de cette fonction.</p>
+      <p id="note-replique" class="info" hidden></p>
+      <p class="info"><strong>—</strong> Aucune réponse ni tentative enregistrée.</p>
+      <div id="contenu"></div>
+    </div>
+  </main>
+  <script>
+    const paramètres = new URLSearchParams(location.search);
+    const noQuestionnaire = Number(paramètres.get('noQuestionnaire'));
+    const saison = paramètres.get('saison');
+    const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    document.getElementById('retour').href = `stats-calendrier.html${saison ? `?saison=${encodeURIComponent(saison)}` : ''}`;
+    async function charger() {
+      const titre = document.getElementById('titre');
+      const contenu = document.getElementById('contenu');
+      try {
+        if (!Number.isInteger(noQuestionnaire) || noQuestionnaire <= 0) throw new Error('Numéro de questionnaire invalide.');
+        const url = `/api/stats/questionnaire/${noQuestionnaire}${saison ? `?saison=${encodeURIComponent(saison)}` : ''}`;
+        const r = await fetch(url);
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.erreur || 'Impossible de charger les résultats.');
+        titre.textContent = `Questionnaire #${data.noQuestionnaire} — ${data.nbParties} partie(s) jouée(s)`;
+        const noteRéplique = document.getElementById('note-replique');
+        if (!data.statutRépliqueComplet) {
+          noteRéplique.textContent = `Questionnaire #${data.noQuestionnaire} : les parties jouées avant l’enregistrement du statut de réplique ne permettent pas de savoir si la réponse a été donnée en réplique.`;
+          noteRéplique.hidden = false;
+        } else {
+          noteRéplique.hidden = true;
+          noteRéplique.textContent = '';
+        }
+        contenu.innerHTML = (data.séries || []).map(s => `<h3 class="series">Série #${s.noSérie}${s.thème ? ` — ${esc(s.thème)}` : ''}${s.sousThème ? ` (${esc(s.sousThème)})` : ''}</h3><div class="table-wrap"><table><thead><tr><th># série</th><th># question</th><th>Question</th><th>Réponse</th><th>Parties jouées — répondants et tentatives</th></tr></thead><tbody>${(s.questions || []).map(q => {
+          const matches = q.parties.map(p => {
+            const événements = [
+              ...p.réponses.map(x => ({ ...x, genre: 'réponse' })),
+              ...p.tentatives.map(x => ({ ...x, genre: x.type }))
+            ].map((x, index) => ({ ...x, index })).sort((a, b) => {
+              const étape = x => x.genre === 'droit-replique' ? 1 : x.enRéplique ? 2 : 0;
+              const ordreÉtape = étape(a) - étape(b);
+              if (ordreÉtape) return ordreÉtape;
+              const tempsA = Date.parse(a.date);
+              const tempsB = Date.parse(b.date);
+              if (Number.isNaN(tempsA) && Number.isNaN(tempsB)) return a.index - b.index;
+              if (Number.isNaN(tempsA)) return 1;
+              if (Number.isNaN(tempsB)) return -1;
+              return tempsA - tempsB || a.index - b.index;
+            });
+            const lignes = événements.map(x => {
+              if (x.genre === 'réponse') return `<div class="${x.enRéplique === null ? 'inconnu' : 'bonne'}">✓ <strong>${esc(x.répondant)}</strong>${x.enRéplique === null ? '' : x.enRéplique ? ' · bonne réponse en réplique' : ' · bonne réponse sans réplique'}</div>`;
+              if (x.genre === 'droit-replique') return '<div class="mauvaise">↩ Droit de réplique</div>';
+              return `<div class="mauvaise">✗ <strong>${esc(x.répondant)}</strong> · ${x.enRéplique ? 'tentative incorrecte en réplique' : 'tentative incorrecte'}</div>`;
+            });
+            return `<div class="partie"><div class="partie-titre">Partie #${p.noPartie}</div>${lignes.length ? lignes.join('') : '<div class="inconnu">—</div>'}</div>`;
+          }).join('');
+          return `<tr><td class="numero">${s.noSérie}</td><td class="numero">${q.noQuestion}</td><td class="question">${esc(q.texte)}</td><td class="reponse">${esc(q.réponse)}</td><td>${matches || '<span class="inconnu">Aucune partie jouée avec ce questionnaire.</span>'}</td></tr>`;
+        }).join('')}</tbody></table></div>`).join('');
+      } catch (e) { titre.textContent = 'Questionnaire indisponible'; contenu.innerHTML = `<p class="erreur">${esc(e.message)}</p>`; }
+    }
+    charger();
+  </script>
+</body>
+</html>
