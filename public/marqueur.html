@@ -435,6 +435,12 @@
             color: white;
         }
 
+        .joueur.éliminé-4v:not(.connecté) {
+            background: #737b84;
+            color: #e7ebef;
+            opacity: 0.7;
+        }
+
         .nav-animateur { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
         .nav-animateur a { font-size: 0.9em; padding: 7px 16px; border-radius: 20px; text-decoration: none; color: var(--gris); background: var(--fond-carte); border: 1px solid var(--fond-champ); transition: all 0.2s; }
         .nav-animateur a:hover { background: var(--fond-champ); color: var(--texte); }
@@ -643,6 +649,7 @@
         let partieTerminee = false;
         let derniersScores = {};
         let derniersScoresJoueurs = {};
+        let joueursÉliminés4V = [];
         let afficherPtsJoueurs = false;
         // Conserver la liste des joueurs connectés entre les événements socket
         // Évite de passer [] par erreur lors des appels à afficherÉquipes()
@@ -1147,8 +1154,10 @@
 
         function afficherInfoQuestion(info) {
             questionCouranteInfo = info;
+            joueursÉliminés4V = info.joueursÉliminés4V || [];
             répliqueEnCours = info.réplique != null;
             actualiserBoutonMauvaise();
+            if (partieActuelle) afficherÉquipes(partieActuelle, derniersJoueursConnectés, derniersScores);
             const { série, question, répondantExistant, estÉquipe } = info;
             if (!série || !question) return;
 
@@ -1170,7 +1179,10 @@
 
             const divToggle = document.getElementById('toggleÉquipe');
             const btnToggle = document.getElementById('btnToggleÉquipe');
-            if (question && question.estÉquipe === null) {
+            const modeÉquipeCommutable = question && (
+                question.estÉquipe === null || (série.noSérie === 5 && question.noQuestion > 1)
+            );
+            if (modeÉquipeCommutable) {
                 btnToggle.style.background = estÉquipe ? '#1a7a42' : '#666';
                 btnToggle.textContent = estÉquipe
                     ? '🏆 Équipe — cliquer pour Individuel'
@@ -1265,6 +1277,9 @@
                     const joueursHTML = membres.map(j => {
                         let classe = '';
                         let icône = '⚪';
+                        const estÉliminé4V = joueursÉliminés4V.some(
+                            joueur => joueur.noÉquipe === j.noÉquipe && joueur.noJoueur === j.noJoueur
+                        );
 
                         if (modeActuel === 'initialisation') {
                             // Mode initialisation — vert si connecté
@@ -1287,7 +1302,7 @@
                         const onclick = modeActuel === 'jeu'
                             ? `onclick="buzzManuel(${j.noÉquipe}, ${j.noJoueur}, '${aliasSafe}', '${nomÉquipeSafe}')"`
                             : '';
-                        return `<div class="joueur ${classe} ${cliquable}" ${onclick} style="display:flex;justify-content:space-between;align-items:center;">${j.alias}${ptsHTML}</div>`;
+                        return `<div class="joueur ${classe} ${cliquable} ${estÉliminé4V ? 'éliminé-4v' : ''}" ${onclick} ${estÉliminé4V ? 'title="A déjà répondu correctement dans cette série"' : ''} style="display:flex;justify-content:space-between;align-items:center;">${j.alias}${ptsHTML}</div>`;
 
 
 

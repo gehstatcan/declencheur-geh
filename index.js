@@ -1087,9 +1087,13 @@ app.get("/api/stats/questionnaire/:noQuestionnaire", (req, res) => {
             const tentatives = tentativesParPartie.get(p.noPartie) || [];
             const réponses = répondants.filter(r => r.noPartie === p.noPartie && r.noSérie === s.noSérie && r.noQuestion === q.noQuestion);
             const tentativesQ = tentatives.filter(t => t.noSérie === s.noSérie && t.noQuestion === q.noQuestion);
-            const estÉquipe = configQuestion?.estÉquipe === null
-              ? répondants.some(r => r.noPartie === p.noPartie && r.noSérie === s.noSérie && r.noQuestion === 1) || réponses.some(r => r.noJoueur === 99) || tentativesQ.some(t => t.noJoueur === 99)
-              : (configQuestion?.estÉquipe ?? configSérie?.estÉquipe ?? false);
+            const q1Répondue = répondants.some(r => r.noPartie === p.noPartie && r.noSérie === s.noSérie && r.noQuestion === 1);
+            const preuveÉquipe = réponses.some(r => r.noJoueur === 99) || tentativesQ.some(t => t.noJoueur === 99);
+            const estÉquipe = s.noSérie === 5 && q.noQuestion > 1
+              ? (preuveÉquipe || (q1Répondue && (configQuestion?.estÉquipe ?? configSérie?.estÉquipe ?? true)))
+              : (configQuestion?.estÉquipe === null
+                ? q1Répondue || preuveÉquipe
+                : (configQuestion?.estÉquipe ?? configSérie?.estÉquipe ?? false));
             return {
               noPartie: p.noPartie, date: p.date || "",
               équipeA: nomÉquipe(p.noÉquipeA), équipeB: nomÉquipe(p.noÉquipeB),
@@ -2490,30 +2494,49 @@ function questionCourante(état) {
     répondants = [];
   }
 
-  // Calculer estÉquipe pour cette question
-  // Série 5 — estÉquipe null = dépend de Q1
-  // Si Q1 non répondue → équipe, sinon individuel
-  // L'animateur peut overrider via état.overrideÉquipe
+  // Calculer le mode de réponse; l'animateur peut l'overrider via état.overrideÉquipe.
   let estÉquipe = série.estÉquipe; // valeur par défaut de la série
 
-  if (question && question.estÉquipe !== undefined) {
-    if (question.estÉquipe === null) {
-      // Série 5 Q2-5 — vérifier si Q1 a été répondue
-      const q1Répondue = répondants.some(
-        (r) => r.noSérie === état.noSérieActuelle && r.noQuestion === 1,
-      );
-      // Override manuel de l'animateur prioritaire
-      if (état.overrideÉquipe !== undefined && état.overrideÉquipe !== null) {
-        estÉquipe = état.overrideÉquipe;
-      } else {
-        estÉquipe = q1Répondue; // équipe si Q1 répondue
-      }
-    } else {
-      estÉquipe = question.estÉquipe; // valeur explicite (Q1 = false)
-    }
+  if (question && question.estÉquipe !== undefined && question.estÉquipe !== null) {
+    estÉquipe = question.estÉquipe;
   }
 
-  return { série, question, répondantExistant, estÉquipe, réplique: état.réplique };
+  // Série 5 : Q1 reste individuelle. Q2 à Q5 suivent la structure (équipe),
+  // sauf si Q1 n'a reçu aucune réponse : dans ce cas elles passent en individuel.
+  if (état.noSérieActuelle === 5 && état.noQuestionActuelle === 1) {
+    estÉquipe = false;
+  } else if (état.noSérieActuelle === 5 && état.noQuestionActuelle > 1) {
+    const q1Répondue = répondants.some(
+      (r) => r.noSérie === état.noSérieActuelle && r.noQuestion === 1,
+    );
+    if (!q1Répondue) estÉquipe = false;
+  }
+
+  if (état.overrideÉquipe !== undefined && état.overrideÉquipe !== null && (
+    question?.estÉquipe === null || (état.noSérieActuelle === 5 && état.noQuestionActuelle > 1)
+  )) {
+    estÉquipe = état.overrideÉquipe;
+  }
+
+  const joueursÉliminés4V = série.typeSérie === "Les 4 V"
+    ? [...new Map(
+        répondants
+          .filter(r => r.noSérie === état.noSérieActuelle && Number.isInteger(r.noJoueur) && r.noJoueur > 0 && r.noJoueur !== 99)
+          .map(r => [`${r.noÉquipe}_${r.noJoueur}`, { noÉquipe: r.noÉquipe, noJoueur: r.noJoueur }]),
+      ).values()]
+    : [];
+  const nbJoueursRépondusParÉquipe = new Map();
+  joueursÉliminés4V.forEach(j => nbJoueursRépondusParÉquipe.set(j.noÉquipe, (nbJoueursRépondusParÉquipe.get(j.noÉquipe) || 0) + 1));
+  const tousRessuscités4V = [...nbJoueursRépondusParÉquipe.values()].some(nb => nb >= 4);
+
+  return {
+    série,
+    question,
+    répondantExistant,
+    estÉquipe,
+    réplique: état.réplique,
+    joueursÉliminés4V: tousRessuscités4V ? [] : joueursÉliminés4V,
+  };
 }
 
 // ============================================================
@@ -2559,6 +2582,7 @@ function enregistrerRépondant(
   io.to(room).emit("reset");
 }
 
+// TODO: Savoir qui a répondu durant un vis-à-vis.
 function enregistrerÉvénementQuestion(état, événement) {
   const chemin = path.join(dossierSaison, "parties", `tentatives-${état.noPartie}.json`);
   let tentatives = [];

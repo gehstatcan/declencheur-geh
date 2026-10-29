@@ -97,7 +97,7 @@
             });
             const lignes = événements.map(x => {
               if (x.genre === 'réponse') return `<div class="bonne">✓ <strong>${esc(x.répondant)}</strong></div>`;
-              if (x.genre === 'droit-replique') return '<div class="mauvaise">↩ Droit de réplique</div>';
+              if (x.genre === 'droit-replique') return '<div class="mauvaise">↩ Réplique</div>';
               return `<div class="mauvaise">✗ <strong>${esc(x.répondant)}</strong></div>`;
             });
             return `<div class="partie"><div class="partie-titre">Partie #${p.noPartie}</div>${lignes.length ? lignes.join('') : '<div class="inconnu">—</div>'}</div>`;
