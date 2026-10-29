@@ -2582,7 +2582,6 @@ function enregistrerRépondant(
   io.to(room).emit("reset");
 }
 
-// TODO: Savoir qui a répondu durant un vis-à-vis.
 function enregistrerÉvénementQuestion(état, événement) {
   const chemin = path.join(dossierSaison, "parties", `tentatives-${état.noPartie}.json`);
   let tentatives = [];
