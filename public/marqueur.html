@@ -546,6 +546,13 @@
             </button>
         </div>
 
+        <div id="choixDirect" style="display:none;text-align:center;margin:12px auto;max-width:760px;">
+            <div style="font-size:1.05em;font-weight:700;margin-bottom:8px;">Attribuer les points sans buzzer</div>
+            <button id="btnChoixEquipeA" class="bouton bouton-bonne" onclick="attribuerChoixDirect('A')"></button>
+            <button id="btnChoixEquipeB" class="bouton bouton-bonne" onclick="attribuerChoixDirect('B')"></button>
+            <button class="bouton" style="background:#7f8c8d" onclick="questionSuivante()">Aucun point — question suivante</button>
+        </div>
+
         <div id="boutonSansRéponse" style="text-align:center; margin:10px 0;">
             <button class="bouton bouton-bonne" onclick="passerQuestionSansRéponse()" title="Passer à la question suivante sans enregistrer de réponse">
                 Pas de réponse, passer à la question suivante
@@ -851,7 +858,9 @@
             buzzer.textContent = 'En attente d\'un buzzer...';
             buzzer.className = '';
             document.getElementById('boutonsPoints').style.display = 'none';
-            document.getElementById('boutonSansRéponse').style.display = 'block';
+            const estChoixDirect = estSérieAssociations(obtenirQuestionCourante().série);
+            document.getElementById('choixDirect').style.display = estChoixDirect ? 'block' : 'none';
+            document.getElementById('boutonSansRéponse').style.display = estChoixDirect ? 'none' : 'block';
         });
 
         socket.on('réplique', (noÉquipe) => {
@@ -936,6 +945,22 @@
                 points,
                 estSecondaire,
                 sansRéplique: !!joueurAyantBuzzé.attributionManuelle
+            });
+        }
+
+        function attribuerChoixDirect(position) {
+            const { série, question } = obtenirQuestionCourante();
+            if (!partieActuelle || série?.noSérie !== 13 || !question) return;
+            const partie = toutesPartiesData.find(p => p.noPartie === partieActuelle);
+            const noÉquipe = position === 'A' ? partie?.noÉquipeA : partie?.noÉquipeB;
+            if (!noÉquipe) return;
+            socket.emit('attribuerPoints', {
+                noPartie: partieActuelle,
+                noÉquipe,
+                noJoueur: 99,
+                points: question.points,
+                estSecondaire: false,
+                sansRéplique: true
             });
         }
 
@@ -1150,6 +1175,10 @@
             return { série: null, question: null };
         }
 
+        function estSérieAssociations(série) {
+            return String(série?.typeSérie || '').toLocaleLowerCase().includes('association');
+        }
+
         let questionCouranteInfo = null;
 
         function afficherInfoQuestion(info) {
@@ -1165,6 +1194,18 @@
                 `Série ${série.noSérie} — ${série.typeSérie}`;
             document.getElementById('titreQuestion').textContent =
                 `Question ${question.noQuestion} / ${série.questions.length} — ${question.points} pts`;
+
+            const choixDirect = estSérieAssociations(série);
+            document.getElementById('choixDirect').style.display = choixDirect ? 'block' : 'none';
+            document.getElementById('boutonsPoints').style.display = 'none';
+            document.getElementById('boutonSansRéponse').style.display = choixDirect ? 'none' : 'block';
+            if (choixDirect) {
+                const partie = toutesPartiesData.find(p => p.noPartie === partieActuelle);
+                const équipeA = toutesÉquipes.find(e => e.noÉquipe === partie?.noÉquipeA);
+                const équipeB = toutesÉquipes.find(e => e.noÉquipe === partie?.noÉquipeB);
+                document.getElementById('btnChoixEquipeA').textContent = `✅ ${équipeA?.nomÉquipe || 'Équipe A'} — ${question.points} pts`;
+                document.getElementById('btnChoixEquipeB').textContent = `✅ ${équipeB?.nomÉquipe || 'Équipe B'} — ${question.points} pts`;
+            }
 
             // Afficher bouton annuler si répondant existant
             const btnAnnuler = document.getElementById('boutonAnnuler');
