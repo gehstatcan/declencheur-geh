@@ -40,7 +40,8 @@ async function chargerResultats() {
         document.getElementById('editeur-resultats').innerHTML = d.séries.map(s => `<details><summary>Série ${s.noSérie} — ${texteResultats(s.typeSérie)}</summary><table class="questions-table"><thead><tr><th>Question</th><th>Répondant</th><th>Points</th></tr></thead><tbody>${s.questions.map(q => {
             const r = d.réponses.find(r => r.noSérie === s.noSérie && r.noQuestion === q.noQuestion);
             const clé = `${s.noSérie}-${q.noQuestion}`;
-            return `<tr><td>Q${q.noQuestion}</td><td><select class="champ reponse-resultat" data-serie="${s.noSérie}" data-question="${q.noQuestion}" id="reponse-${clé}">${options.join('')}</select></td><td><select class="champ" id="points-${clé}"><option value="false">${q.points} points</option>${q.pointsSecondaires > 0 ? `<option value="true">${q.pointsSecondaires} points (secondaires)</option>` : ''}</select></td></tr>`;
+            const texte = d.questions?.find(sq => sq.noSérie === s.noSérie)?.questions?.find(qq => qq.noQuestion === q.noQuestion)?.texte;
+            return `<tr><td><strong>Q${q.noQuestion}</strong>${texte ? `<div style="margin-top:4px;white-space:pre-wrap;line-height:1.4">${texteResultats(texte)}</div>` : ''}</td><td><select class="champ reponse-resultat" data-serie="${s.noSérie}" data-question="${q.noQuestion}" id="reponse-${clé}">${options.join('')}</select></td><td><select class="champ" id="points-${clé}"><option value="false">${q.points} points</option>${q.pointsSecondaires > 0 ? `<option value="true">${q.pointsSecondaires} points (secondaires)</option>` : ''}</select></td></tr>`;
         }).join('')}</tbody></table></details>`).join('');
         for (const r of d.réponses) {
             const clé = `${r.noSérie}-${r.noQuestion}`;

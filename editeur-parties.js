@@ -15,10 +15,15 @@ module.exports = function installerEditeur(app, contexte) {
     if (!alignements.some(a => a.noPartie === noPartie)) throw new Error('Cette partie n’est pas terminée.');
     if (c.étatsParties[noPartie] && c.étatsParties[noPartie].mode !== 'terminée') throw new Error('Cette partie est ouverte dans le marqueur. Fermez-la avant de corriger ses résultats.');
     const cumul = lireJSON('répondants.json');
+    const questionnaire = lireJSON('questions.json').find(q => q.noQuestionnaire === partie.noQuestionnaire);
+    const questions = (questionnaire?.séries || []).map(s => ({
+      noSérie: s.noSérie,
+      questions: (s.questions || []).map(q => ({ noQuestion: q.noQuestion, texte: q.texte || '' })),
+    }));
     const nom = path.join('parties', `répondants-${noPartie}.json`);
     const fichierExiste = fs.existsSync(path.join(c.dossierSaison, nom));
     const réponses = fichierExiste ? lireJSON(nom) : cumul.filter(r => r.noPartie === noPartie);
-    return { ...c, partie, alignements, cumul, nom, fichierExiste, réponses, version: empreinte([c.saisonActive, partie, c.séries, c.joueurs, alignements, cumul, réponses]) };
+    return { ...c, partie, alignements, cumul, questions, nom, fichierExiste, réponses, version: empreinte([c.saisonActive, partie, c.séries, c.joueurs, alignements, cumul, réponses]) };
   }
   function auth(req, res, next) {
     if (!contexte().auth(req)) return res.status(401).json({ erreur: 'Non authentifié' });
@@ -34,7 +39,7 @@ module.exports = function installerEditeur(app, contexte) {
   app.get('/api/admin/resultats/:numero', auth, (req, res) => {
     try {
       const c = lire(Number(req.params.numero));
-      res.json({ saison: c.saisonActive, version: c.version, partie: c.partie, réponses: c.réponses, séries: c.séries, joueurs: c.joueurs, équipes: c.équipes });
+      res.json({ saison: c.saisonActive, version: c.version, partie: c.partie, réponses: c.réponses, séries: c.séries, questions: c.questions, joueurs: c.joueurs, équipes: c.équipes });
     } catch (e) { res.status(400).json({ erreur: e.message }); }
   });
   app.put('/api/admin/resultats/:numero', auth, (req, res) => {
