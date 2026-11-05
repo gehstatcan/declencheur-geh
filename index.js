@@ -3184,16 +3184,6 @@ io.on("connection", (socket) => {
     try {
       const contenuPartie = fs.readFileSync(cheminPartie, "utf-8").trim();
       const répondantsPartie = contenuPartie ? JSON.parse(contenuPartie) : [];
-      let tentativesPartie = [];
-      try {
-        const contenuTentatives = fs.readFileSync(path.join(dossierSaison, "parties", `tentatives-${noPartie}.json`), "utf-8").trim();
-        tentativesPartie = contenuTentatives ? JSON.parse(contenuTentatives) : [];
-      } catch (e) {}
-      const joueursAyantJoué = new Set([
-        ...répondantsPartie.filter((r) => r.noJoueur !== 99).map((r) => `${r.noÉquipe}_${r.noJoueur}`),
-        ...tentativesPartie.filter((t) => Number.isInteger(t.noJoueur) && t.noJoueur !== 99).map((t) => `${t.noÉquipe}_${t.noJoueur}`),
-      ]);
-
       let répondantsCumulatifs = [];
       try {
         const contenuCumulatif = fs
@@ -3299,7 +3289,7 @@ io.on("connection", (socket) => {
                 points: ptsJoueur,
               };
             })
-            .filter((j) => joueursAyantJoué.has(`${noÉq}_${j.noJoueur}`))
+            .filter((j) => j.points > 0)
             .sort((a, b) => b.points - a.points);
 
           // Ajouter les points collectifs si > 0

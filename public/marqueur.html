@@ -466,7 +466,7 @@
         <a href="test-sons.html">🔊 Test sons</a>
         <a href="admin.html">⚙️ Administration</a>
     </nav>
-    <p style="text-align:center;margin:12px 0 20px"><a href="pratique.html?role=animateur" style="color:inherit;font-weight:600">Animer une pratique — Math contre Matique, hors classement</a></p>
+    <p id="invitePratique" style="text-align:center;margin:12px 0 20px"><a href="pratique.html?role=animateur" style="color:inherit;font-weight:600">Animer une pratique — Math contre Matique, hors classement</a></p>
 
     <div id="modePartie" class="initialisation">🔧 Initialisation</div>
 
@@ -495,12 +495,6 @@
             <button id="btnPosFixe" class="bouton" style="font-size:0.85em; font-weight:600; padding:6px 16px; background:var(--accent); color:white;" onclick="togglePositions(false)">
                 🔢 Positions fixes
             </button>
-        </div>
-        <div id="bannièreSauvegarde" style="display:none; margin-top:16px; background:#1a5276; color:white; border-radius:12px; padding:16px 20px; text-align:center;">
-            <div style="font-size:1.1em; font-weight:600; margin-bottom:8px;">✅ Partie terminée</div>
-            <div style="font-size:0.9em; margin-bottom:12px; opacity:0.9;">Pensez à sauvegarder vos données.</div>
-            <div id="résuméFinPartie" style="text-align:left; margin:12px auto; max-width:560px;"></div>
-            <a href="/api/sauvegarde-zip" class="bouton" style="background:white; color:#1a5276; display:inline-block; text-decoration:none;">⬇️ Télécharger la sauvegarde ZIP</a>
         </div>
     </div>
 
@@ -640,6 +634,12 @@
     <!-- Équipes et joueurs -->
     <div id="équipes"></div>
 
+    <div id="bannièreSauvegarde" style="display:none; width:100%; max-width:700px; margin:16px auto; background:#1a5276; color:white; border-radius:12px; padding:16px 20px; text-align:center;">
+        <div style="font-size:1.1em; font-weight:600; margin-bottom:8px;">✅ Partie terminée</div>
+        <div style="font-size:0.9em; margin-bottom:12px; opacity:0.9;">Pensez à sauvegarder vos données.</div>
+        <a href="/api/sauvegarde-zip" class="bouton" style="background:white; color:#1a5276; display:inline-block; text-decoration:none;">⬇️ Télécharger la sauvegarde ZIP</a>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -730,6 +730,7 @@
             mettreÀJourMode(état.mode);
             if (état.noPartie) {
                 document.getElementById('listeParties').value = état.noPartie;
+                document.getElementById('invitePratique').hidden = true;
                 afficherÉquipes(état.noPartie, état.joueursConnectés, état.scores);
             }
             if (état.mode === 'jeu') {
@@ -895,6 +896,7 @@
         // Actions animateur
         function choisirPartie() {
             const noPartie = parseInt(document.getElementById('listeParties').value);
+            document.getElementById('invitePratique').hidden = !!noPartie;
             if (!noPartie) return;
             socket.emit('rejoindrePartie', noPartie);
             socket.emit('choisirPartie', noPartie);
@@ -1444,17 +1446,21 @@
         function téléchargerRépondants() {
             window.open('/api/telecharger/repondants', '_blank');
         }
-        socket.on('partieTerminée', ({ noPartie, scores, résumé = [] }) => {
+        socket.on('partieTerminée', ({ noPartie, scores }) => {
             console.log(`Partie ${noPartie} terminée !`, scores);
             partieTerminee = true;
-            document.getElementById('résuméFinPartie').innerHTML = résumé.map(é =>
-                `<div style="margin:8px 0"><strong>${é.nomÉquipe}</strong> — ${é.score} pts${é.joueurs.length ? `<ul style="margin:4px 0 0;padding-left:22px">${é.joueurs.map(j => `<li>${j.alias} — ${j.points} pts</li>`).join('')}</ul>` : ''}</div>`
-            ).join('');
+            derniersScores = scores;
+            afficherPtsJoueurs = true;
+            const btnPtsJoueurs = document.getElementById('btnPtsJoueurs');
+            btnPtsJoueurs.textContent = '📊 Cacher pts/joueur';
+            btnPtsJoueurs.style.background = 'var(--accent)';
+            btnPtsJoueurs.style.color = 'white';
             modeActuel = 'initialisation';
             partieActuelle = null;
             mettreÀJourMode('initialisation');
+            afficherÉquipes(noPartie, [], scores);
+            document.getElementById('équipes').style.display = 'block';
             document.getElementById('bannièreSauvegarde').style.display = 'block';
-            document.getElementById('équipes').style.display = 'none';
         });
 
     </script>

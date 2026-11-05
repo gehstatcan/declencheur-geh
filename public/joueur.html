@@ -331,7 +331,6 @@
         <img src="/ampouleQuiz.png" alt="Logo Génie en Herbe" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — Statcan</h1>
     </header>
-    <p id="lienPratique" style="text-align:center;margin:12px 0 20px"><a href="pratique.html" style="color:inherit;font-weight:600">Rejoindre la pratique — Math ou Matique</a></p>
 
     <!-- Statut — aria-live pour lecteurs d'écran -->
     <div id="statut" role="status" aria-live="polite">
@@ -379,6 +378,8 @@
             🔔 BUZZ !
         </button>
     </div>
+
+    <p id="lienPratique" style="text-align:center;margin:12px 0 20px"><a href="pratique.html" style="color:inherit;font-weight:600">Rejoindre la pratique — Math ou Matique</a></p>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -517,9 +518,16 @@
         // Passer en mode inscription
         // ============================================================
         function passerEnModeInscription() {
-            document.getElementById('lienPratique').hidden = false;
+            document.getElementById('lienPratique').hidden = !!obtenirNoPartieURL();
             document.getElementById("zoneInscription").style.display = "flex";
             document.getElementById("zoneJeu").style.display = "none";
+        }
+
+        function obtenirNoPartieURL() {
+            const valeur = new URLSearchParams(location.search).get('noPartie');
+            if (!valeur || !/^\d+$/.test(valeur)) return null;
+            const noPartie = Number(valeur);
+            return Number.isSafeInteger(noPartie) && noPartie > 0 ? noPartie : null;
         }
 
         // ============================================================
@@ -539,7 +547,7 @@
             partiesFiltrees = toutesParties.filter(p => p.date >= dateMin);
 
             // Pré-sélectionner la partie si noPartie est dans l'URL
-            const noPartieURL = parseInt(new URLSearchParams(location.search).get('noPartie'));
+            const noPartieURL = obtenirNoPartieURL();
             if (noPartieURL) {
                 const dansFiltrées = partiesFiltrees.find(p => p.noPartie === noPartieURL);
                 if (!dansFiltrées) {
