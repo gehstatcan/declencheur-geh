@@ -392,6 +392,14 @@
         let modeActuel = 'initialisation';
         let questionEstÉquipe = false;
 
+        // Socket.IO reconnecte automatiquement après une coupure réseau.
+        // Rejoindre de nouveau la partie avant de réinscrire le joueur.
+        socket.on('connect', () => {
+            if (!noPartieActuelle) return;
+            socket.emit('rejoindrePartie', noPartieActuelle);
+            if (joueurActuel) socket.emit('sEnregistrer', joueurActuel);
+        });
+
         // ============================================================
         // Feedback vibration — pour le joueur presque aveugle
         // Fonctionne principalement sur mobile

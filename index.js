@@ -523,12 +523,13 @@ app.put("/api/admin/parties", (req, res) => {
     const mises = req.body;
     if (!Array.isArray(mises)) return res.status(400).json({ erreur: "Format invalide" });
 
-    mises.forEach(({ noPartie, date, animateur, salle, noÉquipeA, noÉquipeB, noÉquipeQuestionnaire }) => {
+    mises.forEach(({ noPartie, date, animateur, salle, noQuestionnaire, noÉquipeA, noÉquipeB, noÉquipeQuestionnaire }) => {
       const p = parties.find(p => p.noPartie === noPartie);
       if (!p) return;
       if (date !== undefined) p.date = date;
       if (animateur !== undefined) p.animateur = animateur;
       if (salle !== undefined) p.salle = salle;
+      if (noQuestionnaire !== undefined && Number.isInteger(noQuestionnaire) && noQuestionnaire > 0) p.noQuestionnaire = noQuestionnaire;
       if (noÉquipeA !== undefined) p.noÉquipeA = noÉquipeA;
       if (noÉquipeB !== undefined) p.noÉquipeB = noÉquipeB;
       if (noÉquipeQuestionnaire !== undefined) p.noÉquipeQuestionnaire = noÉquipeQuestionnaire;
@@ -2647,6 +2648,9 @@ io.on("connection", (socket) => {
       }
     }
 
+    // Lier l'inscription au socket pour qu'un ancien événement disconnect
+    // ne puisse pas retirer une session qui vient juste de se reconnecter.
+    joueur.socketId = socket.id;
     état.joueursConnectés.push(joueur);
     io.to(`partie-${joueur.noPartie}`).emit(
       "joueursConnectés",
@@ -3345,7 +3349,8 @@ io.on("connection", (socket) => {
         (j) =>
           !(
             j.noÉquipe === socket.joueur.noÉquipe &&
-            j.noJoueur === socket.joueur.noJoueur
+            j.noJoueur === socket.joueur.noJoueur &&
+            j.socketId === socket.id
           ),
       );
       io.to(`partie-${socket.noPartie}`).emit(

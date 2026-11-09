@@ -333,6 +333,27 @@
             border-top: 1px solid var(--fond-champ);
         }
 
+        /* Garder la navigation du calendrier à portée de main sur les longues listes. */
+        #tableParties {
+            max-height: 62vh;
+            overflow: auto;
+            border: 1px solid var(--fond-champ);
+            border-radius: 8px;
+            scrollbar-gutter: stable;
+        }
+        #tableParties .questions-table {
+            min-width: 900px;
+            width: 100%;
+            margin: 0;
+        }
+        #tableParties .questions-table th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: var(--blanc);
+            box-shadow: 0 1px 0 var(--fond-champ);
+        }
+
         .input-pts {
             width: 64px;
             background: var(--blanc);
@@ -517,11 +538,11 @@
     <aside class="index-sidebar">
         <div class="index-titre">Sections</div>
         <nav id="index-nav">
-            <a href="#resultats">Corriger une partie terminée</a>
+            <a href="#resultats">📝 Corriger le pointage</a>
+            <a href="#questionnaire">📥 Importer un questionnaire</a>
+            <a href="#questionnaires-charges">🔎 Visualiser les questionnaires</a>
             <a href="#parties">✏️ Modifier le calendrier</a>
             <a href="#calendrier">📅 Importer / exporter le calendrier</a>
-            <a href="#questionnaires-charges">🔎 Questionnaires chargés</a>
-            <a href="#questionnaire">📥 Importer un questionnaire</a>
             <a href="#series">📋 Configurer les séries</a>
             <a href="#equipes">👥 Gérer les équipes et les joueurs</a>
             <a href="#saisons">🗓️ Gérer les saisons et les sauvegardes</a>
@@ -532,7 +553,7 @@
     <div class="contenu-principal">
       <section id="resultats" data-section="resultats" style="margin-bottom:24px">
         <div class="carte carte-large">
-          <h2>Corriger une partie terminée</h2>
+          <h2>Corriger le pointage</h2>
           <p class="info">Choisir le joueur ou l’équipe à créditer pour chaque question. Une question non répondue ne donne aucun point. Les points suivent les règles du questionnaire. Chaque sauvegarde conserve une copie des résultats précédents et met à jour les statistiques, sans modifier les alignements.</p>
           <button class="bouton bouton-upload" style="width:auto" onclick="listerResultats()">Charger les parties terminées</button>
           <select id="partie-resultats" class="champ" onchange="chargerResultats()"><option value="">Choisir une partie</option></select>
@@ -541,6 +562,40 @@
           <button id="sauver-resultats" class="bouton bouton-vert" style="display:none;width:auto" onclick="sauverResultats()">Sauvegarder les corrections</button>
         </div>
       </section>
+
+    <!-- Upload questionnaire -->
+    <div class="carte" id="questionnaire" data-section>
+        <h2>📥 Importer un questionnaire</h2>
+
+        <div class="zone-upload" onclick="document.getElementById('fichierExcel').click()">
+            <div class="icone">📊</div>
+            <label>Cliquez pour choisir un fichier Excel</label>
+            <input type="file" id="fichierExcel" accept=".xlsx,.xls" onchange="fichierChoisi(this)">
+            <div id="nomFichier"></div>
+        </div>
+
+        <button class="bouton bouton-upload" id="btnUpload" onclick="uploadQuestionnaire()" disabled>
+            📥 Importer le questionnaire
+        </button>
+
+        <div id="résultat"></div>
+
+        <div class="info">
+            ℹ️ Le fichier doit contenir une feuille <strong>Vers BD</strong>
+            avec les tables <strong>tblThèmes</strong> et
+            <strong>tblQuestionnaires</strong>.<br>
+            Le numéro de questionnaire doit correspondre à celui dans
+            <strong>parties.json</strong>.
+        </div>
+    </div>
+
+    <section class="carte carte-large" id="questionnaires-charges" data-section>
+        <h2>🔎 Visualiser les questionnaires</h2>
+        <p class="info">Valider que le questionnaire a bien été chargé avant une partie.</p>
+        <button class="bouton bouton-upload" style="width:auto" onclick="chargerQuestionnairesAdmin()">Actualiser la liste</button>
+        <div id="liste-questionnaires-admin" style="overflow-x:auto;margin-top:12px">Chargement…</div>
+        <div id="aperçu-questionnaire-admin" style="margin-top:16px"></div>
+    </section>
 
     <!-- Modifier le calendrier -->
     <div class="carte carte-large" id="parties" data-section>
@@ -551,7 +606,7 @@
             <label style="font-size:0.9em;"><input type="radio" name="filtreParties" value="a-venir" checked onchange="filtrerPartiesAdmin()"> À venir</label>
             <label style="font-size:0.9em;"><input type="radio" name="filtreParties" value="toutes" onchange="filtrerPartiesAdmin()"> Toutes</label>
         </div>
-        <div id="tableParties" style="overflow-x:auto;"></div>
+        <div id="tableParties"></div>
         <div style="margin-top:12px;">
             <button class="bouton bouton-vert" style="width:auto" onclick="sauvegarderParties()">💾 Sauvegarder les modifications</button>
         </div>
@@ -591,40 +646,6 @@
             • <strong>Matchup</strong> — identifiant de la série éliminatoire (ex. : <code>Q1</code>, <code>Q2</code>, <code>D1</code>, <code>F</code>)<br><br>
             Les autres colonnes ex: (LienConsole et LienBouton) sont ignorées. Le fichier <strong>remplace</strong>
             entièrement le calendrier existant.
-        </div>
-    </div>
-
-    <section class="carte carte-large" id="questionnaires-charges" data-section>
-        <h2>🔎 Questionnaires chargés</h2>
-        <p class="info">Valider que le questionnaire a bien été chargé avant une partie.</p>
-        <button class="bouton bouton-upload" style="width:auto" onclick="chargerQuestionnairesAdmin()">Actualiser la liste</button>
-        <div id="liste-questionnaires-admin" style="overflow-x:auto;margin-top:12px">Chargement…</div>
-        <div id="aperçu-questionnaire-admin" style="margin-top:16px"></div>
-    </section>
-
-    <!-- Upload questionnaire -->
-    <div class="carte" id="questionnaire" data-section>
-        <h2>📥 Importer un questionnaire</h2>
-
-        <div class="zone-upload" onclick="document.getElementById('fichierExcel').click()">
-            <div class="icone">📊</div>
-            <label>Cliquez pour choisir un fichier Excel</label>
-            <input type="file" id="fichierExcel" accept=".xlsx,.xls" onchange="fichierChoisi(this)">
-            <div id="nomFichier"></div>
-        </div>
-
-        <button class="bouton bouton-upload" id="btnUpload" onclick="uploadQuestionnaire()" disabled>
-            📥 Importer le questionnaire
-        </button>
-
-        <div id="résultat"></div>
-
-        <div class="info">
-            ℹ️ Le fichier doit contenir une feuille <strong>Vers BD</strong>
-            avec les tables <strong>tblThèmes</strong> et
-            <strong>tblQuestionnaires</strong>.<br>
-            Le numéro de questionnaire doit correspondre à celui dans
-            <strong>parties.json</strong>.
         </div>
     </div>
 
@@ -1598,16 +1619,12 @@
                         oninput="màjPartieAdmin(${p.noPartie},'date',this.value)" style="width:140px"></td>
                     <td><input class="input-type-série" type="text" value="${p.animateur || ''}"
                         oninput="màjPartieAdmin(${p.noPartie},'animateur',this.value)" style="width:180px"></td>
-                    <td>
-                        <datalist id="dl-eq-q-${p.noPartie}">
-                            ${équipes.map(e => `<option value="${e.nomÉquipe.replace(/"/g,'&quot;')}">`).join('')}
-                        </datalist>
-                        <input class="input-type-série" type="text"
-                            list="dl-eq-q-${p.noPartie}"
-                            value="${typeof p.noÉquipeQuestionnaire === 'number' ? nomÉq(p.noÉquipeQuestionnaire).replace(/"/g,'&quot;') : (p.noÉquipeQuestionnaire || '').replace(/"/g,'&quot;')}"
-                            oninput="màjResponsableQuestionnaire(${p.noPartie}, this.value)"
-                            style="width:180px" placeholder="Équipe ou nom libre">
-                    </td>
+                    <td><input class="input-type-série" type="number" min="1" step="1" value="${p.noQuestionnaire || ''}"
+                        onchange="màjPartieAdmin(${p.noPartie},'noQuestionnaire',this.value===''?null:+this.value)" style="width:76px"></td>
+                    <td><select class="select-equipe-q" onchange="màjPartieAdmin(${p.noPartie},'noÉquipeQuestionnaire',this.value===''?null:+this.value)">
+                        <option value="" ${p.noÉquipeQuestionnaire == null ? 'selected' : ''}>— Aucune —</option>
+                        ${équipes.map(e => `<option value="${e.noÉquipe}" ${e.noÉquipe === p.noÉquipeQuestionnaire ? 'selected' : ''}>${e.nomÉquipe}</option>`).join('')}
+                    </select></td>
                 </tr>`).join('');
 
             document.getElementById('tableParties').innerHTML = liste.length ? `
@@ -1617,7 +1634,8 @@
                         <th>Équipes</th>
                         <th>Date</th>
                         <th>Animateur</th>
-                        <th>Questionnaire</th>
+                        <th># Questionnaire</th>
+                        <th>Équipe questionnaire</th>
                     </tr></thead>
                     <tbody>${lignes}</tbody>
                 </table>` : '<p style="color:var(--gris);margin-top:8px">Aucune partie à afficher.</p>';
@@ -1625,7 +1643,10 @@
 
         function màjPartieAdmin(noPartie, champ, valeur) {
             const p = partiesAdmin.find(p => p.noPartie === noPartie);
-            if (p) p[champ] = valeur;
+            if (p) {
+                if (champ === 'noQuestionnaire' && valeur !== null && (!Number.isInteger(valeur) || valeur < 1)) return;
+                p[champ] = valeur;
+            }
         }
 
         function exporterCalendrier() {
@@ -1681,6 +1702,12 @@
         }
 
         // Scroll spy — surligne la section active dans l'index
+        document.getElementById('index-nav').addEventListener('click', (événement) => {
+            const lien = événement.target.closest('a[href^="#"]');
+            if (!lien) return;
+            document.querySelectorAll('.index-sidebar nav a').forEach(l => l.classList.remove('actif-section'));
+            lien.classList.add('actif-section');
+        });
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(e => {
                 if (e.isIntersecting) {
