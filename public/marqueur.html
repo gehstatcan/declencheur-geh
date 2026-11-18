@@ -1,3 +1,8 @@
+<!--
+  Marqueur de partie GEH — interface de l'animateur pendant le jeu.
+  Entrées : commandes de l'animateur, état/événements Socket.IO et API du serveur.
+  Sorties : affichage des équipes, scores, questions et buzz; commandes envoyées au serveur.
+-->
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -420,6 +425,62 @@
             font-weight: bold;
         }
 
+        #indicateurConnexionMarqueur {
+            width: min(900px, calc(100% - 24px));
+            margin: 10px auto 16px;
+            padding: 12px 16px;
+            border: 2px solid #7f1d1d;
+            border-radius: 10px;
+            background: #b42318;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        #indicateurConnexionMarqueur[hidden] { display: none; }
+
+        #btnReconnexionMarqueur {
+            flex: 0 0 auto;
+            padding: 8px 14px;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #7f1d1d;
+            font: inherit;
+            font-size: 0.9em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .joueur.hors-ligne {
+            background: #8f2d2d;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .badge-hors-ligne {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 3px 8px;
+            border: 1px solid rgba(255,255,255,0.75);
+            border-radius: 999px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.42em;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
         /* Pts/joueur sur fond vert — forcer blanc pour lisibilité */
         .joueur.connecté span {
             color: white !important;
@@ -459,6 +520,11 @@
         <img src="ampouleQuiz.png" alt="Logo GEH" style="width:52px; height:52px; mix-blend-mode:multiply;">
         <h1>GEH — <span>Statcan</span></h1>
     </header>
+
+    <div id="indicateurConnexionMarqueur" role="alert" aria-live="assertive" hidden>
+        <span id="texteIndicateurConnexionMarqueur"></span>
+        <button id="btnReconnexionMarqueur" type="button" onclick="réessayerConnexionMarqueur()">🔄 Réessayer la connexion</button>
+    </div>
 
     <nav class="nav-animateur">
         <a href="marqueur.html" class="actif">🎮 Marqueur</a>
@@ -669,6 +735,60 @@
         let timerModifié = false;
         let positionsAléatoires = false;
         let afficherTempsRéaction = false;
+        let déconnexionMarqueurDétectéeÀ = null;
+        let minuterieHorsLigneMarqueur = null;
+
+        function mettreÀJourIndicateurConnexionMarqueur() {
+            if (déconnexionMarqueurDétectéeÀ === null) return;
+            const secondes = Math.floor((Date.now() - déconnexionMarqueurDétectéeÀ) / 1000);
+            const unité = secondes === 1 ? 'seconde' : 'secondes';
+            document.getElementById('texteIndicateurConnexionMarqueur').textContent =
+                `⚠️ Marqueur hors ligne depuis ${secondes} ${unité}. Les joueurs peuvent buzzer; le marqueur récupérera le buzz en cours à sa reconnexion.`;
+            document.getElementById('indicateurConnexionMarqueur').hidden = false;
+        }
+
+        function signalerMarqueurHorsLigne() {
+            if (!partieActuelle || déconnexionMarqueurDétectéeÀ !== null) return;
+            déconnexionMarqueurDétectéeÀ = Date.now();
+            mettreÀJourIndicateurConnexionMarqueur();
+            clearInterval(minuterieHorsLigneMarqueur);
+            minuterieHorsLigneMarqueur = setInterval(mettreÀJourIndicateurConnexionMarqueur, 1000);
+        }
+
+        function effacerIndicateurConnexionMarqueur() {
+            clearInterval(minuterieHorsLigneMarqueur);
+            minuterieHorsLigneMarqueur = null;
+            déconnexionMarqueurDétectéeÀ = null;
+            document.getElementById('indicateurConnexionMarqueur').hidden = true;
+        }
+
+        function resynchroniserConnexionMarqueur() {
+            if (!partieActuelle) return;
+            socket.emit('rejoindrePartie', partieActuelle);
+            socket.emit('resynchroniserMarqueur', partieActuelle);
+        }
+
+        function réessayerConnexionMarqueur() {
+            if (socket.connected) {
+                resynchroniserConnexionMarqueur();
+                return;
+            }
+            socket.connect();
+        }
+
+        window.addEventListener('offline', signalerMarqueurHorsLigne);
+        socket.on('disconnect', signalerMarqueurHorsLigne);
+        window.addEventListener('online', () => {
+            if (déconnexionMarqueurDétectéeÀ !== null && socket.connected)
+                resynchroniserConnexionMarqueur();
+        });
+
+        // Rejoindre la salle après une reconnexion Socket.IO sans réinitialiser
+        // la partie; le serveur renverra le buzz actif, s'il y en a un.
+        socket.on('connect', () => {
+            if (!partieActuelle) effacerIndicateurConnexionMarqueur();
+            resynchroniserConnexionMarqueur();
+        });
 
         // Web Audio pour les sons
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -721,6 +841,7 @@
 
         // Réception état global
         socket.on('état', (état) => {
+            if (socket.connected) effacerIndicateurConnexionMarqueur();
             modeActuel = état.mode;
             partieTerminee = état.mode === 'terminée';
             derniersScores = état.scores || {};
@@ -1319,22 +1440,24 @@
 
                     const joueursHTML = membres.map(j => {
                         let classe = '';
-                        let icône = '⚪';
+                        const connexion = joueursConnectés.find(
+                            c => c.noÉquipe === j.noÉquipe && c.noJoueur === j.noJoueur);
+                        const estHorsLigne = connexion?.horsLigne === true;
                         const estÉliminé4V = joueursÉliminés4V.some(
                             joueur => joueur.noÉquipe === j.noÉquipe && joueur.noJoueur === j.noJoueur
                         );
 
-                        if (modeActuel === 'initialisation') {
+                        if (estHorsLigne) {
+                            classe = 'hors-ligne';
+                        } else if (modeActuel === 'initialisation') {
                             // Mode initialisation — vert si connecté
-                            const connecté = joueursConnectés.some(
-                                c => c.noÉquipe === j.noÉquipe && c.noJoueur === j.noJoueur);
-                            if (connecté) { classe = 'connecté'; icône = '🟢'; }
+                            if (connexion) classe = 'connecté';
                         } else {
                             // Mode jeu — vert seulement si c'est le buzzeur
                             const estBuzzeur = joueurAyantBuzzé &&
                                 joueurAyantBuzzé.noÉquipe === j.noÉquipe &&
                                 joueurAyantBuzzé.noJoueur === j.noJoueur;
-                            if (estBuzzeur) { classe = 'connecté'; icône = '🟢'; }
+                            if (estBuzzeur) classe = 'connecté';
                         }
 
                         const pts = afficherPtsJoueurs ? (derniersScoresJoueurs[`${j.noÉquipe}_${j.noJoueur}`] || 0) : null;
@@ -1345,7 +1468,10 @@
                         const onclick = modeActuel === 'jeu'
                             ? `onclick="buzzManuel(${j.noÉquipe}, ${j.noJoueur}, '${aliasSafe}', '${nomÉquipeSafe}')"`
                             : '';
-                        return `<div class="joueur ${classe} ${cliquable} ${estÉliminé4V ? 'éliminé-4v' : ''}" ${onclick} ${estÉliminé4V ? 'title="A déjà répondu correctement dans cette série"' : ''} style="display:flex;justify-content:space-between;align-items:center;">${j.alias}${ptsHTML}</div>`;
+                        const badgeHorsLigne = estHorsLigne
+                            ? '<span class="badge-hors-ligne">📵 HORS LIGNE</span>'
+                            : '';
+                        return `<div class="joueur ${classe} ${cliquable} ${estÉliminé4V ? 'éliminé-4v' : ''}" ${onclick} ${estÉliminé4V ? 'title="A déjà répondu correctement dans cette série"' : ''} style="display:flex;justify-content:space-between;align-items:center;"><span>${j.alias}${badgeHorsLigne}</span>${ptsHTML}</div>`;
 
 
 

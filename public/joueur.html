@@ -1,3 +1,8 @@
+<!--
+  Buzzer joueur GEH — inscription et réponse des joueurs sur téléphone ou ordinateur.
+  Entrées : choix de partie/équipe/joueur et événements du serveur via Socket.IO.
+  Sorties : inscription et buzz transmis au serveur; état de réponse affiché au joueur.
+-->
 <!doctype html>
 <html lang="fr">
 
@@ -289,6 +294,46 @@
             transform: none;
         }
 
+        #indicateurConnexion {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 4px;
+            border: 2px solid #7f1d1d;
+            border-radius: 10px;
+            background: #b42318;
+            color: #ffffff;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        #indicateurConnexion[hidden] {
+            display: none;
+        }
+
+        #btnReconnexion {
+            flex: 0 0 auto;
+            padding: 8px 14px;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #7f1d1d;
+            font: inherit;
+            font-size: 0.9em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        #btnReconnexion:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
         /* ============================================================
            Responsive — téléphone vs laptop
            ============================================================ */
@@ -374,6 +419,10 @@
 
     <!-- Zone jeu -->
     <div id="zoneJeu">
+        <div id="indicateurConnexion" role="alert" aria-live="assertive" hidden>
+            <span id="texteIndicateurConnexion"></span>
+            <button id="btnReconnexion" type="button" onclick="réessayerConnexion()">🔄 Réessayer la connexion</button>
+        </div>
         <button id="boutonBuzz" onclick="buzzer()" aria-label="Buzzer pour répondre">
             🔔 BUZZ !
         </button>
@@ -391,13 +440,67 @@
         let noPartieActuelle = null;
         let modeActuel = 'initialisation';
         let questionEstÉquipe = false;
+        let déconnexionDétectéeÀ = null;
+        let minuterieHorsLigne = null;
+
+        function mettreÀJourIndicateurConnexion() {
+            if (déconnexionDétectéeÀ === null) return;
+            const secondes = Math.floor((Date.now() - déconnexionDétectéeÀ) / 1000);
+            const unité = secondes === 1 ? 'seconde' : 'secondes';
+            const indicateur = document.getElementById('indicateurConnexion');
+            document.getElementById('texteIndicateurConnexion').textContent =
+                `⚠️ Hors ligne depuis ${secondes} ${unité}. Le buzzer ne peut pas transmettre votre réponse.`;
+            indicateur.hidden = false;
+        }
+
+        function signalerHorsLigne() {
+            if (!joueurActuel) return;
+            if (déconnexionDétectéeÀ !== null) return;
+            déconnexionDétectéeÀ = Date.now();
+            document.getElementById('boutonBuzz').disabled = true;
+            mettreÀJourIndicateurConnexion();
+            clearInterval(minuterieHorsLigne);
+            minuterieHorsLigne = setInterval(mettreÀJourIndicateurConnexion, 1000);
+        }
+
+        function effacerIndicateurConnexion() {
+            clearInterval(minuterieHorsLigne);
+            minuterieHorsLigne = null;
+            déconnexionDétectéeÀ = null;
+            document.getElementById('indicateurConnexion').hidden = true;
+        }
+
+        function resynchroniserJoueur() {
+            if (!noPartieActuelle) return;
+            socket.emit('rejoindrePartie', noPartieActuelle);
+            if (joueurActuel) socket.emit('sEnregistrer', joueurActuel);
+        }
+
+        function réessayerConnexion() {
+            if (socket.connected) {
+                resynchroniserJoueur();
+                return;
+            }
+            socket.connect();
+        }
+
+        // L'événement navigateur peut avertir avant le délai de détection Socket.IO.
+        window.addEventListener('offline', signalerHorsLigne);
+        socket.on('disconnect', signalerHorsLigne);
+        window.addEventListener('online', () => {
+            if (déconnexionDétectéeÀ === null || !socket.connected) return;
+            effacerIndicateurConnexion();
+            resynchroniserJoueur();
+        });
 
         // Socket.IO reconnecte automatiquement après une coupure réseau.
         // Rejoindre de nouveau la partie avant de réinscrire le joueur.
         socket.on('connect', () => {
-            if (!noPartieActuelle) return;
-            socket.emit('rejoindrePartie', noPartieActuelle);
-            if (joueurActuel) socket.emit('sEnregistrer', joueurActuel);
+            effacerIndicateurConnexion();
+            const bouton = document.getElementById('btnReconnexion');
+            bouton.disabled = false;
+            bouton.textContent = '🔄 Réessayer la connexion';
+            resynchroniserJoueur();
         });
 
         // ============================================================
@@ -412,11 +515,29 @@
         // Réception de l'état global de la partie
         // ============================================================
         socket.on("état", (état) => {
+            if (socket.connected) {
+                effacerIndicateurConnexion();
+                const boutonReconnexion = document.getElementById('btnReconnexion');
+                boutonReconnexion.disabled = false;
+                boutonReconnexion.textContent = '🔄 Réessayer la connexion';
+            }
             modeActuel = état.mode;
             console.log('État reçu:', état.mode, état.noPartie);
             if (état.mode === "jeu" && joueurActuel) {
                 // Partie en cours et joueur enregistré
                 passerEnModeJeu();
+                const buzzCourant = état.buzzCourant;
+                const btn = document.getElementById('boutonBuzz');
+                const statut = document.getElementById('statut');
+                btn.disabled = !!buzzCourant;
+                if (buzzCourant) {
+                    const estMoi = buzzCourant.noJoueur === joueurActuel.noJoueur &&
+                        buzzCourant.noÉquipe === joueurActuel.noÉquipe;
+                    statut.textContent = estMoi
+                        ? `🎯 À toi de répondre, ${joueurActuel.alias} !`
+                        : `🔔 ${buzzCourant.alias} a buzzé en premier !`;
+                    statut.className = estMoi ? 'buzzé' : 'adverse';
+                }
             } else if (état.mode === "jeu" && !joueurActuel) {
                 // Partie en cours mais joueur pas encore enregistré — cas A/C/D/H
                 document.getElementById('statut').textContent =
@@ -862,6 +983,7 @@
             };
 
             socket.emit("sEnregistrer", joueurActuel);
+            if (!socket.connected) signalerHorsLigne();
 
             // Cacher la case à cocher et la zone inscription
             document.getElementById('conteneurParties').style.display = 'none';
@@ -876,7 +998,7 @@
         // Buzzer — émet l'événement au serveur
         // ============================================================
         function buzzer() {
-            if (joueurActuel) {
+            if (joueurActuel && socket.connected) {
                 // Noter l'heure du clic pour calculer le temps de réaction
                 socket.emit("buzz", joueurActuel);
             }

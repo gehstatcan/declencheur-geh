@@ -1,3 +1,7 @@
+// Serveur principal GEH Statcan — Express, Socket.IO et API du jeu.
+// Entrées : requêtes HTTP/Socket.IO, fichiers JSON de la saison et variables d'environnement.
+// Sorties : pages/API aux navigateurs et mise à jour des fichiers de données de la saison.
+
 // Charger les variables d'environnement en développement local
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -12,7 +16,11 @@ if (process.env.NODE_ENV !== "production") {
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
-const io = require("socket.io")(http);
+const io = require("socket.io")(http, {
+  // Détecter une coupure plus vite sans ajouter de sondage applicatif.
+  pingInterval: 10_000,
+  pingTimeout: 10_000,
+});
 const fs = require("fs");
 const path = require("path");
 
@@ -2407,6 +2415,7 @@ function obtenirÉtat(noPartie) {
       noQuestionActuelle: 1,
       réplique: null,
       buzzVerrou: false,
+      buzzCourant: null,
       overrideÉquipe: null,
     };
   }
@@ -2440,6 +2449,7 @@ function reculerQuestion(état) {
 // pour calculer un temps de réaction fiable (même horloge)
 function libérerBuzz(état) {
   état.buzzVerrou = false;
+  état.buzzCourant = null;
   état.tempsDisponible = Date.now();
 }
 
@@ -2619,6 +2629,14 @@ io.on("connection", (socket) => {
     socket.emit("état", état);
   });
 
+  // Le marqueur peut se reconnecter sans recharger la page. Lui renvoyer
+  // le buzz actif évite de réinitialiser une réponse déjà reçue.
+  socket.on("resynchroniserMarqueur", (noPartie) => {
+    if (socket.noPartie !== noPartie) return;
+    const état = obtenirÉtat(noPartie);
+    if (état.buzzCourant) socket.emit("buzz", état.buzzCourant);
+  });
+
   // --------------------------------------------------------
   // Un joueur s'enregistre dans sa partie
   // --------------------------------------------------------
@@ -2651,6 +2669,7 @@ io.on("connection", (socket) => {
     // Lier l'inscription au socket pour qu'un ancien événement disconnect
     // ne puisse pas retirer une session qui vient juste de se reconnecter.
     joueur.socketId = socket.id;
+    joueur.horsLigne = false;
     état.joueursConnectés.push(joueur);
     io.to(`partie-${joueur.noPartie}`).emit(
       "joueursConnectés",
@@ -2709,6 +2728,7 @@ io.on("connection", (socket) => {
     état.noQuestionActuelle = 1;
     état.réplique = null;
     état.buzzVerrou = false;
+    état.buzzCourant = null;
 
     // Vérifier si un fichier de répondants existe (reprise)
     const cheminPartie = path.join(
@@ -2807,6 +2827,7 @@ io.on("connection", (socket) => {
     const état = obtenirÉtat(noPartie);
     état.mode = "jeu";
     état.buzzVerrou = false;
+    état.buzzCourant = null;
 
     const partie = parties.find((p) => p.noPartie === noPartie);
     if (partie) {
@@ -2834,6 +2855,7 @@ io.on("connection", (socket) => {
     const état = obtenirÉtat(noPartie);
     état.mode = "initialisation";
     état.buzzVerrou = false;
+    état.buzzCourant = null;
     io.to(`partie-${noPartie}`).emit("état", état);
   });
 
@@ -2853,6 +2875,7 @@ io.on("connection", (socket) => {
     état.noQuestionActuelle = 1;
     état.réplique = null;
     état.buzzVerrou = false;
+    état.buzzCourant = null;
 
     // Vider le fichier de répondants
     fs.writeFileSync(cheminPartie, "[]", "utf-8");
@@ -2875,6 +2898,7 @@ io.on("connection", (socket) => {
     // Vérifier droit de réplique
     if (état.réplique !== null && joueur.noÉquipe !== état.réplique) return;
     état.buzzVerrou = true;
+    état.buzzCourant = joueur;
 
     // Calculer le temps de réaction — tout sur l'horloge serveur pour éviter
     // les valeurs négatives dues au décalage d'horloge entre client et serveur
@@ -3329,6 +3353,7 @@ io.on("connection", (socket) => {
 
       état.mode = "terminée";
       état.buzzVerrou = false;
+      état.buzzCourant = null;
       io.to(`partie-${noPartie}`).emit("état", état);
       io.to(`partie-${noPartie}`).emit("partieTerminée", {
         noPartie,
@@ -3342,21 +3367,31 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    // Retirer le joueur déconnecté — repassera en gris chez le marqueur
+    // Garder temporairement le joueur visible : les téléphones suspendent
+    // parfois Socket.IO quand l'écran se verrouille ou que l'onglet est caché.
+    // À la reconnexion, sEnregistrer remplace son ancienne entrée; le délai
+    // ci-dessous ne supprimera alors que l'entrée de cet ancien socket.
     if (socket.noPartie && socket.joueur) {
       const état = obtenirÉtat(socket.noPartie);
-      état.joueursConnectés = état.joueursConnectés.filter(
-        (j) =>
-          !(
-            j.noÉquipe === socket.joueur.noÉquipe &&
-            j.noJoueur === socket.joueur.noJoueur &&
-            j.socketId === socket.id
-          ),
-      );
+      const joueurDéconnecté = état.joueursConnectés.find(j => j.socketId === socket.id);
+      if (!joueurDéconnecté) return;
+
+      joueurDéconnecté.horsLigne = true;
       io.to(`partie-${socket.noPartie}`).emit(
         "joueursConnectés",
         état.joueursConnectés,
       );
+
+      setTimeout(() => {
+        const étaitPrésent = état.joueursConnectés.some(j => j.socketId === socket.id);
+        if (!étaitPrésent) return;
+
+        état.joueursConnectés = état.joueursConnectés.filter(j => j.socketId !== socket.id);
+        io.to(`partie-${socket.noPartie}`).emit(
+          "joueursConnectés",
+          état.joueursConnectés,
+        );
+      }, 30_000);
     }
   });
 
