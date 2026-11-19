@@ -129,6 +129,14 @@
             /* Contraste blanc sur #1a5f99 = 7:1 ✅ WCAG AA */
         }
 
+        #partieSélectionnée {
+            width: 100%;
+            max-width: 560px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
         #indicateurMarqueurAbsent {
             width: 100%;
             max-width: 560px;
@@ -393,6 +401,8 @@
         <h1>GEH — Statcan</h1>
     </header>
 
+    <div id="partieSélectionnée" hidden></div>
+
     <!-- Statut — aria-live pour lecteurs d'écran -->
     <div id="statut" role="status" aria-live="polite">
         Choisissez votre partie
@@ -542,9 +552,12 @@
                 boutonReconnexion.textContent = '🔄 Réessayer la connexion';
             }
             modeActuel = état.mode;
+            mettreÀJourPartieAffichée();
+            document.getElementById('statut').className = '';
             console.log('État reçu:', état.mode, état.noPartie);
             marqueurEnLigne = état.marqueurEnLigne !== false;
-            document.getElementById('indicateurMarqueurAbsent').hidden = marqueurEnLigne;
+            document.getElementById('indicateurMarqueurAbsent').hidden =
+                marqueurEnLigne || état.mode !== "jeu";
             const inscriptionConfirmée = !!joueurActuel &&
                 (état.joueursConnectés || []).some(j =>
                     j.noÉquipe === joueurActuel.noÉquipe &&
@@ -583,6 +596,35 @@
             } else {
                 // Mode initialisation
                 passerEnModeInscription();
+                if (joueurActuel) {
+                    document.getElementById('zoneInscription').style.display = 'none';
+                }
+                const marqueurAChoisiPartie =
+                    état.marqueurAChoisiPartie === true || marqueurEnLigne;
+                if (!marqueurAChoisiPartie) {
+                    const statut = document.getElementById('statut');
+                    if (inscriptionConfirmée) {
+                        statut.textContent =
+                            `✅ Bienvenue ${joueurActuel.alias} ! En attente que le marqueur sélectionne la partie...`;
+                    } else if (joueurActuel) {
+                        statut.textContent = '⌛ Connexion à la partie en cours…';
+                    } else if (état.aDesRépondants) {
+                        statut.textContent =
+                            '⚠️ Cette partie semble déjà terminée. Vérifiez le numéro de partie !';
+                    } else {
+                        statut.textContent =
+                            '⌛ En attente que le marqueur sélectionne cette partie. Vous pouvez vous inscrire en attendant.';
+                    }
+                    return;
+                }
+                if (!marqueurEnLigne) {
+                    if (inscriptionConfirmée) {
+                        document.getElementById('conteneurParties').style.display = 'none';
+                    }
+                    document.getElementById('statut').textContent =
+                        '⚠️ Le marqueur est déconnecté. Attendez son retour avant le début de la partie.';
+                    return;
+                }
                 if (inscriptionConfirmée) {
                     document.getElementById('conteneurParties').style.display = 'none';
                     document.getElementById('zoneInscription').style.display = 'none';
@@ -590,6 +632,8 @@
                         `✅ Bienvenue ${joueurActuel.alias} ! En attente du début de la partie...`;
                     return;
                 }
+                document.getElementById('statut').textContent =
+                    '🛠️ Le marqueur prépare la partie. Vous pouvez vous inscrire en attendant le début.';
                 if (joueurActuel) {
                     // Sur reconnexion, attendre sEnregistrer sans réafficher le formulaire.
                     document.getElementById('zoneInscription').style.display = 'none';
@@ -631,6 +675,8 @@
         // Reset — réactiver le buzzer pour la prochaine question
         // ============================================================
         socket.on('reset', () => {
+            if (modeActuel !== 'jeu') return;
+
             const btn = document.getElementById('boutonBuzz');
             const statut = document.getElementById('statut');
             btn.disabled = !marqueurEnLigne;
@@ -711,6 +757,21 @@
         let toutesParties = [];
         let partiesFiltrees = [];
 
+        function mettreÀJourPartieAffichée() {
+            const afficheur = document.getElementById('partieSélectionnée');
+            if (!noPartieActuelle) {
+                afficheur.hidden = true;
+                return;
+            }
+
+            const partie = toutesParties.find(p => p.noPartie === noPartieActuelle);
+            const équipeA = toutesÉquipes.find(e => e.noÉquipe === partie?.noÉquipeA);
+            const équipeB = toutesÉquipes.find(e => e.noÉquipe === partie?.noÉquipeB);
+            afficheur.textContent =
+                `Partie #${noPartieActuelle}, ${équipeA?.nomÉquipe || 'Équipe A'} vs ${équipeB?.nomÉquipe || 'Équipe B'}`;
+            afficheur.hidden = modeActuel === 'jeu';
+        }
+
         async function chargerDonnées() {
             toutesÉquipes = await fetch("/api/equipes").then(r => r.json());
             tousJoueurs = await fetch("/api/joueurs").then(r => r.json());
@@ -772,6 +833,7 @@
 
             // Rejoindre la room Socket.io de cette partie
             noPartieActuelle = noPartie;
+            mettreÀJourPartieAffichée();
             socket.emit('rejoindrePartie', noPartie);
 
             fetch("/api/parties").then(r => r.json()).then(parties => {
@@ -830,7 +892,7 @@
             const statut = document.getElementById('statut');
             statut.style.display = 'block';
             statut.className = '';
-            statut.innerHTML = '<div>🏁 Chargement du résumé...</div>';
+            statut.innerHTML = '<div>🏁 Partie terminée ! Chargement du résumé...</div>';
 
             try {
                 // Charger calendrier pour les scores
@@ -966,17 +1028,23 @@
             const val = document.getElementById("listeJoueurs").value;
             const divNouveau = document.getElementById("nouveauNom");
             const boutonPrêt = document.getElementById("boutonPrêt");
+            const statut = document.getElementById("statut");
 
             if (val === "nouveau") {
                 divNouveau.style.display = "flex";
                 boutonPrêt.style.display = "block";
+                statut.textContent =
+                    'Remplissez les champs puis cliquez sur « JOINDRE LA PARTIE ».';
             } else if (val) {
                 divNouveau.style.display = "none";
                 boutonPrêt.style.display = "block";
+                statut.textContent = 'Cliquez sur « JOINDRE LA PARTIE ».';
             } else {
                 divNouveau.style.display = "none";
                 boutonPrêt.style.display = "none";
+                statut.textContent = "Choisissez votre nom";
             }
+            statut.className = '';
         }
 
         // ============================================================

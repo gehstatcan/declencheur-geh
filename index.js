@@ -2418,6 +2418,7 @@ function obtenirÉtat(noPartie) {
       buzzVerrou: false,
       buzzCourant: null,
       marqueurEnLigne: false,
+      marqueurAChoisiPartie: false,
       overrideÉquipe: null,
     };
   }
@@ -2646,6 +2647,7 @@ io.on("connection", (socket) => {
     socket.estMarqueur = true;
     socketsMarqueurs.set(noPartie, socket.id);
     état.marqueurEnLigne = true;
+    état.marqueurAChoisiPartie = true;
     io.to(`partie-${noPartie}`).emit("état", état);
     if (état.buzzCourant) socket.emit("buzz", état.buzzCourant);
   });
@@ -2741,6 +2743,7 @@ io.on("connection", (socket) => {
     socketsMarqueurs.set(noPartie, socket.id);
     état.noPartie = noPartie;
     état.marqueurEnLigne = true;
+    état.marqueurAChoisiPartie = true;
     état.joueursConnectés = [];
     état.positionsAléatoires = false;
     état.scores = {};
