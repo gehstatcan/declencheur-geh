@@ -734,7 +734,14 @@
             const tbody = document.getElementById('tbodyÉquipes');
             const { col, dir } = triÉtat.équipes;
             const équipes = trierPar(
-                donnéesCompteurs.filter(é => é.pjÉquipe > 0),
+                donnéesCompteurs
+                    .filter(é => é.pjÉquipe > 0)
+                    .map(é => ({
+                        ...é,
+                        // La valeur affichée est pts collectifs / parties jouées.
+                        // La calculer avant le tri, car l'API ne fournit pas cette clé.
+                        ptsPJCollectif: (é.ptsÉquipeCollectif || 0) / é.pjÉquipe,
+                    })),
                 col, dir
             );
 

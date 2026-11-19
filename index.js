@@ -2386,6 +2386,7 @@ app.get('/api/stats/match/:noPartie', (req, res) => {
 // Chaque partie a sa propre room Socket.io : "partie-25", etc.
 // ============================================================
 const étatsParties = {};
+const socketsMarqueurs = new Map();
 
 require('./editeur-parties')(app, () => ({
   dossierSaison, saisonActive, parties, séries, joueurs, équipes, étatsParties,
@@ -2416,6 +2417,7 @@ function obtenirÉtat(noPartie) {
       réplique: null,
       buzzVerrou: false,
       buzzCourant: null,
+      marqueurEnLigne: false,
       overrideÉquipe: null,
     };
   }
@@ -2619,6 +2621,13 @@ io.on("connection", (socket) => {
   socket.on("rejoindrePartie", (noPartie) => {
     // Quitter les autres rooms si déjà dans une
     if (socket.noPartie) {
+      if (socket.estMarqueur && socket.noPartie !== noPartie &&
+          socketsMarqueurs.get(socket.noPartie) === socket.id) {
+        const ancienÉtat = obtenirÉtat(socket.noPartie);
+        ancienÉtat.marqueurEnLigne = false;
+        socketsMarqueurs.delete(socket.noPartie);
+        io.to(`partie-${socket.noPartie}`).emit("état", ancienÉtat);
+      }
       socket.leave(`partie-${socket.noPartie}`);
     }
     socket.noPartie = noPartie;
@@ -2634,6 +2643,10 @@ io.on("connection", (socket) => {
   socket.on("resynchroniserMarqueur", (noPartie) => {
     if (socket.noPartie !== noPartie) return;
     const état = obtenirÉtat(noPartie);
+    socket.estMarqueur = true;
+    socketsMarqueurs.set(noPartie, socket.id);
+    état.marqueurEnLigne = true;
+    io.to(`partie-${noPartie}`).emit("état", état);
     if (état.buzzCourant) socket.emit("buzz", état.buzzCourant);
   });
 
@@ -2720,7 +2733,14 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on("choisirPartie", (noPartie) => {
     const état = obtenirÉtat(noPartie);
+    // Un buzz accepté juste avant la coupure du marqueur n'est pas encore
+    // dans le fichier des répondants. Le conserver lors du F5/rechoix protège
+    // le premier buzz, au lieu de le remplacer par un reset.
+    const buzzEnAttente = état.mode === "jeu" ? état.buzzCourant : null;
+    socket.estMarqueur = true;
+    socketsMarqueurs.set(noPartie, socket.id);
     état.noPartie = noPartie;
+    état.marqueurEnLigne = true;
     état.joueursConnectés = [];
     état.positionsAléatoires = false;
     état.scores = {};
@@ -2796,6 +2816,11 @@ io.on("connection", (socket) => {
       }
     }
 
+    if (buzzEnAttente) {
+      état.buzzCourant = buzzEnAttente;
+      état.buzzVerrou = true;
+    }
+
     // Envoyer les scores recalculés à la room
     if (reprise) {
       io.to(`partie-${noPartie}`).emit("scoresMisÀJour", { scores: état.scores, scoresJoueurs: état.scoresJoueurs });
@@ -2813,10 +2838,13 @@ io.on("connection", (socket) => {
     }
 
     // Demander aux joueurs déjà connectés de se réenregistrer
-    // et réactiver les buzzers pour tous les joueurs.
-    // Utile en cas de crash de "marqueur"
+    // après un rafraîchissement du marqueur.
     io.to(`partie-${noPartie}`).emit("réenregistrer");
-    io.to(`partie-${noPartie}`).emit("reset");
+    if (buzzEnAttente) {
+      io.to(`partie-${noPartie}`).emit("buzz", buzzEnAttente);
+    } else {
+      io.to(`partie-${noPartie}`).emit("reset");
+    }
 
   });
 
@@ -2894,7 +2922,7 @@ io.on("connection", (socket) => {
   // --------------------------------------------------------
   socket.on("buzz", (joueur) => {
     const état = obtenirÉtat(joueur.noPartie);
-    if (état.buzzVerrou || état.mode !== "jeu") return;
+    if (!état.marqueurEnLigne || état.buzzVerrou || état.mode !== "jeu") return;
     // Vérifier droit de réplique
     if (état.réplique !== null && joueur.noÉquipe !== état.réplique) return;
     état.buzzVerrou = true;
@@ -3367,6 +3395,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    if (socket.estMarqueur && socket.noPartie &&
+        socketsMarqueurs.get(socket.noPartie) === socket.id) {
+      const état = obtenirÉtat(socket.noPartie);
+      état.marqueurEnLigne = false;
+      socketsMarqueurs.delete(socket.noPartie);
+      io.to(`partie-${socket.noPartie}`).emit("état", état);
+    }
+
     // Garder temporairement le joueur visible : les téléphones suspendent
     // parfois Socket.IO quand l'écran se verrouille ou que l'onglet est caché.
     // À la reconnexion, sEnregistrer remplace son ancienne entrée; le délai
